@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "image.kit.url.endpoint",
+      "type": "java.lang.String",
+      "description": "Description for image.kit.url.endpoint."
+    },
+    {
+      "name": "image.kit.private.key",
+      "type": "java.lang.String",
+      "description": "Description for image.kit.private.key."
+    },
+    {
+      "name": "image.kit.public.key",
+      "type": "java.lang.String",
+      "description": "Description for image.kit.public.key."
+    }
+  ] }
