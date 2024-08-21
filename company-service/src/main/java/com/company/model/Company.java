@@ -7,8 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,5 +32,5 @@ public class Company {
     private Float companyShareCapital;
 //    @CollectionTable(joinColumns = @JoinColumn(name = "company_id", nullable = false))
     @ElementCollection
-    private List<UUID> companyMembers = new ArrayList<>();
+    private Set<UUID> companyMembers = new HashSet<>();
 }

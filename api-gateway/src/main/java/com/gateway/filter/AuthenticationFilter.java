@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -66,7 +65,6 @@ public class AuthenticationFilter implements WebFilter {
         }
 
         if (routerValidator.isSecured.test(request)) {
-//            if (this.isAuthMissing(request) && this.isJwtCookieHeaderMissing(request))
             if (this.isAuthMissing(request))
                 return this.onError(exchange, "Authorization header is missing in request");
 
@@ -95,10 +93,6 @@ public class AuthenticationFilter implements WebFilter {
 
     private boolean isAuthMissing(ServerHttpRequest request) {
         return !request.getHeaders().containsKey("Authorization");
-    }
-
-    private boolean isJwtCookieHeaderMissing(ServerHttpRequest request) {
-        return !request.getHeaders().containsKey("Cookie");
     }
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {

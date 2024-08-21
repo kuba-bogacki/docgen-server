@@ -47,6 +47,9 @@ public class User implements UserDetails {
     @Size(max = 64)
     @Column(nullable = false)
     private String userVerificationCode;
+    @Size(max = 64)
+    @Column(unique = true)
+    private String userPrincipal;
     private String userPhotoFileName;
     private Boolean termsAndCondition;
     private Boolean accountNonExpired;

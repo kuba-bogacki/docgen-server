@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Builder
 @Data
@@ -23,5 +21,5 @@ public class CompanyDto {
     private String companyRegistrationDate;
     private AddressDto companyAddressDto;
     private Float companyShareCapital;
-    private List<UUID> companyMembers = new ArrayList<>();
+    private Set<UUID> companyMembers = new HashSet<>();
 }

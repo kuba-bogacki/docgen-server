@@ -8,6 +8,7 @@ import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
 import com.company.service.CompanyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,10 +20,7 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.company.util.ApplicationConstants.API_VERSION;
@@ -32,7 +30,7 @@ import static com.company.util.UrlBuilder.buildUrl;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class CompanyServiceImplementation implements CompanyService {
 
     private final CompanyRepository companyRepository;
@@ -49,13 +47,7 @@ public class CompanyServiceImplementation implements CompanyService {
 
     @Override
     public CompanyDto createCompany(CompanyDto companyDto, String jwtToken) {
-        UUID currentUserId = webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/get-id"))
-                .retrieve()
-                .bodyToMono(UUID.class)
-                .block();
+        UUID currentUserId = getCurrentUserId(jwtToken);
         companyDto.getCompanyMembers().add(currentUserId);
         Company company = companyRepository.save(companyMapper.mapToEntity(companyDto));
         log.info("Company has been created with id : {}", company.getCompanyId());
@@ -103,13 +95,7 @@ public class CompanyServiceImplementation implements CompanyService {
 
     @Override
     public List<CompanyDto> getCurrentUserCompanies(String jwtToken) {
-        UUID currentUserId = webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/get-id"))
-                .retrieve()
-                .bodyToMono(UUID.class)
-                .block();
+        UUID currentUserId = getCurrentUserId(jwtToken);
         List<Company> companyList = companyRepository.findAll().stream()
                 .filter(company -> company.getCompanyMembers().contains(currentUserId))
                 .toList();
@@ -117,7 +103,7 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public List<UUID> getCompanyMemberIdList(String companyId) {
+    public Set<UUID> getCompanyMemberIdList(String companyId) {
         Optional<Company> entity = companyRepository.findCompanyByCompanyId(UUID.fromString(companyId));
         if (entity.isEmpty()) {
             throw new CompanyNonExistException("Company with provided id is not exist");
@@ -148,6 +134,16 @@ public class CompanyServiceImplementation implements CompanyService {
         return entity.get().getCompanyMembers().stream()
                 .map(memberId -> getAuthenticationServiceUserDto(memberId.toString(), jwtToken))
                 .toList();
+    }
+
+    private UUID getCurrentUserId(String jwtToken) {
+        return webClientBuilder
+                .filter(addTokenHeader(jwtToken))
+                .build().get()
+                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/get-id"))
+                .retrieve()
+                .bodyToMono(UUID.class)
+                .block();
     }
 
     private UserDto getAuthenticationServiceUserDto(String userId, String jwtToken) {

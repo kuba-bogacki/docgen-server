@@ -1,7 +1,10 @@
 package com.notification.model.type;
 
 public enum NotificationType {
-    MEMBERSHIP_REQUEST, MEMBERSHIP_RESPONSE;
+    MEMBERSHIP_REQUEST,
+    MEMBERSHIP_RESPONSE,
+    EVENT_REQUEST,
+    EVENT_RESPONSE;
 
     public static NotificationType fromString(String type) {
         for (NotificationType notificationType : NotificationType.values()) {

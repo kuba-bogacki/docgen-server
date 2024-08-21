@@ -3,6 +3,7 @@ package com.authentication.service.implementation;
 import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
+import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.model.type.Gender;
 import com.authentication.model.type.Role;
 import com.authentication.repository.UserRepository;
@@ -13,16 +14,13 @@ import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -32,7 +30,6 @@ import static com.authentication.util.ApplicationConstants.API_VERSION;
 import static com.authentication.util.ApplicationConstants.PROTOCOL;
 import static com.authentication.util.UrlBuilder.addTokenHeader;
 import static com.authentication.util.UrlBuilder.buildUrl;
-import static org.springframework.security.authentication.UsernamePasswordAuthenticationToken.unauthenticated;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +62,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .enabled(false)
                 .build();
         ResponseEntity<?> emailStatus = webClientBuilder.build().post()
-                .uri(buildUrl(PROTOCOL, "notification-service", API_VERSION, "/email/verification"))
+                .uri(buildUrl(PROTOCOL, "notification-service", API_VERSION, "/notification/verification"))
                 .bodyValue(userMapper.mapToUserEventDto(user))
                 .retrieve()
                 .toEntity(ResponseEntity.class)
@@ -74,6 +71,18 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
             throw new UserAuthenticationException("Couldn't send verification email. New user is not saved in database.");
         }
         userRepository.save(user);
+    }
+
+    @Override
+    public void addUserPrincipal(UserPrincipalDto userPrincipalDto) throws UserNotFoundException {
+        Optional<User> user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()));
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Impossible to find user with provide id");
+        }
+
+        user.get().setUserPrincipal(userPrincipalDto.getUserPrincipal());
+        userRepository.save(user.get());
     }
 
     @Override
@@ -112,19 +121,6 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
         authenticateUser(authenticationRequest);
         String jwtToken = jwtService.generateJwtToken(user.get());
-
-        Boolean websocketHandshakeSet = webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().put()
-                .uri(buildUrl(PROTOCOL, "notification-service", API_VERSION, "/notification/set-websocket-handshake/" + user.get().getUserId()))
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .block();
-
-        if (Objects.nonNull(websocketHandshakeSet) && websocketHandshakeSet.equals(Boolean.FALSE)) {
-            throw new UserAccountDisableException("Impossible to set user id websocket handshake.");
-        }
-
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
                 .build();

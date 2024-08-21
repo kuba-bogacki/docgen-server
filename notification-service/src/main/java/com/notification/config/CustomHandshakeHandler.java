@@ -16,6 +16,7 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
 
     @Override
     protected Principal determineUser(@NonNull ServerHttpRequest request, @NonNull WebSocketHandler wsHandler, @NonNull Map<String, Object> attributes) {
-        return new UserPrincipal(UUID.randomUUID().toString());
+        final var customHandshakeHandlerUuid = UUID.randomUUID().toString();
+        return new UserPrincipal(customHandshakeHandlerUuid);
     }
 }

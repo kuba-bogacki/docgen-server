@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -22,9 +24,12 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID eventId;
-    @Enumerated(EnumType.STRING)
-    private EventType eventType;
+    private UUID eventCompany;
+    private String eventTitle;
     private LocalDate eventDate;
     private LocalTime eventTime;
-    private Boolean eventHeld;
+    @Enumerated(EnumType.STRING)
+    private EventType eventType;
+    @ElementCollection
+    private Set<UUID> eventMembers = new HashSet<>();
 }

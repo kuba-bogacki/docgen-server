@@ -7,9 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
-
 import static com.event.util.ApplicationConstants.API_VERSION;
 
 @RestController
@@ -19,27 +16,40 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping(value = "/{eventId}")
-    public ResponseEntity<?> getEventByEventId(@PathVariable String eventId) {
-        EventDto event = eventService.getEventByEventId(UUID.fromString(eventId));
-        return new ResponseEntity<>(event, HttpStatus.OK);
+    @GetMapping(value = "/get/{companyId}/{date}")
+    public ResponseEntity<?> getCompanyEventsByDate(@PathVariable("companyId") String companyId, @PathVariable("date") String date) {
+        try {
+            return new ResponseEntity<>(eventService.getCompanyEventsByDate(companyId, date), HttpStatus.OK);
+        } catch (Exception exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/get-all/{companyId}")
+    public ResponseEntity<?> getCompanyEvents(@PathVariable String companyId) {
+        try {
+            return new ResponseEntity<>(eventService.getCompanyEvents(companyId), HttpStatus.OK);
+        } catch (Exception exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping(value = "/create")
     public ResponseEntity<?> createEvent(@RequestBody EventDto eventDto) {
-        eventService.createEvent(eventDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(eventService.createEvent(eventDto), HttpStatus.CREATED);
+        } catch (Exception exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+        }
     }
 
-    @GetMapping(value = "/get-all")
-    public ResponseEntity<?> getAllEvents() {
-        List<EventDto> events = eventService.getAllEvents();
-        return new ResponseEntity<>(events, HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/voting-held")
-    public ResponseEntity<?> votingEventTookPlace() {
-        Boolean votingHeld = eventService.votingEventTookPlace();
-        return new ResponseEntity<>(votingHeld, HttpStatus.OK);
+    @DeleteMapping(value = "/delete/{eventId}")
+    public ResponseEntity<?> deleteCompanyEvent(@PathVariable("eventId") String eventId) {
+        try {
+            eventService.deleteCompanyEvent(eventId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception exception) {
+            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

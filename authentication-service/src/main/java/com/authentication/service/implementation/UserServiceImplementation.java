@@ -148,7 +148,8 @@ public class UserServiceImplementation implements UserService {
             throw new NoSuchObjectException("Can't find " + userEmail + " user");
         }
 
-        final var formattedCompanyId = validateCompanyId(companyId);
+        var formattedCompanyId = formattedCompanyId(companyId);
+
         List<UUID> membersList = webClientBuilder
                 .filter(addTokenHeader(jwtToken))
                 .build().get()
@@ -166,7 +167,7 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public Object getUserDtoByUserId(String userId) throws UserNotFoundException {
+    public UserDto getUserDtoByUserId(String userId) throws UserNotFoundException {
         Optional<User> user = userRepository.findById(UUID.fromString(userId));
 
         if (user.isEmpty()) {
@@ -176,7 +177,7 @@ public class UserServiceImplementation implements UserService {
         return userMapper.mapToUserDto(user.get());
     }
 
-    private String validateCompanyId(String unformattedCompanyId) {
-        return unformattedCompanyId.substring(0, 36);
+    private String formattedCompanyId(String companyId) {
+        return companyId.substring(0, companyId.length() - 1);
     }
 }

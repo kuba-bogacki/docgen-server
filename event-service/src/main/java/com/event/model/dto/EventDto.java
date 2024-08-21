@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -15,9 +17,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EventDto {
 
-    private UUID eventId;
-    private EventType eventType;
+    private String eventId;
+    private String eventCompany;
+    private String eventTitle;
     private String eventDate;
     private String eventTime;
-    private Boolean eventHeld;
+    private EventType eventType;
+    private Set<String> eventMembers = new HashSet<>();
 }

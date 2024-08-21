@@ -16,7 +16,10 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
+import static com.authentication.util.ApplicationConstants.SESSION_DURATION;
 
 @Service
 @PropertySource(value = "classpath:application.properties")
@@ -46,7 +49,7 @@ public class JwtServiceImplementation implements JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(SESSION_DURATION)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

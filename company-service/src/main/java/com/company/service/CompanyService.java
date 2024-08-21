@@ -5,6 +5,7 @@ import com.company.model.dto.CompanyDto;
 import com.company.model.dto.UserDto;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface CompanyService {
@@ -15,7 +16,7 @@ public interface CompanyService {
     CompanyDto updateCompany(CompanyDto companyDto);
     List<CompanyDto> getCurrentUserCompanies(String jwtToken);
     Boolean checkIfCompanyAlreadyExist(String companyKrsNumber);
-    List<UUID> getCompanyMemberIdList(String companyId) throws CompanyNonExistException;
+    Set<UUID> getCompanyMemberIdList(String companyId) throws CompanyNonExistException;
     void addNewMemberToCompany(String companyId, String userId);
     List<UserDto> getDetailMembersList(String companyId, String jwtToken) throws CompanyNonExistException;
 }

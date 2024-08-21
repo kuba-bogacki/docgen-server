@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class NotificationDto {
 
     private String notificationId;
+    private String notificationCompanyId;
+    private String notificationUserPrincipal;
     private String notificationRequesterId;
     private String notificationReceiverId;
     private String notificationMessage;

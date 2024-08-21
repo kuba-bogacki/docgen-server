@@ -24,6 +24,7 @@ public class UserDto {
     private Gender userGender;
     private Role userRole;
     private String userVerificationCode;
+    private String userPrincipal;
     private String userPhotoFileName;
     private Boolean accountNonExpired;
     private Boolean accountNonLocked;

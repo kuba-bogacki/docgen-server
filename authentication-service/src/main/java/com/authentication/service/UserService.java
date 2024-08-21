@@ -17,5 +17,5 @@ public interface UserService {
     UserDto updateUserData(UserDto userDto) throws UserNotFoundException;
     String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) throws Exception;
     UserDto getUserNotCompanyMember(String companyId, String jwtToken, String userEmail) throws NoSuchObjectException, UserAlreadyExistException;
-    Object getUserDtoByUserId(String userId) throws UserNotFoundException;
+    UserDto getUserDtoByUserId(String userId) throws UserNotFoundException;
 }

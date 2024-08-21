@@ -1,8 +1,8 @@
 package com.authentication.controller;
 
 import com.authentication.exception.UserAlreadyExistException;
-import com.authentication.model.dto.UserDto;
 import com.authentication.exception.UserNotFoundException;
+import com.authentication.model.dto.UserDto;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
 import lombok.RequiredArgsConstructor;

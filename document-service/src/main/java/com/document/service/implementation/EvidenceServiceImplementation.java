@@ -32,14 +32,14 @@ class EvidenceServiceImplementation implements EvidenceService {
 
     @Override
     public void createEvidence(EvidenceDto evidenceDto) {
-        Boolean votingHeld = webClientBuilder.build().get()
-                .uri(buildUrl(PROTOCOL, "event-service", API_VERSION, "/event/voting-held"))
-                .retrieve()
-                .bodyToMono(Boolean.class)
-                .block();
-        if (Boolean.FALSE.equals(votingHeld)) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Couldn't save evidence");
-        }
+//        Boolean votingHeld = webClientBuilder.build().get()
+//                .uri(buildUrl(PROTOCOL, "event-service", API_VERSION, "/event/voting-held"))
+//                .retrieve()
+//                .bodyToMono(Boolean.class)
+//                .block();
+//        if (Boolean.FALSE.equals(votingHeld)) {
+//            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Couldn't save evidence");
+//        }
         Evidence evidence = evidenceRepository.save(evidenceMapper.mapToEntity(evidenceDto));
         kafkaTemplate.send("notificationTopic", new EvidenceCreateEvent(evidence.getEvidenceId()));
         log.info("Evidence has been created with id : {}", evidence.getEvidenceId());

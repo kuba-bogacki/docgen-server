@@ -22,15 +22,10 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        var customHandshakeHandler = new CustomHandshakeHandler();
         registry
                 .addEndpoint(WEBSOCKET_ENDPOINT)
                 .setAllowedOrigins(WEBSOCKET_ORIGIN)
-                .setHandshakeHandler(customHandshakeHandler)
+                .setHandshakeHandler(new CustomHandshakeHandler())
                 .withSockJS();
-        registry
-                .addEndpoint(WEBSOCKET_ENDPOINT)
-                .setAllowedOrigins(WEBSOCKET_ORIGIN)
-                .setHandshakeHandler(customHandshakeHandler);
     }
 }

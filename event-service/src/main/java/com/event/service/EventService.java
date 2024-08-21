@@ -3,12 +3,10 @@ package com.event.service;
 import com.event.model.dto.EventDto;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface EventService {
-
-    EventDto getEventByEventId(UUID eventId);
-    List<EventDto> getAllEvents();
-    void createEvent(EventDto eventDto);
-    boolean votingEventTookPlace();
+    List<EventDto> getCompanyEventsByDate(String companyId, String date);
+    List<EventDto> getCompanyEvents(String companyId);
+    EventDto createEvent(EventDto eventDto);
+    void deleteCompanyEvent(String eventId);
 }

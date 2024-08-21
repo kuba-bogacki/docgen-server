@@ -2,20 +2,15 @@ package com.authentication.controller;
 
 import com.authentication.exception.*;
 import com.authentication.security.AuthenticationRequest;
-import com.authentication.security.AuthenticationResponse;
+import com.authentication.security.RegisterRequest;
+import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
-import com.authentication.util.ApplicationConstants;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
-import com.authentication.security.RegisterRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.rmi.NoSuchObjectException;
 
 import static com.authentication.util.ApplicationConstants.API_VERSION;
 
@@ -86,6 +81,16 @@ public class AuthenticationController {
             return new ResponseEntity<>(authenticationService.confirmCompanyMembership(companyId, authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAuthorizationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PutMapping(value = "/add-user-principal")
+    public ResponseEntity<?> addUserPrincipal(@RequestBody UserPrincipalDto userPrincipalDto) {
+        try {
+            authenticationService.addUserPrincipal(userPrincipalDto);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

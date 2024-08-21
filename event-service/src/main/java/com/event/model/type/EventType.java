@@ -7,10 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum EventType {
     VOTING("Voting"),
+    WEEKLY("Weekly"),
     MEETING("Meeting"),
-    NEGOTIATIONS("Negotiations"),
-    PRESENTATION("Presentation"),
-    INTEGRATION("Integration");
+    SUBMIT("Submit");
 
     private final String eventName;
 }

@@ -16,8 +16,10 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @Builder
 public class Notification {
 
-    @MongoId(targetType = FieldType.STRING)
+    @MongoId(targetType = FieldType.OBJECT_ID)
     private String notificationId;
+    private String notificationCompanyId;
+    private String notificationUserPrincipal;
     private String notificationRequesterId;
     private String notificationReceiverId;
     private String notificationMessage;

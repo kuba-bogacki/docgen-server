@@ -1,4 +1,4 @@
-package com.notification.model.dto;
+package com.authentication.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserPrincipalDto {
 
     private String userId;
-    private String userFirstNameI;
-    private String userLastNameI;
-    private String userEmail;
-    private String userVerificationCode;
     private String userPrincipal;
 }
