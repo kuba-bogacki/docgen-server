@@ -5,7 +5,7 @@ pipeline {
         // Docker Hub credentials ID
         DOCKER_CREDENTIALS = 'b05c57b9-a488-435e-bbc6-2a644dcc0114'
         // Docker Registry URL (e.g., Docker Hub, AWS ECR)
-        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_REGISTRY = 'https://registry.hub.docker.com'
         // Docker Image Namespace (your Docker Hub username)
         DOCKER_NAMESPACE = 'spaceavocado34'
     }
