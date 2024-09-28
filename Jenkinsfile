@@ -23,7 +23,7 @@ pipeline {
                 // Use Maven to build the project and download dependencies
                 script {
                     // Loop through each microservice directory
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
+                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         sh "mvn clean package -pl ${service} -am -DskipTests"
                     }
@@ -34,7 +34,7 @@ pipeline {
         stage('Build Test') {
             steps {
                 script {
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
+                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         sh "mvn test -pl ${service}"
                     }
@@ -45,7 +45,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
+                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         def imageName = "${DOCKER_NAMESPACE}/${service}:1.0-SNAPSHOT"
                         sh """
@@ -60,7 +60,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
-                        def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
+                        def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                         for (service in services) {
                             def imageName = "${DOCKER_NAMESPACE}/${service}:1.0-SNAPSHOT"
                             docker.image(imageName).push()
