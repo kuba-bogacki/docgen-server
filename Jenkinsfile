@@ -14,7 +14,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout code from GitHub
-                git credentialsId: '171df50d-7844-49ee-b099-901765f37324', url: 'https://github.com/kuba-bogacki/docgen-server.git', branch: 'main'
+                git credentialsId: '171df50d-7844-49ee-b099-901765f37324', url: 'https://github.com/kuba-bogacki/docgen-server', branch: 'main'
             }
         }
 
@@ -26,6 +26,17 @@ pipeline {
                     def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
                     for (service in services) {
                         sh "mvn clean package -pl ${service} -am -DskipTests"
+                    }
+                }
+            }
+        }
+
+        stage('Build Test') {
+            steps {
+                script {
+                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway', 'kafka-service']
+                    for (service in services) {
+                        sh "mvn test -pl ${service}"
                     }
                 }
             }
@@ -59,27 +70,27 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                // Deploy to your environment. This could be a server with Docker Compose, Kubernetes, etc.
-                // Example using Docker Compose on a remote server via SSH:
-                script {
-                    // Define deployment server details
-                    def remoteUser = 'deploy-user'
-                    def remoteHost = 'your-deployment-server.com'
-                    def sshKey = 'your-ssh-credentials-id' // Stored in Jenkins Credentials
-
-                    // Execute Docker Compose commands on the remote server
-                    sh """
-                        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${remoteUser}@${remoteHost} '
-                            cd /path/to/deployment/directory &&
-                            docker-compose pull &&
-                            docker-compose up -d --build
-                        '
-                    """
-                }
-            }
-        }
+//         stage('Deploy') {
+//             steps {
+//                 // Deploy to your environment. This could be a server with Docker Compose, Kubernetes, etc.
+//                 // Example using Docker Compose on a remote server via SSH:
+//                 script {
+//                     // Define deployment server details
+//                     def remoteUser = 'deploy-user'
+//                     def remoteHost = 'your-deployment-server.com'
+//                     def sshKey = 'your-ssh-credentials-id' // Stored in Jenkins Credentials
+//
+//                     // Execute Docker Compose commands on the remote server
+//                     sh """
+//                         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${remoteUser}@${remoteHost} '
+//                             cd /path/to/deployment/directory &&
+//                             docker-compose pull &&
+//                             docker-compose up -d --build
+//                         '
+//                     """
+//                 }
+//             }
+//         }
     }
 
     post {
@@ -88,10 +99,10 @@ pipeline {
             sh 'docker system prune -af'
         }
         success {
-            echo 'CI/CD Pipeline completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'CI/CD Pipeline failed.'
+            echo 'Pipeline failed.'
         }
     }
 }
