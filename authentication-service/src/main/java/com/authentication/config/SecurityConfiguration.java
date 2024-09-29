@@ -51,9 +51,9 @@ public class SecurityConfiguration implements WebMvcConfigurer {
                         .requestMatchers("/v1.0/authentication/create").permitAll()
                         .requestMatchers("/v1.0/authentication/login").permitAll()
                         .requestMatchers("/v1.0/authentication/verify/**").permitAll()
-                        .requestMatchers("/v1.0/authentication/send-email-to-reset-password").permitAll()
                         .requestMatchers("/v1.0/authentication/reset-password/**").permitAll()
                         .requestMatchers("/v1.0/authentication/confirm-membership/**").permitAll()
+                        .requestMatchers("/v1.0/authentication/send-email-to-reset-password").permitAll()
                         .anyRequest().authenticated()
                 );
         return httpSecurity.build();

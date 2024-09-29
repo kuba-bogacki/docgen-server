@@ -22,7 +22,7 @@
         <module>discovery-server</module>
         <module>api-gateway</module>
         <module>authentication-service</module>
-        <module>kafka-service</module>
+<!--        <module>kafka-service</module>-->
         <module>notification-service</module>
     </modules>
 

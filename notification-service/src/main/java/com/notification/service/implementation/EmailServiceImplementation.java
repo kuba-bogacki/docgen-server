@@ -1,13 +1,15 @@
 package com.notification.service.implementation;
 
+import com.notification.exception.InvitationSendFailureException;
 import com.notification.model.dto.CompanyDto;
 import com.notification.model.dto.InvitationDto;
 import com.notification.model.dto.UserDto;
-import com.notification.exception.InvitationSendFailureException;
 import com.notification.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,15 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 import static com.notification.util.ApplicationConstants.*;
 import static com.notification.util.UrlBuilder.addTokenHeader;
 import static com.notification.util.UrlBuilder.buildUrl;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 class EmailServiceImplementation implements EmailService {
@@ -32,28 +36,30 @@ class EmailServiceImplementation implements EmailService {
     private final JavaMailSender javaMailSender;
     private final WebClient.Builder webClientBuilder;
 
-    public String fileFormatterAndReader(String text) throws IOException {
+    public String fileFormatterAndReader(String fileName) {
+        var filePath = STATIC_FILE_FOLDER + fileName;
 
-        File fileDirectory = new File(text);
-        FileInputStream fileInputStream = new FileInputStream(fileDirectory);
-        Charset inputCharset = StandardCharsets.ISO_8859_1;
-        BufferedReader in = new BufferedReader(new InputStreamReader(fileInputStream, inputCharset));
+        try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
+             BufferedReader bufferedReader = new BufferedReader(reader);
+        ) {
+            String line;
+            StringBuilder emailBody = new StringBuilder();
 
-        String line;
-        StringBuilder emailBody = new StringBuilder();
-
-        while ((line = in.readLine()) != null) {
-            emailBody.append(line);
+            while ((line = bufferedReader.readLine()) != null) {
+                emailBody.append(line);
+            }
+            return emailBody.toString();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new NotFoundException(e);
         }
-        return emailBody.toString();
     }
 
     @Override
     @Transactional
     public void sendVerificationEmail(UserDto userDto) throws MessagingException, IOException {
 
-        String textRoute = NOTIFICATION_ROUTE + "/verify-email.txt";
-        String content = fileFormatterAndReader(textRoute);
+        String content = fileFormatterAndReader("verify-email.txt");
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -72,8 +78,7 @@ class EmailServiceImplementation implements EmailService {
     @Transactional
     public void sendResetPasswordEmail(UserDto userDto) throws MessagingException, IOException {
 
-        String textRoute = NOTIFICATION_ROUTE + "/reset-password.txt";
-        String content = fileFormatterAndReader(textRoute);
+        String content = fileFormatterAndReader("reset-password.txt");
 
         StringBuilder verifyUrlStringBuilder = new StringBuilder();
 
@@ -120,8 +125,7 @@ class EmailServiceImplementation implements EmailService {
             throw new InvitationSendFailureException("Impossible to send invitation - current user or current company is null");
         }
 
-        String textRoute = NOTIFICATION_ROUTE + "/user-invitation.txt";
-        String content = fileFormatterAndReader(textRoute);
+        String content = fileFormatterAndReader("user-invitation.txt");
 
         StringBuilder verifyUrlStringBuilder = new StringBuilder();
 

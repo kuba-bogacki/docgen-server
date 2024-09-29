@@ -7,6 +7,7 @@ import com.document.model.dto.EvidenceDto;
 import com.document.repository.EvidenceRepository;
 import com.document.service.EvidenceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,7 +23,7 @@ import static com.document.util.UrlBuilder.buildUrl;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 class EvidenceServiceImplementation implements EvidenceService {
 
     private final EvidenceRepository evidenceRepository;

@@ -17,6 +17,7 @@ public class RouterValidator {
             "/v1.0/authentication/reset-password",
             "/v1.0/authentication/confirm-membership/{id}",
             "/v1.0/authentication/send-email-to-reset-password",
+            "/v1.0/notification/verification",
             "/v1.0/notification/websocket/{id}"
     );
 

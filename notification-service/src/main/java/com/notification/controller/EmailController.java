@@ -4,6 +4,7 @@ import com.notification.model.dto.InvitationDto;
 import com.notification.model.dto.UserDto;
 import com.notification.service.EmailService;
 import jakarta.mail.MessagingException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class EmailController {
         try {
             emailService.sendVerificationEmail(userDto);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (MessagingException | IOException e) {
+        } catch (MessagingException | IOException | NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
