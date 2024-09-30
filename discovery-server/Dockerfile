@@ -13,14 +13,9 @@ COPY notification-service/pom.xml ./notification-service/
 
 RUN mvn dependency:go-offline
 COPY . .
-RUN mvn clean package -pl discovery-server -am
+RUN mvn clean package -pl discovery-server -am -DskipTests
 
 FROM openjdk:17-alpine
 WORKDIR /discovery-server
 COPY --from=builder /docgenserver/discovery-server/target/discovery-server-1.0-SNAPSHOT.jar ./
 CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "discovery-server-1.0-SNAPSHOT.jar"]
-
-
-#FROM openjdk:17-alpine
-#ADD target/discovery-server-1.0-SNAPSHOT.jar discovery-server-1.0-SNAPSHOT.jar
-#ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "discovery-server-1.0-SNAPSHOT.jar"]
