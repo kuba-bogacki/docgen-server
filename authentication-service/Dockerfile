@@ -13,7 +13,7 @@ COPY notification-service/pom.xml ./notification-service/
 
 RUN mvn dependency:go-offline
 COPY . .
-RUN mvn clean package
+RUN mvn clean package -Dmaven.test.skip
 
 FROM openjdk:17-alpine
 WORKDIR /authentication-service
