@@ -2,14 +2,14 @@ FROM maven:3.8.3-openjdk-17 AS builder
 WORKDIR /docgenserver
 
 COPY pom.xml .
-COPY pom.xml ./api-gateway/
-COPY pom.xml ./authentication-service/
-COPY pom.xml ./company-service/
-COPY pom.xml ./discovery-server/
-COPY pom.xml ./document-service/
-COPY pom.xml ./event-service/
+COPY api-gateway/pom.xml ./api-gateway/
+COPY authentication-service/pom.xml ./authentication-service/
+COPY company-service/pom.xml ./company-service/
+COPY discovery-server/pom.xml ./discovery-server/
+COPY document-service/pom.xml ./document-service/
+COPY event-service/pom.xml ./event-service/
 #COPY kafka-service/pom.xml ./kafka-service/
-COPY pom.xml ./notification-service/
+COPY notification-service/pom.xml ./notification-service/
 
 RUN mvn dependency:go-offline
 COPY . .
