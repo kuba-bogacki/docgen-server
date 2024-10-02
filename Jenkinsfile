@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS = 'b05c57b9-a488-435e-bbc6-2a644dcc0114'
+        DOCKER_CREDENTIALS = 'a7d50e5c-36b3-464f-aa85-81d0a498ce09'
         DOCKER_REGISTRY = 'https://registry.hub.docker.com'
         DOCKER_NAMESPACE = 'spaceavocado34'
     }
@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: '171df50d-7844-49ee-b099-901765f37324', url: 'https://github.com/kuba-bogacki/docgen-server', branch: 'main'
+                git credentialsId: 'd1a07e22-e482-4351-88a6-2f40c9a760a9', url: 'https://github.com/kuba-bogacki/docgen-server', branch: 'main'
             }
         }
 
