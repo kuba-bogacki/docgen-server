@@ -43,7 +43,7 @@ pipeline {
                     for (service in services) {
                         def imageName = "${DOCKER_NAMESPACE}/${service}:1.0-SNAPSHOT"
                         sh """
-                            docker build -t ${imageName} ./${service}
+                            docker build -t ${imageName} -f ${service}/Dockerfile .
                         """
                     }
                 }
