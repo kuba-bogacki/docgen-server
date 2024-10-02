@@ -13,7 +13,7 @@ COPY notification-service/pom.xml ./notification-service/
 
 RUN mvn dependency:go-offline
 COPY . .
-RUN mvn clean package -pl document-service -am
+RUN mvn clean package
 
 FROM openjdk:17-alpine
 WORKDIR /document-service
