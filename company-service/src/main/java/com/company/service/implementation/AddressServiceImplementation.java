@@ -35,7 +35,7 @@ public class AddressServiceImplementation implements AddressService {
     @Override
     public AddressDto createAddress(AddressDto addressDto) {
         Address address = addressRepository.save(addressMapper.mapToEntity(addressDto));
-        log.info("Address has been created with id : {}", address.getAddressId());
+        log.debug("Address has been created with id : {}", address.getAddressId());
         return addressMapper.mapToDto(address);
     }
 

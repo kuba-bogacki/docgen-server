@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "address")
