@@ -19,9 +19,18 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID addressId;
+
+    @Column(nullable = false)
     private String addressStreetName;
+
+    @Column(nullable = false)
     private String addressStreetNumber;
+
     private String addressLocalNumber;
+
+    @Column(nullable = false)
     private String addressPostalCode;
+
+    @Column(nullable = false)
     private String addressCity;
 }

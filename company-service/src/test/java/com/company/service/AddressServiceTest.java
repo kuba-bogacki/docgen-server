@@ -5,13 +5,13 @@ import com.company.mapper.AddressMapper;
 import com.company.model.dto.AddressDto;
 import com.company.repository.AddressRepository;
 import com.company.service.implementation.AddressServiceImplementation;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.verification.VerificationMode;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +56,6 @@ class AddressServiceTest extends AddressSamples {
     @Test
     @DisplayName("Should throw an exception if entity with provided id not found")
     void test_02() {
-        //given
-
         //when
         when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
 
@@ -102,8 +100,53 @@ class AddressServiceTest extends AddressSamples {
     }
 
     @Test
-    @DisplayName("Should return all addresses dtos list if any entities exists")
+    @DisplayName("Should throw an exception if address dto is null")
     void test_04() {
+        //given
+        AddressDto nullAddressDto = null;
+
+        //when
+        when(addressMapper.mapToEntity(nullAddressDto)).thenReturn(null);
+        when(addressRepository.save(any())).thenThrow(IllegalArgumentException.class);
+
+        final var expectedException = catchException(() -> addressService.createAddress(nullAddressDto));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(addressMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if address dto have some null fields")
+    void test_05() {
+        //given
+        final var invalidAddressDto = sampleDtoAddressI.toBuilder()
+                .addressStreetName(null)
+                .addressCity(null)
+                .build();
+        final var invalidAddressEntity = sampleEntityAddressI.toBuilder()
+                .addressStreetName(null)
+                .addressCity(null)
+                .build();
+
+        //when
+        when(addressMapper.mapToEntity(invalidAddressDto)).thenReturn(invalidAddressEntity);
+        when(addressRepository.save(invalidAddressEntity)).thenThrow(ConstraintViolationException.class);
+
+        final var expectedException = catchException(() -> addressService.createAddress(invalidAddressDto));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(ConstraintViolationException.class);
+        verify(addressMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return all addresses dtos list if any entities exists")
+    void test_06() {
         //given
         var sampleDto = sampleDtoAddressI.toBuilder()
                 .addressId(addressIdI)
@@ -131,7 +174,7 @@ class AddressServiceTest extends AddressSamples {
 
     @Test
     @DisplayName("Should return empty addresses dtos list if no entities exist")
-    void test_05() {
+    void test_07() {
         //when
         when(addressMapper.mapToDtos(anyList())).thenReturn(Collections.emptyList());
         when(addressRepository.findAll()).thenReturn(Collections.emptyList());
@@ -150,7 +193,7 @@ class AddressServiceTest extends AddressSamples {
 
     @Test
     @DisplayName("Should return dto of updated entity if entity already exist")
-    void test_06() {
+    void test_08() {
         //given
         var providedDto = sampleDtoAddressII.toBuilder()
                 .addressId(addressIdI)
@@ -181,5 +224,23 @@ class AddressServiceTest extends AddressSamples {
         verify(addressMapper).mapToEntity(providedDto);
         verify(addressMapper).mapToDto(savedEntity);
         verify(addressRepository).findAddressByAddressId(addressIdI);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if address entity to update was not found")
+    void test_09() {
+        //when
+        when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
+
+        final var expectedException = catchException(() -> addressService.getAddressByAddressId(addressIdII));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(AddressNotFoundException.class)
+                .hasMessageContaining("Address with provided id does not exist");
+        verify(addressMapper, never()).mapToEntity(any());
+        verify(addressRepository, never()).save(any());
+        verify(addressMapper, never()).mapToDto(any());
     }
 }

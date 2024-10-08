@@ -39,9 +39,7 @@ public class CompanyServiceImplementation implements CompanyService {
 
     @Override
     public Boolean checkIfCompanyAlreadyExist(String companyKrsNumber) {
-        Optional<Company> foundedCompany = companyRepository.findAll().stream()
-                .filter(company -> company.getCompanyKrsNumber().equals(companyKrsNumber))
-                .findAny();
+        Optional<Company> foundedCompany = companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber);
         return foundedCompany.isPresent();
     }
 
