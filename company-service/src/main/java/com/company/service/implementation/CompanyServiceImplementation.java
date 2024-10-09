@@ -48,7 +48,7 @@ public class CompanyServiceImplementation implements CompanyService {
         UUID currentUserId = getCurrentUserId(jwtToken);
         companyDto.getCompanyMembers().add(currentUserId);
         Company company = companyRepository.save(companyMapper.mapToEntity(companyDto));
-        log.info("Company has been created with id : {}", company.getCompanyId());
+        log.debug("Company has been created with id : {}", company.getCompanyId());
         return companyMapper.mapToDto(company);
     }
 

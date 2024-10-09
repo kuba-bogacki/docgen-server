@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.*;
 
-@Builder
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyDto {
@@ -23,3 +23,5 @@ public class CompanyDto {
     private Float companyShareCapital;
     private Set<UUID> companyMembers = new HashSet<>();
 }
+
+
