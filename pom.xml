@@ -76,7 +76,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${org.maven.surefire.version}</version>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>false</skipTests>
                 </configuration>
             </plugin>
             <plugin>

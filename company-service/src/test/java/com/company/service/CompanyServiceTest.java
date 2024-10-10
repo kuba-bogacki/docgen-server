@@ -1,9 +1,11 @@
 package com.company.service;
 
+import com.company.exception.CompanyNonExistException;
 import com.company.mapper.CompanyMapper;
 import com.company.model.dto.CompanyDto;
 import com.company.repository.CompanyRepository;
 import com.company.service.implementation.CompanyServiceImplementation;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -44,33 +45,33 @@ class CompanyServiceTest extends CompanySamples {
     @DisplayName("Should return true if company entity with provided krs number exist")
     void test_01() {
         //given
-        final var company = sampleEntityCompany;
+        final var company = sampleEntityCompanyI;
 
         //when
-        when(companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber)).thenReturn(Optional.of(company));
+        when(companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumberI)).thenReturn(Optional.of(company));
 
-        final var result = companyService.checkIfCompanyAlreadyExist(companyKrsNumber);
+        final var result = companyService.checkIfCompanyAlreadyExist(companyKrsNumberI);
 
         //then
         assertThat(result)
                 .isNotNull()
                 .isTrue();
-        verify(companyRepository).findCompanyByCompanyKrsNumber(companyKrsNumber);
+        verify(companyRepository).findCompanyByCompanyKrsNumber(companyKrsNumberI);
     }
 
     @Test
     @DisplayName("Should return false if company entity with provided krs number not exist")
     void test_02() {
         //when
-        when(companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber)).thenReturn(Optional.empty());
+        when(companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumberI)).thenReturn(Optional.empty());
 
-        final var result = companyService.checkIfCompanyAlreadyExist(companyKrsNumber);
+        final var result = companyService.checkIfCompanyAlreadyExist(companyKrsNumberI);
 
         //then
         assertThat(result)
                 .isNotNull()
                 .isFalse();
-        verify(companyRepository).findCompanyByCompanyKrsNumber(companyKrsNumber);
+        verify(companyRepository).findCompanyByCompanyKrsNumber(companyKrsNumberI);
     }
 
     @Test
@@ -80,16 +81,16 @@ class CompanyServiceTest extends CompanySamples {
         //given
         final var sampleToken = "sample-token";
         final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
-        final var companyDto = sampleDtoCompany;
-        final var savedCompanyDto = sampleDtoCompany.toBuilder()
-                .companyId(companyId)
+        final var companyDto = sampleDtoCompanyI;
+        final var savedCompanyDto = sampleDtoCompanyI.toBuilder()
+                .companyId(companyIdI)
                 .companyMembers(Set.of(currentUserId))
                 .build();
-        final var companyEntity = sampleEntityCompany.toBuilder()
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
                 .companyMembers(Set.of(currentUserId))
                 .build();
         final var savedCompanyEntity = companyEntity.toBuilder()
-                .companyId(companyId)
+                .companyId(companyIdI)
                 .build();
 
         //when
@@ -110,7 +111,7 @@ class CompanyServiceTest extends CompanySamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(CompanyDto.class)
-                .hasFieldOrPropertyWithValue("companyId", companyId)
+                .hasFieldOrPropertyWithValue("companyId", companyIdI)
                 .hasFieldOrPropertyWithValue("companyMembers", Set.of(currentUserId));
         verify(companyRepository).save(companyEntity);
         verify(companyMapper).mapToDto(savedCompanyEntity);
@@ -124,7 +125,7 @@ class CompanyServiceTest extends CompanySamples {
         //given
         final var sampleToken = "sample-token";
         final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
-        final var companyDto = sampleDtoCompany;
+        final var companyDto = sampleDtoCompanyI;
 
         //when
         when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
@@ -143,5 +144,299 @@ class CompanyServiceTest extends CompanySamples {
         verify(companyRepository, never()).save(any());
         verify(companyMapper, never()).mapToDto(any());
         verify(companyMapper, never()).mapToEntity(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception if issue appear due mapping malformed company registration date")
+    void test_05() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
+        final var malformedCompanyRegistrationDate = "123-error;2137";
+        final var companyDto = sampleDtoCompanyI.toBuilder()
+                .companyRegistrationDate(malformedCompanyRegistrationDate)
+                .build();
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
+
+        when(companyMapper.mapToEntity(companyDto)).thenThrow(DateTimeParseException.class);
+
+        final var expectedException = catchThrowable(() -> companyService.createCompany(companyDto, sampleToken));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(DateTimeParseException.class);
+        verify(companyRepository, never()).save(any());
+        verify(companyMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception if issue appear due null company krs number")
+    void test_06() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
+        final var companyDto = sampleDtoCompanyI.toBuilder()
+                .companyKrsNumber(null)
+                .build();
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
+                .companyKrsNumber(null)
+                .build();
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
+
+        when(companyMapper.mapToEntity(companyDto)).thenReturn(companyEntity);
+        when(companyRepository.save(companyEntity)).thenThrow(ConstraintViolationException.class);
+
+        final var expectedException = catchThrowable(() -> companyService.createCompany(companyDto, sampleToken));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(ConstraintViolationException.class);
+        verify(companyMapper).mapToEntity(companyDto);
+        verify(companyMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return founded company dto if company entity exist and company name is valid")
+    void test_07() {
+        //given
+        final var companyDto = sampleDtoCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+
+        //when
+        when(companyRepository.findCompanyByCompanyName(companyNameI)).thenReturn(Optional.of(companyEntity));
+        when(companyMapper.mapToDto(companyEntity)).thenReturn(companyDto);
+
+        final var result = companyService.getCompanyByName(companyNameI);
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(CompanyDto.class)
+                .hasFieldOrPropertyWithValue("companyName", companyNameI);
+        verify(companyRepository).findCompanyByCompanyName(companyNameI);
+        verify(companyMapper).mapToDto(companyEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if company entity with provided name not exist")
+    void test_08() {
+        //given
+        final var nonExistingCompanyName = "My fake company sp. z o.o.";
+
+        //when
+        when(companyRepository.findCompanyByCompanyName(nonExistingCompanyName)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> companyService.getCompanyByName(nonExistingCompanyName));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(CompanyNonExistException.class)
+                .hasMessageContaining("Couldn't find company using provide company name");
+        verify(companyRepository).findCompanyByCompanyName(nonExistingCompanyName);
+        verify(companyMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return founded company dto if company entity exist and company id is valid")
+    void test_09() {
+        //given
+        final var companyDto = sampleDtoCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(companyIdI)).thenReturn(Optional.of(companyEntity));
+        when(companyMapper.mapToDto(companyEntity)).thenReturn(companyDto);
+
+        final var result = companyService.getCompanyByCompanyId(companyIdI.toString());
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(CompanyDto.class)
+                .hasFieldOrPropertyWithValue("companyId", companyIdI);
+        verify(companyRepository).findCompanyByCompanyId(companyIdI);
+        verify(companyMapper).mapToDto(companyEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if company entity with provided id not exist")
+    void test_10() {
+        //given
+        final var nonExistingCompanyId = "c74c670b-38b1-4369-8bd2-ec5accaeb3e7";
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId))).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> companyService.getCompanyByCompanyId(nonExistingCompanyId));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(CompanyNonExistException.class)
+                .hasMessageContaining("Couldn't find company using provide id");
+        verify(companyRepository).findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId));
+        verify(companyMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return founded company dto if company entity exist and company krs number is valid")
+    void test_11() {
+        //given
+        final var companyDto = sampleDtoCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+
+        //when
+        when(companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumberI)).thenReturn(Optional.of(companyEntity));
+        when(companyMapper.mapToDto(companyEntity)).thenReturn(companyDto);
+
+        final var result = companyService.getCompanyByCompanyKrsNumber(companyKrsNumberI);
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(CompanyDto.class)
+                .hasFieldOrPropertyWithValue("companyKrsNumber", companyKrsNumberI);
+        verify(companyRepository).findCompanyByCompanyKrsNumber(companyKrsNumberI);
+        verify(companyMapper).mapToDto(companyEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if company entity with provided krs number not exist")
+    void test_12() {
+        //given
+        final var nonExistingKrsNumber = "0000775882";
+
+        //when
+        when(companyRepository.findCompanyByCompanyKrsNumber(nonExistingKrsNumber)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> companyService.getCompanyByCompanyKrsNumber(nonExistingKrsNumber));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(CompanyNonExistException.class)
+                .hasMessageContaining("Couldn't find company using provide krs number");
+        verify(companyRepository).findCompanyByCompanyKrsNumber(nonExistingKrsNumber);
+        verify(companyMapper, never()).mapToDto(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should return list of founded company dtos when company members contain current user id")
+    void test_13() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
+
+        when(companyRepository.findCompaniesByCompanyMembersContaining(currentUserId)).thenReturn(List.of(sampleEntityCompanyII, sampleEntityCompanyIII));
+        when(companyMapper.mapToDtos(List.of(sampleEntityCompanyII, sampleEntityCompanyIII))).thenReturn(List.of(sampleDtoCompanyII, sampleDtoCompanyIII));
+
+        final var result = companyService.getCurrentUserCompanies(sampleToken);
+
+        //then
+        assertThat(result)
+                .isInstanceOf(List.class)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(2);
+        verify(companyRepository).findCompaniesByCompanyMembersContaining(currentUserId);
+        verify(companyMapper).mapToDtos(List.of(sampleEntityCompanyII, sampleEntityCompanyIII));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should return empty list when any company members not contain current user id")
+    void test_14() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
+
+        when(companyRepository.findCompaniesByCompanyMembersContaining(currentUserId)).thenReturn(Collections.emptyList());
+        when(companyMapper.mapToDtos(any())).thenReturn(Collections.emptyList());
+
+        final var result = companyService.getCurrentUserCompanies(sampleToken);
+
+        //then
+        assertThat(result)
+                .isInstanceOf(List.class)
+                .isNotNull()
+                .hasSize(0)
+                .isEmpty();
+        verify(companyRepository).findCompaniesByCompanyMembersContaining(currentUserId);
+        verify(companyMapper).mapToDtos(Collections.emptyList());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception if issue appear due getting current user id")
+    void test_15() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
+        final var companyDto = sampleDtoCompanyI;
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UUID.class)).thenThrow(WebClientResponseException.Unauthorized.class);
+
+        final var expectedException = catchThrowable(() -> companyService.getCurrentUserCompanies(sampleToken));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(WebClientResponseException.Unauthorized.class);
+        verify(companyRepository, never()).findCompaniesByCompanyMembersContaining(any());
+        verify(companyMapper, never()).mapToDtos(any());
     }
 }

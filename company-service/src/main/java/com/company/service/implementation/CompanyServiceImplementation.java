@@ -73,15 +73,13 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public CompanyDto getCompanyByCompanyKrsNumber(String krsNumber) {
-        Optional<Company> foundedCompany = companyRepository.findAll().stream()
-                .filter(company -> company.getCompanyKrsNumber().equals(krsNumber))
-                .findAny();
+    public CompanyDto getCompanyByCompanyKrsNumber(String companyKrsNumber) {
+        Optional<Company> companyEntity = companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber);
 
-        if (foundedCompany.isEmpty()) {
+        if (companyEntity.isEmpty()) {
             throw new CompanyNonExistException("Couldn't find company using provide krs number");
         }
-        return companyMapper.mapToDto(foundedCompany.get());
+        return companyMapper.mapToDto(companyEntity.get());
     }
 
     @Override
@@ -94,15 +92,14 @@ public class CompanyServiceImplementation implements CompanyService {
     @Override
     public List<CompanyDto> getCurrentUserCompanies(String jwtToken) {
         UUID currentUserId = getCurrentUserId(jwtToken);
-        List<Company> companyList = companyRepository.findAll().stream()
-                .filter(company -> company.getCompanyMembers().contains(currentUserId))
-                .toList();
+        List<Company> companyList = companyRepository.findCompaniesByCompanyMembersContaining(currentUserId);
         return companyMapper.mapToDtos(companyList);
     }
 
     @Override
     public Set<UUID> getCompanyMemberIdList(String companyId) {
         Optional<Company> entity = companyRepository.findCompanyByCompanyId(UUID.fromString(companyId));
+
         if (entity.isEmpty()) {
             throw new CompanyNonExistException("Company with provided id is not exist");
         }
@@ -116,7 +113,6 @@ public class CompanyServiceImplementation implements CompanyService {
         if (entity.isEmpty()) {
             throw new CompanyNonExistException("Company with provided id is not exist");
         }
-
         entity.get().getCompanyMembers().add(UUID.fromString(userId));
         companyRepository.save(entity.get());
     }
@@ -128,7 +124,6 @@ public class CompanyServiceImplementation implements CompanyService {
         if (entity.isEmpty()) {
             throw new CompanyNonExistException("Company with provided id is not exist");
         }
-
         return entity.get().getCompanyMembers().stream()
                 .map(memberId -> getAuthenticationServiceUserDto(memberId.toString(), jwtToken))
                 .toList();

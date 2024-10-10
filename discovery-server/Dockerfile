@@ -18,4 +18,4 @@ RUN mvn clean package -Dmaven.test.skip
 FROM openjdk:17-alpine
 WORKDIR /discovery-server
 COPY --from=builder /docgenserver/discovery-server/target/discovery-server-1.0-SNAPSHOT.jar ./
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "discovery-server-1.0-SNAPSHOT.jar"]
+CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8761", "-jar", "discovery-server-1.0-SNAPSHOT.jar"]

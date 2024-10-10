@@ -18,4 +18,4 @@ RUN mvn clean package -Dmaven.test.skip
 FROM openjdk:17-alpine
 WORKDIR /authentication-service
 COPY --from=builder /docgenserver/authentication-service/target/authentication-service-1.0-SNAPSHOT.jar ./
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "authentication-service-1.0-SNAPSHOT.jar"]
+CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001", "-jar", "authentication-service-1.0-SNAPSHOT.jar"]
