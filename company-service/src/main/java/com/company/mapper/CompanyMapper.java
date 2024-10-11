@@ -2,12 +2,8 @@ package com.company.mapper;
 
 import com.company.model.Company;
 import com.company.model.dto.CompanyDto;
-import lombok.RequiredArgsConstructor;
-import org.mapstruct.InheritConfiguration;
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 

@@ -1,10 +1,11 @@
 package com.company.service;
 
 import com.company.exception.CompanyNonExistException;
+import com.company.service.implementation.CompanyServiceImplementation;
 import com.company.mapper.CompanyMapper;
 import com.company.model.dto.CompanyDto;
+import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
-import com.company.service.implementation.CompanyServiceImplementation;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -420,7 +421,6 @@ class CompanyServiceTest extends CompanySamples {
         //given
         final var sampleToken = "sample-token";
         final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
-        final var companyDto = sampleDtoCompanyI;
 
         //when
         when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
@@ -438,5 +438,133 @@ class CompanyServiceTest extends CompanySamples {
                 .isInstanceOf(WebClientResponseException.Unauthorized.class);
         verify(companyRepository, never()).findCompaniesByCompanyMembersContaining(any());
         verify(companyMapper, never()).mapToDtos(any());
+    }
+
+    @Test
+    @DisplayName("Should add new member id to company members if company entity exist")
+    void test_16() {
+        //given
+        final var companyEntity = sampleEntityCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .build();
+        final var updatedEntity = sampleEntityCompanyI.toBuilder()
+                .companyId(companyIdI)
+                .companyMembers(Set.of(currentUserId))
+                .build();
+        //when
+        when(companyRepository.findCompanyByCompanyId(companyIdI)).thenReturn(Optional.of(companyEntity));
+
+        companyService.addNewMemberToCompany(companyIdI.toString(), currentUserId.toString());
+
+        //then
+        verify(companyRepository).save(updatedEntity);
+    }
+
+    @Test
+    @DisplayName("Should thrown an exception if company entity not found")
+    void test_17() {
+        //given
+        final var nonExistingCompanyId = "c74c670b-38b1-4369-8bd2-ec5accaeb3e7";
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId))).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> companyService.addNewMemberToCompany(nonExistingCompanyId, currentUserId.toString()));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(CompanyNonExistException.class)
+                .hasMessageContaining("Company with provided id is not exist");
+        verify(companyRepository).findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId));
+        verify(companyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should return user dto list of company members if company entity was found")
+    void test_18() {
+        //given
+        final var sampleToken = "sample-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-by-id/";
+        final var companyEntity = sampleEntityCompanyII.toBuilder()
+                .companyId(companyIdII)
+                .companyMembers(Set.of(currentUserId, companyMemberId))
+                .build();
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(companyIdII)).thenReturn(Optional.of(companyEntity));
+        var uuidMembersList = companyEntity.getCompanyMembers().stream().toList();
+        for (int i = 0; i < uuidMembersList.size(); i++) {
+            callWebFluxUserDto(sampleUri + uuidMembersList.get(i).toString(), userDtoList.get(i));
+        }
+
+        final var result = companyService.getDetailMembersList(companyIdII.toString(), sampleToken);
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(2)
+                .isInstanceOf(List.class);
+        verify(companyRepository).findCompanyByCompanyId(companyIdII);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if company entity not found using provided company id")
+    void test_19() {
+        //given
+        final var sampleToken = "sample-token";
+        final var nonExistingCompanyId = "c74c670b-38b1-4369-8bd2-ec5accaeb3e7";
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId))).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> companyService.getDetailMembersList(nonExistingCompanyId, sampleToken));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(CompanyNonExistException.class)
+                .hasMessageContaining("Company with provided id is not exist");
+        verify(companyRepository).findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId));
+        verify(companyRepository, never()).save(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception when some error occur due getting user dto list")
+    void test_20() {
+        final var wrongToken = "wrong-token";
+        final var sampleUri = "http://authentication-service/v1.0/authentication/get-by-id/";
+        final var companyEntity = sampleEntityCompanyII.toBuilder()
+                .companyId(companyIdII)
+                .build();
+
+        //when
+        when(companyRepository.findCompanyByCompanyId(companyIdII)).thenReturn(Optional.of(companyEntity));
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri + currentUserId)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenThrow(WebClientResponseException.Unauthorized.class);
+
+        final var expectedException = catchThrowable(() -> companyService.getDetailMembersList(companyIdII.toString(), wrongToken));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(WebClientResponseException.Unauthorized.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void callWebFluxUserDto(String url, UserDto userDto) {
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(url)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(userDto));
     }
 }

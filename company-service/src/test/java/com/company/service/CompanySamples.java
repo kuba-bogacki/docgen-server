@@ -4,15 +4,18 @@ import com.company.model.Address;
 import com.company.model.Company;
 import com.company.model.dto.AddressDto;
 import com.company.model.dto.CompanyDto;
+import com.company.model.dto.UserDto;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 class CompanySamples {
 
     final static UUID currentUserId = UUID.fromString("5a00f387-2035-4e91-860e-33a1db0a64db");
+    final static UUID companyMemberId = UUID.fromString("9b54793c-d655-4971-89f7-859cfa24beef");
     final static UUID companyIdI = UUID.fromString("c2f83a82-71df-4298-9989-363227d6ab79");
     final static UUID companyIdII = UUID.fromString("52d40201-0e69-43fa-86b1-14b66ff9572a");
     final static UUID companyIdIII = UUID.fromString("767adfdc-0c97-49ab-a6c2-f3a4d77c5fe7");
@@ -46,6 +49,17 @@ class CompanySamples {
     final static Set<UUID> companyMembersI = new HashSet<>();
     final static Set<UUID> companyMembersII = Set.of(currentUserId);
     final static Set<UUID> companyMembersIII = Set.of(currentUserId);
+
+    final static String userOneFirstNameI = "Jack";
+    final static String userOneFirstNameII = "John";
+    final static String userOneLastNameI = "Smith";
+    final static String userOneLastNameII = "Dowel";
+    final static String userOneEmail = "j.dowel@gmail.com";
+    final static String userTwoFirstNameI = "Lilly";
+    final static String userTwoFirstNameII = "Anna";
+    final static String userTwoLastNameI = "Gigi";
+    final static String userTwoLastNameII = "Blow";
+    final static String userTwoEmail = "g.blow@gmail.com";
 
     Company sampleEntityCompanyI = Company.builder()
             .companyName(companyNameI)
@@ -116,4 +130,22 @@ class CompanySamples {
             .companyShareCapital(companyShareCapitalIII)
             .companyMembers(companyMembersIII)
             .build();
+
+    UserDto sampleUserDtoI = UserDto.builder()
+            .userFirstNameI(userOneFirstNameI)
+            .userFirstNameII(userOneFirstNameII)
+            .userLastNameI(userOneLastNameI)
+            .userLastNameII(userOneLastNameII)
+            .userEmail(userOneEmail)
+            .build();
+
+    UserDto sampleUserDtoII = UserDto.builder()
+            .userFirstNameI(userTwoFirstNameI)
+            .userFirstNameII(userTwoFirstNameII)
+            .userLastNameI(userTwoLastNameI)
+            .userLastNameII(userTwoLastNameII)
+            .userEmail(userTwoEmail)
+            .build();
+
+    List<UserDto> userDtoList = List.of(sampleUserDtoI, sampleUserDtoII);
 }

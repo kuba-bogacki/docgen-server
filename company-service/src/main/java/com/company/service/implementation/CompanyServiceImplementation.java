@@ -1,27 +1,21 @@
 package com.company.service.implementation;
 
+import com.company.service.CompanyService;
 import com.company.exception.CompanyNonExistException;
 import com.company.mapper.CompanyMapper;
 import com.company.model.Company;
 import com.company.model.dto.CompanyDto;
 import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
-import com.company.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHeaders;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.company.util.ApplicationConstants.API_VERSION;
 import static com.company.util.ApplicationConstants.PROTOCOL;
@@ -84,8 +78,7 @@ public class CompanyServiceImplementation implements CompanyService {
 
     @Override
     public CompanyDto updateCompany(CompanyDto companyDto) {
-        Optional<Company> companyEntity = companyRepository.findCompanyByCompanyId(companyDto.getCompanyId());
-//        companyRepository.
+        //TODO
         return null;
     }
 
