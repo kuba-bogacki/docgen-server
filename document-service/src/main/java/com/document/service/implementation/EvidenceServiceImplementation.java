@@ -29,7 +29,7 @@ class EvidenceServiceImplementation implements EvidenceService {
     private final EvidenceRepository evidenceRepository;
     private final EvidenceMapper evidenceMapper;
     private final WebClient.Builder webClientBuilder;
-    private final KafkaTemplate<String, EvidenceCreateEvent> kafkaTemplate;
+//    private final KafkaTemplate<String, EvidenceCreateEvent> kafkaTemplate;
 
     @Override
     public void createEvidence(EvidenceDto evidenceDto) {
@@ -42,7 +42,7 @@ class EvidenceServiceImplementation implements EvidenceService {
 //            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Couldn't save evidence");
 //        }
         Evidence evidence = evidenceRepository.save(evidenceMapper.mapToEntity(evidenceDto));
-        kafkaTemplate.send("notificationTopic", new EvidenceCreateEvent(evidence.getEvidenceId()));
+//        kafkaTemplate.send("notificationTopic", new EvidenceCreateEvent(evidence.getEvidenceId()));
         log.info("Evidence has been created with id : {}", evidence.getEvidenceId());
     }
 

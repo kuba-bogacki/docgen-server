@@ -25,13 +25,12 @@
         <spring.starter.test.version>3.1.0</spring.starter.test.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <org.mapstruct.binding.version>0.2.0</org.mapstruct.binding.version>
-        <org.test.containers.version>1.18.3</org.test.containers.version>
-        <org.test.containers.mongodb.version>1.18.3</org.test.containers.mongodb.version>
-        <org.test.containers.jupiter.version>1.18.3</org.test.containers.jupiter.version>
         <spring.eureka.client.version>4.0.3</spring.eureka.client.version>
         <spring.circuitbreaker.resilience4j.version>3.0.0</spring.circuitbreaker.resilience4j.version>
         <spring.starter.actuator.version>3.1.2</spring.starter.actuator.version>
         <spring.kafka.version>3.0.9</spring.kafka.version>
+        <mockito.core.version>5.14.1</mockito.core.version>
+        <assertj.core.version>3.26.3</assertj.core.version>
     </properties>
 
     <dependencies>
@@ -100,22 +99,6 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.testcontainers/mongodb -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
-            <version>${org.test.containers.mongodb.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${org.test.containers.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -143,6 +126,21 @@
             <artifactId>spring-kafka</artifactId>
             <version>${spring.kafka.version}</version>
         </dependency>
-    </dependencies>
 
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.core.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.core.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

@@ -31,15 +31,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CompanyServiceTest extends CompanySamples {
 
-    @Mock private CompanyRepository companyRepository;
-    @Mock private CompanyMapper companyMapper;
-    @Mock private WebClient.Builder webClientBuilder;
-    @Mock private WebClient webClient;
     @SuppressWarnings("rawtypes")
     @Mock private RequestHeadersUriSpec requestHeadersUriSpec;
     @SuppressWarnings("rawtypes")
     @Mock private RequestHeadersSpec requestHeadersSpec;
     @Mock private ResponseSpec responseSpec;
+    @Mock private WebClient webClient;
+    @Mock private WebClient.Builder webClientBuilder;
+    @Mock private CompanyMapper companyMapper;
+    @Mock private CompanyRepository companyRepository;
     @InjectMocks private CompanyServiceImplementation companyService;
 
     @Test

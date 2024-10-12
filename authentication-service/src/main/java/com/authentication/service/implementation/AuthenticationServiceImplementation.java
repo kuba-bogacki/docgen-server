@@ -12,8 +12,8 @@ import com.authentication.security.AuthenticationResponse;
 import com.authentication.security.RegisterRequest;
 import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
+import com.authentication.util.NumberGenerator;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +38,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final NumberGenerator numberGenerator;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final WebClient.Builder webClientBuilder;
@@ -54,7 +55,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .userPassword(passwordEncoder.encode(registerRequest.getUserPassword()))
                 .userGender(Gender.valueOf(registerRequest.getUserGender().toUpperCase()))
                 .userRole(Role.USER)
-                .userVerificationCode(RandomString.make(64))
+                .userVerificationCode(numberGenerator.generateVerificationCode())
                 .termsAndCondition(registerRequest.getTermsAndCondition())
                 .accountNonExpired(true)
                 .accountNonLocked(true)
