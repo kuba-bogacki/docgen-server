@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static com.gateway.util.ApplicationConstants.*;
 import static org.springframework.web.cors.reactive.CorsUtils.isCorsRequest;
 
 @RefreshScope
@@ -32,11 +33,6 @@ public class AuthenticationFilter implements WebFilter {
     private final RouterValidator routerValidator;
     private final JwtUtil jwtUtil;
 
-    private static final String ALLOWED_HEADERS = "*";
-    private static final String ALLOWED_METHODS = "GET, PUT, POST, DELETE, OPTIONS, PATCH";
-    private static final String ALLOWED_ORIGIN = "http://localhost:3000";
-    private static final String ALLOWED_CREDENTIALS = "true";
-
     @Override
     public @NotNull Mono<Void> filter(ServerWebExchange exchange, @Nullable WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
@@ -45,17 +41,17 @@ public class AuthenticationFilter implements WebFilter {
             ServerHttpResponse response = exchange.getResponse();
             HttpHeaders headers = response.getHeaders();
 
-            if (Objects.isNull(headers.get("Access-Control-Allow-Headers"))) {
-                headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS);
+            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_HEADERS))) {
+                headers.add(ACCESS_CONTROL_ALLOW_HEADERS, ALLOWED_HEADERS);
             }
-            if (Objects.isNull(headers.get("Access-Control-Allow-Origin"))) {
-                headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_ORIGIN))) {
+                headers.add(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN);
             }
-            if (Objects.isNull(headers.get("Access-Control-Allow-Methods"))) {
-                headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS);
+            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_METHODS))) {
+                headers.add(ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS);
             }
-            if (Objects.isNull(headers.get("Access-Control-Allow-Credentials"))) {
-                headers.add("Access-Control-Allow-Credentials", ALLOWED_CREDENTIALS);
+            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_CREDENTIALS))) {
+                headers.add(ACCESS_CONTROL_ALLOW_CREDENTIALS, ALLOWED_CREDENTIALS);
             }
 
             if (request.getMethod() == HttpMethod.OPTIONS) {

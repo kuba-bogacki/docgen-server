@@ -19,17 +19,17 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.authentication.util.ApplicationConstants.SESSION_DURATION;
-
 @Service
 @PropertySource(value = "classpath:application.properties")
 public class JwtServiceImplementation implements JwtService {
 
     private final String secretKey;
+    private final Integer sessionDuration;
 
     @Autowired
-    public JwtServiceImplementation(@Value("${token.secret.key:}") String secretKey) {
+    public JwtServiceImplementation(@Value("${token.secret.key:}") String secretKey, @Value("${token.session.duration:}") Integer sessionDuration) {
         this.secretKey = secretKey;
+        this.sessionDuration = sessionDuration;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class JwtServiceImplementation implements JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(SESSION_DURATION)))
+                .setExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(sessionDuration)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

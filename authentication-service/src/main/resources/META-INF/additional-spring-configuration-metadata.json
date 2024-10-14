@@ -1,6 +1,11 @@
 {
   "properties": [
     {
+      "name": "token.session.duration",
+      "type": "java.lang.Integer",
+      "description": "Description for token.session.duration."
+    },
+    {
       "name": "image.kit.url.endpoint",
       "type": "java.lang.String",
       "description": "Description for image.kit.url.endpoint."

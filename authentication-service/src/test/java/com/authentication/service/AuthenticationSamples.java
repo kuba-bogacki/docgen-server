@@ -3,8 +3,10 @@ package com.authentication.service;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserDto;
 import com.authentication.model.dto.UserEventDto;
+import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.model.type.Gender;
 import com.authentication.model.type.Role;
+import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.RegisterRequest;
 
 import java.util.UUID;
@@ -23,6 +25,7 @@ class AuthenticationSamples {
     final Role userRole = Role.USER;
     final boolean termsAndCondition = true;
     final String userVerificationCode = "HDoLh86MBCMB4uEc3jWkgHfUTGxhbGDZjkgyS2Dm46tysfylyVYhyxJUEvpKDTQf";
+    final String userPrincipal = "cf8579c0-b0f1-4f8a-bbc3-cb5e00f1a929";
 
     RegisterRequest registerRequest = RegisterRequest.builder()
             .userFirstNameI(userFirstNameI)
@@ -33,6 +36,11 @@ class AuthenticationSamples {
             .userPassword(userPassword)
             .userGender(userGender.name())
             .termsAndCondition(termsAndCondition)
+            .build();
+
+    AuthenticationRequest sampleAuthenticationRequest = AuthenticationRequest.builder()
+            .userEmail(userEmailI)
+            .userPassword(userPassword)
             .build();
 
     User sampleUserEntity = User.builder()
@@ -73,5 +81,10 @@ class AuthenticationSamples {
             .userLastNameI(userLastNameI)
             .userEmail(userEmailI)
             .userVerificationCode(userVerificationCode)
+            .build();
+
+    UserPrincipalDto sampleUserPrincipalDto = UserPrincipalDto.builder()
+            .userId(userId.toString())
+            .userPrincipal(userPrincipal)
             .build();
 }

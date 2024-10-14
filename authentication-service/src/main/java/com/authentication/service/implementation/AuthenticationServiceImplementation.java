@@ -68,7 +68,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .retrieve()
                 .toEntity(ResponseEntity.class)
                 .block();
-        if (Objects.isNull(emailStatus) || emailStatus.getStatusCode().is4xxClientError()) {
+        if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException("Couldn't send verification email. New user is not saved in database.");
         }
         userRepository.save(user);
@@ -92,16 +92,16 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Bad credentials. Impossible to authenticate user with provide email or password.");
+            throw new UserNotFoundException("Impossible to find user with provided email");
         }
         if (!user.get().getUserVerificationCode().equals(registrationCode)) {
-            throw new UserAuthenticationException("Verification codes are different or code already expired.");
+            throw new UserAuthenticationException("Verification codes are different or code already expired");
         }
+        authenticateUser(authenticationRequest);
 
         user.get().setEnabled(true);
         userRepository.save(user.get());
 
-        authenticateUser(authenticationRequest);
         String jwtToken = jwtService.generateJwtToken(user.get());
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
@@ -168,8 +168,8 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getUserEmail(), authenticationRequest.getUserPassword()));
-        } catch (AuthenticationException e) {
-            throw new UserAuthorizationException("Bad credentials. Impossible to authenticate user with provide email or password.");
+        } catch (Exception e) {
+            throw new UserAuthorizationException("Bad credentials. Impossible to authenticate user with provide email or password");
         }
     }
 }
