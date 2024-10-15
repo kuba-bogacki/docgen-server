@@ -28,7 +28,6 @@
         <org.projectlombok.version>1.18.28</org.projectlombok.version>
         <spring.starter.test.version>3.1.0</spring.starter.test.version>
         <spring.security.test.version>6.1.0</spring.security.test.version>
-        <spring.mockito.version>5.4.0</spring.mockito.version>
         <spring.jupiter.api.version>5.9.3</spring.jupiter.api.version>
         <spring.jjwt.api.version>0.11.5</spring.jjwt.api.version>
         <spring.jjwt.impl.version>0.11.5</spring.jjwt.impl.version>
@@ -119,14 +118,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <version>${spring.security.test.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${spring.mockito.version}</version>
             <scope>test</scope>
         </dependency>
 

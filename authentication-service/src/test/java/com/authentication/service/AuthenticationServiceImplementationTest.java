@@ -1,9 +1,6 @@
 package com.authentication.service;
 
-import com.authentication.exception.UserAlreadyExistException;
-import com.authentication.exception.UserAuthenticationException;
-import com.authentication.exception.UserAuthorizationException;
-import com.authentication.exception.UserNotFoundException;
+import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationResponse;
@@ -21,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -36,8 +32,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplementationTest extends AuthenticationSamples{
 
-    @SuppressWarnings("rawtypes")
-    @Mock private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
     @SuppressWarnings("rawtypes")
     @Mock private WebClient.RequestHeadersSpec requestHeadersSpec;
     @Mock private WebClient.RequestBodyUriSpec requestBodyUriSpec;
@@ -55,7 +49,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
 
     @Test
     @SuppressWarnings("unchecked")
-    @DisplayName("Should create new user entity if valid register request is valid")
+    @DisplayName("Should create new user entity if register request is valid")
     void test_01() {
         //given
         final var sampleUri = "http://notification-service/v1.0/notification/verification";
@@ -396,5 +390,335 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(userRepository).save(updatedEntity);
         verify(jwtService).generateJwtToken(updatedEntity);
+    }
+
+    @Test
+    @DisplayName("Should return jwt token if authentication credentials are correct")
+    void test_13() {
+        //given
+        final var sampleToken = "sample-secret-token";
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
+
+        final var result = authenticationService.authenticate(sampleAuthenticationRequest);
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(AuthenticationResponse.class)
+                .hasFieldOrPropertyWithValue("jwtToken", sampleToken);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity not found by provided authentication request email")
+    void test_14() {
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> authenticationService.authenticate(sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("Impossible to find user with provided email");
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager, never()).authenticate(any());
+        verify(jwtService, never()).generateJwtToken(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user account is not activated")
+    void test_15() {
+        //given
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+
+        final var expectedException = catchThrowable(() -> authenticationService.authenticate(sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAccountDisableException.class)
+                .hasMessageContaining("User account need to be activate first. Check your email for activate link");
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager, never()).authenticate(any());
+        verify(jwtService, never()).generateJwtToken(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if provided authentication request password is incorrect")
+    void test_16() {
+        //given
+        final var wrongPassword = "wrongPassword";
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var wrongCredentialsAuthenticationRequest = sampleAuthenticationRequest.toBuilder()
+                .userPassword(wrongPassword)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                wrongCredentialsAuthenticationRequest.getUserEmail(), wrongCredentialsAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
+
+        final var expectedException = catchThrowable(() -> authenticationService.authenticate(wrongCredentialsAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAuthorizationException.class)
+                .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService, never()).generateJwtToken(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if unexpected error occur during generate jwt token")
+    void test_17() {
+        //given
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenThrow(JwtException.class);
+
+        final var expectedException = catchThrowable(() -> authenticationService.authenticate(sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(JwtException.class);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should add user to company as a member if register request is valid and company id is provided")
+    void test_18() {
+        //given
+        final var sampleToken = "sample-secret-token";
+        final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.just(new ResponseEntity<>(HttpStatus.OK)));
+
+        final var result = authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest);
+
+        //then
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(AuthenticationResponse.class)
+                .hasFieldOrPropertyWithValue("jwtToken", sampleToken);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user with provided authentication request email not found")
+    void test_19() {
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("Impossible to find user with provided email");
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager, never()).authenticate(any());
+        verify(jwtService, never()).generateJwtToken(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if provided authentication request password is incorrect")
+    void test_20() {
+        //given
+        final var wrongPassword = "wrongPassword";
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var wrongCredentialsAuthenticationRequest = sampleAuthenticationRequest.toBuilder()
+                .userPassword(wrongPassword)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                wrongCredentialsAuthenticationRequest.getUserEmail(), wrongCredentialsAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
+
+        final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, wrongCredentialsAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAuthorizationException.class)
+                .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService, never()).generateJwtToken(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if some issue occur during generate jwt token")
+    void test_21() {
+        //given
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenThrow(JwtException.class);
+
+        final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(JwtException.class);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception if company web client response error occur")
+    void test_22() {
+        //given
+        final var sampleToken = "sample-secret-token";
+        final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.just(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE)));
+
+        final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAuthenticationException.class)
+                .hasMessageContaining("Couldn't add user as a member to company with id: " + companyId);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should throw an exception if company web client return null")
+    void test_23() {
+        //given
+        final var sampleToken = "sample-secret-token";
+        final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userId)
+                .enabled(true)
+                .build();
+        final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
+                sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
+        when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.empty());
+
+        final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAuthenticationException.class)
+                .hasMessageContaining("Couldn't add user as a member to company with id: " + companyId);
+        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(authenticationManager).authenticate(usernamePasswordAuthentication);
+        verify(jwtService).generateJwtToken(userEntity);
     }
 }

@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -114,10 +113,10 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Bad credentials. Impossible to authenticate user with provide email or password.");
+            throw new UserNotFoundException("Impossible to find user with provided email");
         }
         if (!user.get().getEnabled()) {
-            throw new UserAccountDisableException("User account need to be activate first. Check your email for activate link.");
+            throw new UserAccountDisableException("User account need to be activate first. Check your email for activate link");
         }
 
         authenticateUser(authenticationRequest);
@@ -133,7 +132,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Bad credentials. Impossible to authenticate user with provide email or password.");
+            throw new UserNotFoundException("Impossible to find user with provided email");
         }
 
         authenticateUser(authenticationRequest);
@@ -148,7 +147,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .toEntity(ResponseEntity.class)
                 .block();
 
-        if (Objects.isNull(joiningStatus) || joiningStatus.getStatusCode().is4xxClientError()) {
+        if (Objects.isNull(joiningStatus) || !joiningStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException(String.format("Couldn't add user as a member to company with id: %s.", companyId));
         }
 
