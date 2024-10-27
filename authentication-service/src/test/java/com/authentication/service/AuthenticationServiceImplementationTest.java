@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceImplementationTest extends AuthenticationSamples{
+class AuthenticationServiceImplementationTest extends AuthenticationSamples {
 
     @SuppressWarnings("rawtypes")
     @Mock private WebClient.RequestHeadersSpec requestHeadersSpec;
@@ -55,7 +55,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         final var sampleUri = "http://notification-service/v1.0/notification/verification";
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
@@ -74,7 +74,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         //then
         assertThat(catchException)
                 .isNull();
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(passwordEncoder).encode(userPassword);
         verify(userMapper).mapToUserEventDto(sampleUserEntity);
         verify(userRepository).save(sampleUserEntity);
@@ -90,7 +90,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .build();
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));
 
@@ -98,7 +98,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         assertThat(catchException)
                 .isNotNull()
                 .isInstanceOf(UserAlreadyExistException.class)
-                .hasMessageContaining(String.format("User %s already exist in database.", userEmailI));
+                .hasMessageContaining(String.format("User %s already exist in database.", userEmail));
         verify(passwordEncoder, never()).encode(userPassword);
         verify(numberGenerator, never()).generateVerificationCode();
         verify(userMapper, never()).mapToUserEventDto(sampleUserEntity);
@@ -113,7 +113,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         final var sampleUri = "http://notification-service/v1.0/notification/verification";
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
@@ -146,7 +146,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         final var sampleUri = "http://notification-service/v1.0/notification/verification";
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
@@ -179,7 +179,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         final var sampleUri = "http://notification-service/v1.0/notification/verification";
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
@@ -264,7 +264,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(userRepository.save(updatedEntity)).thenReturn(updatedEntity);
         when(jwtService.generateJwtToken(updatedEntity)).thenReturn(sampleToken);
@@ -276,7 +276,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(AuthenticationResponse.class)
                 .hasFieldOrPropertyWithValue("jwtToken", sampleToken);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(userRepository).save(updatedEntity);
         verify(jwtService).generateJwtToken(updatedEntity);
@@ -286,7 +286,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
     @DisplayName("Should throw an exception if user entity not found by provided email")
     void test_09() {
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
 
         final var expectedException = catchThrowable(() -> authenticationService.verifyUserRegistrationCode(userVerificationCode, sampleAuthenticationRequest));
 
@@ -295,7 +295,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Impossible to find user with provided email");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(userRepository, never()).save(any());
         verify(jwtService, never()).generateJwtToken(any());
@@ -312,7 +312,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .build();
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
 
         final var expectedException = catchThrowable(() -> authenticationService.verifyUserRegistrationCode(differentRegistrationCode, sampleAuthenticationRequest));
 
@@ -321,7 +321,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Verification codes are different or code already expired");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(userRepository, never()).save(any());
         verify(jwtService, never()).generateJwtToken(any());
@@ -343,7 +343,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 wrongCredentialsAuthenticationRequest.getUserEmail(), wrongCredentialsAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
 
         final var expectedException = catchThrowable(() -> authenticationService.verifyUserRegistrationCode(userVerificationCode, wrongCredentialsAuthenticationRequest));
@@ -353,7 +353,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthorizationException.class)
                 .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(userRepository, never()).save(any());
         verify(jwtService, never()).generateJwtToken(any());
@@ -375,7 +375,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(userRepository.save(updatedEntity)).thenReturn(updatedEntity);
         when(jwtService.generateJwtToken(updatedEntity)).thenThrow(JwtException.class);
@@ -386,7 +386,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(JwtException.class);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(userRepository).save(updatedEntity);
         verify(jwtService).generateJwtToken(updatedEntity);
@@ -406,7 +406,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
 
@@ -417,7 +417,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(AuthenticationResponse.class)
                 .hasFieldOrPropertyWithValue("jwtToken", sampleToken);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }
@@ -426,7 +426,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
     @DisplayName("Should throw an exception if user entity not found by provided authentication request email")
     void test_14() {
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
 
         final var expectedException = catchThrowable(() -> authenticationService.authenticate(sampleAuthenticationRequest));
 
@@ -435,7 +435,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Impossible to find user with provided email");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(jwtService, never()).generateJwtToken(any());
     }
@@ -450,7 +450,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .build();
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
 
         final var expectedException = catchThrowable(() -> authenticationService.authenticate(sampleAuthenticationRequest));
 
@@ -459,7 +459,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAccountDisableException.class)
                 .hasMessageContaining("User account need to be activate first. Check your email for activate link");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(jwtService, never()).generateJwtToken(any());
     }
@@ -481,7 +481,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 wrongCredentialsAuthenticationRequest.getUserEmail(), wrongCredentialsAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
 
         final var expectedException = catchThrowable(() -> authenticationService.authenticate(wrongCredentialsAuthenticationRequest));
@@ -491,7 +491,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthorizationException.class)
                 .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService, never()).generateJwtToken(any());
     }
@@ -509,7 +509,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenThrow(JwtException.class);
 
@@ -519,7 +519,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(JwtException.class);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }
@@ -540,7 +540,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
 
@@ -559,7 +559,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(AuthenticationResponse.class)
                 .hasFieldOrPropertyWithValue("jwtToken", sampleToken);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }
@@ -568,7 +568,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
     @DisplayName("Should throw an exception if user with provided authentication request email not found")
     void test_19() {
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.empty());
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
 
         final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, sampleAuthenticationRequest));
 
@@ -577,7 +577,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Impossible to find user with provided email");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(jwtService, never()).generateJwtToken(any());
     }
@@ -599,7 +599,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 wrongCredentialsAuthenticationRequest.getUserEmail(), wrongCredentialsAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
 
         final var expectedException = catchThrowable(() -> authenticationService.confirmCompanyMembership(companyId, wrongCredentialsAuthenticationRequest));
@@ -609,7 +609,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthorizationException.class)
                 .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService, never()).generateJwtToken(any());
     }
@@ -627,7 +627,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenThrow(JwtException.class);
 
@@ -637,7 +637,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
         assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(JwtException.class);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }
@@ -658,7 +658,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
 
@@ -677,7 +677,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Couldn't add user as a member to company with id: " + companyId);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }
@@ -698,7 +698,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 sampleAuthenticationRequest.getUserEmail(), sampleAuthenticationRequest.getUserPassword());
 
         //when
-        when(userRepository.findUserByUserEmail(userEmailI)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenReturn(any());
         when(jwtService.generateJwtToken(userEntity)).thenReturn(sampleToken);
 
@@ -717,7 +717,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples{
                 .isNotNull()
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Couldn't add user as a member to company with id: " + companyId);
-        verify(userRepository).findUserByUserEmail(userEmailI);
+        verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
         verify(jwtService).generateJwtToken(userEntity);
     }

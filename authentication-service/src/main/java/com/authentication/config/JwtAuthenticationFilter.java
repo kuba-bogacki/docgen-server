@@ -88,7 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return 0 < diffInMinutes && diffInMinutes < TIME_LEFT_TO_REFRESH_TOKEN;
     }
 
-    private void sendRefreshTokenToClient(String jwtToken, String refreshToken) throws NoSuchObjectException {
+    private void sendRefreshTokenToClient(String jwtToken, String refreshToken) throws UserNotFoundException {
         final var userPrincipal = userService.getUserDtoByUserEmail(jwtService.extractUsername(jwtToken)).getUserPrincipal();
 
         ResponseEntity<?> sendRefreshTokenStatus = webClientBuilder

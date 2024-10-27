@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.rmi.NoSuchObjectException;
 
 public interface UserService {
-    UserDto getUserDtoByUserEmail(String userEmail) throws NoSuchObjectException;
+    UserDto getUserDtoByUserEmail(String userEmail) throws UserNotFoundException;
     Boolean sendVerificationEmail(String userEmail) throws UserNotFoundException, UserPasswordException;
     Boolean resetUserPassword(String verificationCode, AuthenticationRequest authenticationRequest) throws UserNotFoundException, UserAuthenticationException;
     UserDto updateUserData(UserDto userDto) throws UserNotFoundException;

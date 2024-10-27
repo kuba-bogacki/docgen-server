@@ -46,13 +46,12 @@ public class UserServiceImplementation implements UserService {
     private final ImageKitConfiguration imageKitConfiguration;
 
     @Override
-    public UserDto getUserDtoByUserEmail(String userEmail) throws NoSuchObjectException {
+    public UserDto getUserDtoByUserEmail(String userEmail) {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
-        if (user.isPresent()) {
-            return userMapper.mapToUserDto(user.get());
-        } else {
-            throw new NoSuchObjectException("Can't find " + userEmail + " user");
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Can't find " + userEmail + " user");
         }
+        return userMapper.mapToUserDto(user.get());
     }
 
     @Override
@@ -69,7 +68,7 @@ public class UserServiceImplementation implements UserService {
                 .retrieve()
                 .toEntity(ResponseEntity.class)
                 .block();
-        if (Objects.isNull(emailStatus) || emailStatus.getStatusCode().is4xxClientError()) {
+        if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserPasswordException("Couldn't send reset email. User account still not locked.");
         }
 

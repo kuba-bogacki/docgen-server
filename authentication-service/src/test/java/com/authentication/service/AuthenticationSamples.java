@@ -1,6 +1,7 @@
 package com.authentication.service;
 
 import com.authentication.model.User;
+import com.authentication.model.dto.UserDto;
 import com.authentication.model.dto.UserEventDto;
 import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.model.type.Gender;
@@ -17,7 +18,7 @@ class AuthenticationSamples {
     final String userFirstNameII = "Paul";
     final String userLastNameI = "Doe";
     final String userLastNameII = "Carter";
-    final String userEmailI = "john.doe@gmail.com";
+    final String userEmail = "john.doe@gmail.com";
     final String userPassword = "secret-password";
     final String userEncodedPassword = "$2a$10$SnbHHtWU07v8K6k";
     final Gender userGender = Gender.MALE;
@@ -32,14 +33,14 @@ class AuthenticationSamples {
             .userFirstNameII(userFirstNameII)
             .userLastNameI(userLastNameI)
             .userLastNameII(userLastNameII)
-            .userEmail(userEmailI)
+            .userEmail(userEmail)
             .userPassword(userPassword)
             .userGender(userGender.name())
             .termsAndCondition(termsAndCondition)
             .build();
 
     AuthenticationRequest sampleAuthenticationRequest = AuthenticationRequest.builder()
-            .userEmail(userEmailI)
+            .userEmail(userEmail)
             .userPassword(userPassword)
             .build();
 
@@ -48,7 +49,7 @@ class AuthenticationSamples {
             .userFirstNameII(userFirstNameII)
             .userLastNameI(userLastNameI)
             .userLastNameII(userLastNameII)
-            .userEmail(userEmailI)
+            .userEmail(userEmail)
             .userPassword(userEncodedPassword)
             .userGender(userGender)
             .userRole(userRole)
@@ -60,10 +61,26 @@ class AuthenticationSamples {
             .enabled(false)
             .build();
 
+    UserDto sampleUserDto = UserDto.builder()
+            .userFirstNameI(userFirstNameI)
+            .userFirstNameII(userFirstNameII)
+            .userLastNameI(userLastNameI)
+            .userLastNameII(userLastNameII)
+            .userEmail(userEmail)
+            .userGender(userGender)
+            .userRole(userRole)
+            .userVerificationCode(userVerificationCode)
+            .userPrincipal(userPrincipal)
+            .accountNonExpired(true)
+            .accountNonLocked(true)
+            .credentialsNonExpired(true)
+            .enabled(false)
+            .build();
+
     UserEventDto sampleUserEventDto = UserEventDto.builder()
             .userFirstNameI(userFirstNameI)
             .userLastNameI(userLastNameI)
-            .userEmail(userEmailI)
+            .userEmail(userEmail)
             .userVerificationCode(userVerificationCode)
             .build();
 

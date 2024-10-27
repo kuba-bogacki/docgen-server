@@ -28,7 +28,7 @@ public class UserController {
         try {
             String userEmail = jwtService.extractUsername(jwtToken.substring(7));
             return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
-        } catch (NoSuchObjectException e) {
+        } catch (UserNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<?> getUserDtoByUserEmail(@PathVariable("userEmail") String userEmail) {
         try {
             return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
-        } catch (NoSuchObjectException e) {
+        } catch (UserNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
@@ -56,7 +56,7 @@ public class UserController {
         try {
             String userEmail = jwtService.extractUsername(jwtToken.substring(7));
             return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail).getUserId(), HttpStatus.OK);
-        } catch (NoSuchObjectException e) {
+        } catch (UserNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
