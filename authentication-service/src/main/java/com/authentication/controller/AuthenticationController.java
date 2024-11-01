@@ -1,9 +1,9 @@
 package com.authentication.controller;
 
 import com.authentication.exception.*;
+import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.RegisterRequest;
-import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
@@ -55,7 +55,7 @@ public class AuthenticationController {
     public ResponseEntity<?> sendEmailWithResetPasswordLink(@RequestParam("userEmail") String userEmail) {
         try {
             return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException | UserPasswordException e) {
+        } catch (UserNotFoundException | UserWebClientException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

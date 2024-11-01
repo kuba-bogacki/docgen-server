@@ -54,7 +54,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .userPassword(passwordEncoder.encode(registerRequest.getUserPassword()))
                 .userGender(Gender.valueOf(registerRequest.getUserGender().toUpperCase()))
                 .userRole(Role.USER)
-                .userVerificationCode(numberGenerator.generateVerificationCode())
+                .userVerificationCode(numberGenerator.generateVerificationCode(64))
                 .termsAndCondition(registerRequest.getTermsAndCondition())
                 .accountNonExpired(true)
                 .accountNonLocked(true)

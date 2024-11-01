@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NumberGenerator {
 
-    public String generateVerificationCode() {
-        return RandomStringUtils.randomAlphabetic(64);
+    public String generateVerificationCode(int length) {
+        return RandomStringUtils.randomAlphabetic(length);
     }
 }

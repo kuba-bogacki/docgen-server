@@ -4,13 +4,14 @@ import com.authentication.config.ImageKitConfiguration;
 import com.authentication.exception.UserAlreadyExistException;
 import com.authentication.exception.UserAuthenticationException;
 import com.authentication.exception.UserNotFoundException;
-import com.authentication.exception.UserPasswordException;
+import com.authentication.exception.UserWebClientException;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserDto;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
+import com.authentication.util.NumberGenerator;
 import io.imagekit.sdk.models.FileCreateRequest;
 import io.imagekit.sdk.models.GetFileListRequest;
 import io.imagekit.sdk.models.results.Result;
@@ -42,6 +43,7 @@ public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final NumberGenerator numberGenerator;
     private final WebClient.Builder webClientBuilder;
     private final ImageKitConfiguration imageKitConfiguration;
 
@@ -55,7 +57,7 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public Boolean sendVerificationEmail(String userEmail) throws UserNotFoundException, UserPasswordException {
+    public Boolean sendVerificationEmail(String userEmail) throws UserNotFoundException, UserWebClientException {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
@@ -69,7 +71,7 @@ public class UserServiceImplementation implements UserService {
                 .toEntity(ResponseEntity.class)
                 .block();
         if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
-            throw new UserPasswordException("Couldn't send reset email. User account still not locked.");
+            throw new UserWebClientException("Couldn't send reset email. User account still locked.");
         }
 
         user.get().setAccountNonLocked(false);
@@ -90,7 +92,7 @@ public class UserServiceImplementation implements UserService {
         }
 
         user.get().setAccountNonLocked(true);
-        user.get().setUserVerificationCode(RandomString.make(64));
+        user.get().setUserVerificationCode(numberGenerator.generateVerificationCode(64));
         user.get().setUserPassword(passwordEncoder.encode(authenticationRequest.getUserPassword()));
         User savedUser = userRepository.save(user.get());
         return savedUser.getAccountNonLocked();

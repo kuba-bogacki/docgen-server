@@ -57,7 +57,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
-        when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
+        when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
 
         when(webClientBuilder.build()).thenReturn(webClient);
@@ -100,7 +100,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .isInstanceOf(UserAlreadyExistException.class)
                 .hasMessageContaining(String.format("User %s already exist in database.", userEmail));
         verify(passwordEncoder, never()).encode(userPassword);
-        verify(numberGenerator, never()).generateVerificationCode();
+        verify(numberGenerator, never()).generateVerificationCode(64);
         verify(userMapper, never()).mapToUserEventDto(sampleUserEntity);
         verify(userRepository, never()).save(sampleUserEntity);
     }
@@ -115,7 +115,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
-        when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
+        when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
 
         when(webClientBuilder.build()).thenReturn(webClient);
@@ -133,7 +133,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Couldn't send verification email. New user is not saved in database.");
         verify(passwordEncoder).encode(userPassword);
-        verify(numberGenerator).generateVerificationCode();
+        verify(numberGenerator).generateVerificationCode(64);
         verify(userMapper).mapToUserEventDto(sampleUserEntity);
         verify(userRepository, never()).save(sampleUserEntity);
     }
@@ -148,7 +148,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
-        when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
+        when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
 
         when(webClientBuilder.build()).thenReturn(webClient);
@@ -166,7 +166,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Couldn't send verification email. New user is not saved in database.");
         verify(passwordEncoder).encode(userPassword);
-        verify(numberGenerator).generateVerificationCode();
+        verify(numberGenerator).generateVerificationCode(64);
         verify(userMapper).mapToUserEventDto(sampleUserEntity);
         verify(userRepository, never()).save(sampleUserEntity);
     }
@@ -181,7 +181,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
-        when(numberGenerator.generateVerificationCode()).thenReturn(userVerificationCode);
+        when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(sampleUserEntity)).thenReturn(sampleUserEventDto);
         doThrow(ConstraintViolationException.class).when(userRepository).save(sampleUserEntity);
 
@@ -199,7 +199,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .isNotNull()
                 .isInstanceOf(ConstraintViolationException.class);
         verify(passwordEncoder).encode(userPassword);
-        verify(numberGenerator).generateVerificationCode();
+        verify(numberGenerator).generateVerificationCode(64);
         verify(userMapper).mapToUserEventDto(sampleUserEntity);
         verify(userRepository).save(sampleUserEntity);
     }
