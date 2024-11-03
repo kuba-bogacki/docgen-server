@@ -55,7 +55,6 @@ class AuthenticationSamples {
             .userGender(userGender)
             .userRole(userRole)
             .userVerificationCode(userVerificationCode)
-            .userPhotoFileName(userPhotoFileName)
             .termsAndCondition(termsAndCondition)
             .accountNonExpired(true)
             .accountNonLocked(true)

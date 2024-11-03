@@ -327,6 +327,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
         final var userEntity = sampleUserEntity.toBuilder()
                 .userId(userId)
+                .userPhotoFileName(userPhotoFileName)
                 .build();
 
         //when
@@ -360,6 +361,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
         final var userEntity = sampleUserEntity.toBuilder()
                 .userId(userId)
+                .userPhotoFileName(userPhotoFileName)
                 .build();
 
         //when
