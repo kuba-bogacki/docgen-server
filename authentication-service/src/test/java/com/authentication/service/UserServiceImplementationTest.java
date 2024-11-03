@@ -1,11 +1,11 @@
 package com.authentication.service;
 
-import com.authentication.config.ImageKitConfiguration;
+import com.authentication.config.imagekit.DefaultImageKitConfiguration;
 import com.authentication.exception.UserAuthenticationException;
 import com.authentication.exception.UserNotFoundException;
+import com.authentication.exception.UserUploadPhotoException;
 import com.authentication.exception.UserWebClientException;
 import com.authentication.mapper.UserMapper;
-import com.authentication.model.User;
 import com.authentication.model.dto.UserDto;
 import com.authentication.repository.UserRepository;
 import com.authentication.service.implementation.UserServiceImplementation;
@@ -16,14 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -43,7 +44,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private NumberGenerator numberGenerator;
-    @Mock private ImageKitConfiguration imageKitConfiguration;
+    @Mock private DefaultImageKitConfiguration imageKitConfiguration;
     @InjectMocks private UserServiceImplementation userService;
 
     @Test
@@ -254,6 +255,188 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         verify(userRepository).findUserByUserEmail(sampleAuthenticationRequest.getUserEmail());
         verify(numberGenerator, never()).generateVerificationCode(64);
         verify(passwordEncoder, never()).encode(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should return mapped user dto of saved entity if user dto is valid")
+    void test_09() {
+        //given
+        final var updatedUserDto = sampleUserDto.toBuilder()
+                .userId(userId)
+                .userFirstNameI("Michael")
+                .userFirstNameII("Anthony")
+                .userLastNameI("Corleone")
+                .userLastNameII("Hamilton")
+                .build();
+        final var updatedUserEntity = sampleUserEntity.toBuilder()
+                .userId(userId)
+                .userFirstNameI("Michael")
+                .userFirstNameII("Anthony")
+                .userLastNameI("Corleone")
+                .userLastNameII("Hamilton")
+                .build();
+        final var foundedEntity = sampleUserEntity.toBuilder()
+                .userId(userId)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(foundedEntity));
+        when(userRepository.save(updatedUserEntity)).thenReturn(updatedUserEntity);
+        when(userMapper.mapToUserDto(updatedUserEntity)).thenReturn(updatedUserDto);
+
+        final var result = userService.updateUserData(updatedUserDto);
+
+        //then
+        Assertions.assertThat(result)
+                .isNotNull()
+                .isInstanceOf(UserDto.class)
+                .hasFieldOrPropertyWithValue("userFirstNameI", "Michael")
+                .hasFieldOrPropertyWithValue("userFirstNameII", "Anthony")
+                .hasFieldOrPropertyWithValue("userLastNameI", "Corleone")
+                .hasFieldOrPropertyWithValue("userLastNameII", "Hamilton");
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(userRepository).save(updatedUserEntity);
+        verify(userMapper).mapToUserDto(updatedUserEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity not found by provided user email")
+    void test_10() {
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> userService.updateUserData(sampleUserDto));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(String.format("Can't find %s user", userEmail));
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(userRepository, never()).save(any());
+        verify(userMapper, never()).mapToUserDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return user photo file name if user entity was found, new photo was updated and result file list is empty")
+    void test_11() throws Exception {
+        //given
+        final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
+        final var sampleFileName = "sample-new-file-name";
+        final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userId)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
+        when(numberGenerator.generateUserPhotoFileName(26)).thenReturn(sampleFileName);
+        when(imageKitConfiguration.uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName)).thenReturn(updatedPhotoFileName);
+        when(imageKitConfiguration.resultFileListIsEmpty(userPhotoFileName)).thenReturn(true);
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+
+        final var result = userService.uploadNewUserPhoto(sampleMultipartFile, userEmail);
+
+        //then
+        Assertions.assertThat(result)
+                .isNotNull()
+                .isInstanceOf(String.class)
+                .isEqualTo(updatedPhotoFileName);
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(numberGenerator).generateUserPhotoFileName(26);
+        verify(imageKitConfiguration).uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName);
+        verify(imageKitConfiguration).resultFileListIsEmpty(userPhotoFileName);
+        verify(userRepository).save(userEntity);
+        verify(imageKitConfiguration, never()).deleteFile(anyString());
+    }
+
+    @Test
+    @DisplayName("Should return user photo file name if user entity was found, new photo was updated and result file list is not empty")
+    void test_12() throws Exception {
+        //given
+        final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
+        final var sampleFileName = "sample-new-file-name";
+        final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userId)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
+        when(numberGenerator.generateUserPhotoFileName(26)).thenReturn(sampleFileName);
+        when(imageKitConfiguration.uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName)).thenReturn(updatedPhotoFileName);
+        when(imageKitConfiguration.resultFileListIsEmpty(userPhotoFileName)).thenReturn(false);
+        doNothing().when(imageKitConfiguration).deleteFile(userPhotoFileName);
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+
+        final var result = userService.uploadNewUserPhoto(sampleMultipartFile, userEmail);
+
+        //then
+        Assertions.assertThat(result)
+                .isNotNull()
+                .isInstanceOf(String.class)
+                .isEqualTo(updatedPhotoFileName);
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(numberGenerator).generateUserPhotoFileName(26);
+        verify(imageKitConfiguration).uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName);
+        verify(imageKitConfiguration).resultFileListIsEmpty(userPhotoFileName);
+        verify(imageKitConfiguration).deleteFile(userPhotoFileName);
+        verify(userRepository).save(userEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity not found by provided user email")
+    void test_13() throws Exception {
+        //given
+        final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> userService.uploadNewUserPhoto(sampleMultipartFile, userEmail));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(String.format("Can't find %s user", userEmail));
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(numberGenerator, never()).generateUserPhotoFileName(anyInt());
+        verify(imageKitConfiguration, never()).uploadImage(any(), anyString());
+        verify(imageKitConfiguration, never()).resultFileListIsEmpty(anyString());
+        verify(imageKitConfiguration, never()).deleteFile(anyString());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity was found, but updated new photo failed")
+    void test_14() throws Exception {
+        //given
+        final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
+        final var sampleFileName = "sample-new-file-name";
+        final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userId)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
+        when(numberGenerator.generateUserPhotoFileName(26)).thenReturn(sampleFileName);
+        when(imageKitConfiguration.uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName)).thenThrow(IOException.class);
+
+        final var expectedException = catchThrowable(() -> userService.uploadNewUserPhoto(sampleMultipartFile, userEmail));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserUploadPhotoException.class)
+                .hasMessageContaining("Couldn't upload result file");
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(numberGenerator).generateUserPhotoFileName(26);
+        verify(imageKitConfiguration).uploadImage(sampleMultipartFile.getBytes(), updatedPhotoFileName);
+        verify(imageKitConfiguration, never()).resultFileListIsEmpty(anyString());
+        verify(imageKitConfiguration, never()).deleteFile(anyString());
         verify(userRepository, never()).save(any());
     }
 }

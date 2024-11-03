@@ -7,12 +7,16 @@ import com.authentication.security.RegisterRequest;
 import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.authentication.util.ApplicationConstants.API_VERSION;
+import static com.authentication.util.ApplicationConstants.EMAIL_PATTERN;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +28,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping(value = "/create")
-    public ResponseEntity<?> createNewUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> createNewUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
             authenticationService.register(registerRequest);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -34,7 +38,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/verify/{registrationCode}")
-    public ResponseEntity<?> verifyUser(@PathVariable String registrationCode, @RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> verifyUser(@PathVariable String registrationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(authenticationService.verifyUserRegistrationCode(registrationCode, authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAuthenticationException | UserAuthorizationException e) {
@@ -43,7 +47,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAccountDisableException | UserAuthorizationException e) {
@@ -52,7 +56,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/send-email-to-reset-password")
-    public ResponseEntity<?> sendEmailWithResetPasswordLink(@RequestParam("userEmail") String userEmail) {
+    public ResponseEntity<?> sendEmailWithResetPasswordLink(@Email(regexp = EMAIL_PATTERN) @RequestParam("userEmail") String userEmail) {
         try {
             return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
         } catch (UserNotFoundException | UserWebClientException e) {
@@ -61,7 +65,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/reset-password/{verificationCode}")
-    public ResponseEntity<?> resetCustomerPassword(@PathVariable String verificationCode, @RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> resetCustomerPassword(@PathVariable String verificationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(userService.resetUserPassword(verificationCode, authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAuthenticationException e) {
@@ -76,7 +80,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/confirm-membership/{companyId}")
-    public ResponseEntity<?> confirmCompanyMembership(@PathVariable("companyId") String companyId, @RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> confirmCompanyMembership(@PathVariable("companyId") String companyId, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(authenticationService.confirmCompanyMembership(companyId, authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAuthorizationException e) {
@@ -85,7 +89,7 @@ public class AuthenticationController {
     }
 
     @PutMapping(value = "/add-user-principal")
-    public ResponseEntity<?> addUserPrincipal(@RequestBody UserPrincipalDto userPrincipalDto) {
+    public ResponseEntity<?> addUserPrincipal(@Valid @RequestBody UserPrincipalDto userPrincipalDto) {
         try {
             authenticationService.addUserPrincipal(userPrincipalDto);
             return new ResponseEntity<>(HttpStatus.OK);

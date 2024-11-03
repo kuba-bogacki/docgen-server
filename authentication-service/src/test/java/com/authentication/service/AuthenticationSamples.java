@@ -25,6 +25,7 @@ class AuthenticationSamples {
     final Role userRole = Role.USER;
     final boolean termsAndCondition = true;
     final String userVerificationCode = "HDoLh86MBCMB4uEc3jWkgHfUTGxhbGDZjkgyS2Dm46tysfylyVYhyxJUEvpKDTQf";
+    final String userPhotoFileName = "profile-picture-current-photo-file-name.jpg";
     final String userPrincipal = "cf8579c0-b0f1-4f8a-bbc3-cb5e00f1a929";
     final String companyId = "8189d0bf-88e9-4e17-816f-5ef57c482a9d";
 
@@ -54,6 +55,7 @@ class AuthenticationSamples {
             .userGender(userGender)
             .userRole(userRole)
             .userVerificationCode(userVerificationCode)
+            .userPhotoFileName(userPhotoFileName)
             .termsAndCondition(termsAndCondition)
             .accountNonExpired(true)
             .accountNonLocked(true)

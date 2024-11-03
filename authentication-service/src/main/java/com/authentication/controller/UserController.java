@@ -2,6 +2,7 @@ package com.authentication.controller;
 
 import com.authentication.exception.UserAlreadyExistException;
 import com.authentication.exception.UserNotFoundException;
+import com.authentication.exception.UserUploadPhotoException;
 import com.authentication.model.dto.UserDto;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
@@ -75,7 +76,7 @@ public class UserController {
         try {
             String userEmail = jwtService.extractUsername(jwtToken.substring(7));
             return new ResponseEntity<>(userService.uploadNewUserPhoto(multipartFile, userEmail), HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (UserNotFoundException | UserUploadPhotoException  e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

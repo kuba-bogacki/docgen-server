@@ -1,10 +1,7 @@
 package com.authentication.service.implementation;
 
-import com.authentication.config.ImageKitConfiguration;
-import com.authentication.exception.UserAlreadyExistException;
-import com.authentication.exception.UserAuthenticationException;
-import com.authentication.exception.UserNotFoundException;
-import com.authentication.exception.UserWebClientException;
+import com.authentication.config.imagekit.ImageKitConfiguration;
+import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserDto;
@@ -12,13 +9,7 @@ import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
 import com.authentication.util.NumberGenerator;
-import io.imagekit.sdk.models.FileCreateRequest;
-import io.imagekit.sdk.models.GetFileListRequest;
-import io.imagekit.sdk.models.results.Result;
-import io.imagekit.sdk.models.results.ResultList;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.utility.RandomString;
-import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -116,27 +107,30 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) throws Exception {
+    public String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) throws UserNotFoundException, UserUploadPhotoException {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
             throw new UserNotFoundException("Can't find " + userEmail + " user");
         }
+        final var resultFileName = uploadNewMultipartFile(multipartFile, user.get().getUserPhotoFileName());
 
-        String userPhotoFileName = String.format("profile-picture-%s.jpg", RandomStringUtils.randomAlphanumeric(26));
-        byte[] bytes = multipartFile.getBytes();
-        FileCreateRequest fileCreateRequest = new FileCreateRequest(bytes, userPhotoFileName);
-        Result result = imageKitConfiguration.imageKitProvider().upload(fileCreateRequest);
-
-        GetFileListRequest getFileListRequest = new GetFileListRequest();
-        getFileListRequest.setSearchQuery("name='" + user.get().getUserPhotoFileName() + "'");
-        ResultList resultList = imageKitConfiguration.imageKitProvider().getFileList(getFileListRequest);
-        if (!resultList.getResults().isEmpty()) {
-            imageKitConfiguration.imageKitProvider().deleteFile(resultList.getResults().get(0).getFileId());
-        }
-
-        user.get().setUserPhotoFileName(result.getName());
+        user.get().setUserPhotoFileName(resultFileName);
         return userRepository.save(user.get()).getUserPhotoFileName();
+    }
+
+    private String uploadNewMultipartFile(MultipartFile multipartFile, String currentUserPhotoFileName) {
+        try {
+            final var fileName = String.format("profile-picture-%s.jpg", numberGenerator.generateUserPhotoFileName(26));
+            final var resultFileName = imageKitConfiguration.uploadImage(multipartFile.getBytes(), fileName);
+
+            if (!imageKitConfiguration.resultFileListIsEmpty(currentUserPhotoFileName)) {
+                imageKitConfiguration.deleteFile(currentUserPhotoFileName);
+            }
+            return resultFileName;
+        } catch (Exception exception) {
+            throw new UserUploadPhotoException("Couldn't upload result file");
+        }
     }
 
     @Override
