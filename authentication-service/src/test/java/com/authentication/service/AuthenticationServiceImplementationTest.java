@@ -86,7 +86,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -210,7 +210,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var updatedUser = userEntity
                 .toBuilder()
@@ -218,7 +218,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .build();
 
         //when
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findById(userIdI)).thenReturn(Optional.of(userEntity));
         when(userRepository.save(updatedUser)).thenReturn(updatedUser);
 
         final var catchException = catchThrowable(() -> authenticationService.addUserPrincipal(sampleUserPrincipalDto));
@@ -226,7 +226,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //then
         assertThat(catchException)
                 .isNull();
-        verify(userRepository).findById(userId);
+        verify(userRepository).findById(userIdI);
         verify(userRepository).save(updatedUser);
     }
 
@@ -234,7 +234,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
     @DisplayName("Should throw an exception if user entity to update not exist")
     void test_07() {
         //when
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userIdI)).thenReturn(Optional.empty());
 
         final var catchException = catchThrowable(() -> authenticationService.addUserPrincipal(sampleUserPrincipalDto));
 
@@ -243,7 +243,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Impossible to find user with provide id");
-        verify(userRepository).findById(userId);
+        verify(userRepository).findById(userIdI);
         verify(userRepository, never()).save(any());
     }
 
@@ -254,7 +254,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var sampleToken = "sample-secret-token";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var updatedEntity = userEntity
                 .toBuilder()
@@ -308,7 +308,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var differentRegistrationCode = "asdLh86MBCMB4uEc3jWgsgHfUTGxhbGDZjkgyghjk46tysfylyV46yxJUEvpKDTQf";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -334,7 +334,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var wrongPassword = "wrongPassword";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var wrongCredentialsAuthenticationRequest = sampleAuthenticationRequest.toBuilder()
                 .userPassword(wrongPassword)
@@ -365,7 +365,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var updatedEntity = userEntity
                 .toBuilder()
@@ -399,7 +399,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var sampleToken = "sample-secret-token";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -446,7 +446,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -471,7 +471,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var wrongPassword = "wrongPassword";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var wrongCredentialsAuthenticationRequest = sampleAuthenticationRequest.toBuilder()
@@ -502,7 +502,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -533,7 +533,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -548,7 +548,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.put()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(userIdI.toString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.just(new ResponseEntity<>(HttpStatus.OK)));
 
@@ -589,7 +589,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var wrongPassword = "wrongPassword";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var wrongCredentialsAuthenticationRequest = sampleAuthenticationRequest.toBuilder()
@@ -620,7 +620,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -651,7 +651,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -666,7 +666,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.put()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(userIdI.toString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.just(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE)));
 
@@ -691,7 +691,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .enabled(true)
                 .build();
         final var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(
@@ -706,7 +706,7 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
         when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.put()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(sampleUri)).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(userId.toString())).thenReturn(requestHeadersSpec);
+        when(requestBodySpec.bodyValue(userIdI.toString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.empty());
 

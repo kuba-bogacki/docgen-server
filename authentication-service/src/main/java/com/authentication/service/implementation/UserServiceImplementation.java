@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.rmi.NoSuchObjectException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +40,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserDto getUserDtoByUserEmail(String userEmail) {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+
         if (user.isEmpty()) {
             throw new UserNotFoundException("Can't find " + userEmail + " user");
         }
@@ -64,9 +64,9 @@ public class UserServiceImplementation implements UserService {
         if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserWebClientException("Couldn't send reset email. User account still locked.");
         }
-
         user.get().setAccountNonLocked(false);
         User savedUser = userRepository.save(user.get());
+
         return savedUser.getAccountNonLocked();
     }
 
@@ -86,6 +86,7 @@ public class UserServiceImplementation implements UserService {
         user.get().setUserVerificationCode(numberGenerator.generateVerificationCode(64));
         user.get().setUserPassword(passwordEncoder.encode(authenticationRequest.getUserPassword()));
         User savedUser = userRepository.save(user.get());
+
         return savedUser.getAccountNonLocked();
     }
 
@@ -116,7 +117,9 @@ public class UserServiceImplementation implements UserService {
         final var resultFileName = uploadNewMultipartFile(multipartFile, user.get().getUserPhotoFileName());
 
         user.get().setUserPhotoFileName(resultFileName);
-        return userRepository.save(user.get()).getUserPhotoFileName();
+        var savedUser = userRepository.save(user.get());
+
+        return savedUser.getUserPhotoFileName();
     }
 
     private String uploadNewMultipartFile(MultipartFile multipartFile, String currentUserPhotoFileName) {
@@ -134,19 +137,17 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDto getUserNotCompanyMember(String companyId, String jwtToken, String userEmail) throws NoSuchObjectException, UserAlreadyExistException {
+    public UserDto getUserNotCompanyMember(String companyId, String jwtToken, String userEmail) throws UserNotFoundException, UserAlreadyExistException {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new NoSuchObjectException("Can't find " + userEmail + " user");
+            throw new UserNotFoundException("Can't find " + userEmail + " user");
         }
-
-        var formattedCompanyId = formattedCompanyId(companyId);
 
         List<UUID> membersList = webClientBuilder
                 .filter(addTokenHeader(jwtToken))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/company-members/" + formattedCompanyId))
+                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/company-members/" + companyId.substring(0, companyId.length() - 1)))
                 .retrieve()
                 .bodyToFlux(UUID.class)
                 .collectList()
@@ -155,7 +156,6 @@ public class UserServiceImplementation implements UserService {
         if (Objects.nonNull(membersList) && membersList.contains(user.get().getUserId())) {
             throw new UserAlreadyExistException("User with email " + userEmail + " is already member of company");
         }
-
         return userMapper.mapToUserDto(user.get());
     }
 
@@ -166,11 +166,6 @@ public class UserServiceImplementation implements UserService {
         if (user.isEmpty()) {
             throw new UserNotFoundException("Can't find user with provided id: " + userId);
         }
-
         return userMapper.mapToUserDto(user.get());
-    }
-
-    private String formattedCompanyId(String companyId) {
-        return companyId.substring(0, companyId.length() - 1);
     }
 }

@@ -1,15 +1,13 @@
 package com.authentication.service;
 
 import com.authentication.config.imagekit.DefaultImageKitConfiguration;
-import com.authentication.exception.UserAuthenticationException;
-import com.authentication.exception.UserNotFoundException;
-import com.authentication.exception.UserUploadPhotoException;
-import com.authentication.exception.UserWebClientException;
+import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.dto.UserDto;
 import com.authentication.repository.UserRepository;
 import com.authentication.service.implementation.UserServiceImplementation;
 import com.authentication.util.NumberGenerator;
+import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,10 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplementationTest extends AuthenticationSamples {
 
+    @SuppressWarnings("rawtypes")
+    @Mock private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
     @SuppressWarnings("rawtypes")
     @Mock private WebClient.RequestHeadersSpec requestHeadersSpec;
     @Mock private WebClient.RequestBodyUriSpec requestBodyUriSpec;
@@ -53,11 +56,11 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userDto = sampleUserDto
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -99,7 +102,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var sampleUri = "http://notification-service/v1.0/notification/reset";
 
@@ -152,7 +155,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         //given
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var sampleUri = "http://notification-service/v1.0/notification/reset";
 
@@ -186,7 +189,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final String newGeneratedVerificationCode = "gDoLh86MfCMB4uEc3jWkgHfUhGTjbGDZjKgyS2Dm46tysUyKyVYRyxJUEvpKDTQf";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
         final var entityToSave = userEntity.toBuilder()
                 .userVerificationCode(newGeneratedVerificationCode)
@@ -239,7 +242,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final String differentVerificationCode = "gDoLh86MfCMB4uEc3jWkgHfUhGTjbGDZjKgyS2Dm46tysUyKyVYRyxJUEvpKDTQf";
         final var userEntity = sampleUserEntity
                 .toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -263,21 +266,21 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     void test_09() {
         //given
         final var updatedUserDto = sampleUserDto.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .userFirstNameI("Michael")
                 .userFirstNameII("Anthony")
                 .userLastNameI("Corleone")
                 .userLastNameII("Hamilton")
                 .build();
         final var updatedUserEntity = sampleUserEntity.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .userFirstNameI("Michael")
                 .userFirstNameII("Anthony")
                 .userLastNameI("Corleone")
                 .userLastNameII("Hamilton")
                 .build();
         final var foundedEntity = sampleUserEntity.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -319,14 +322,15 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("Should return user photo file name if user entity was found, new photo was updated and result file list is empty")
-    void test_11() throws Exception {
+    void test_11() {
         //given
         final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
         final var sampleFileName = "sample-new-file-name";
         final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
         final var userEntity = sampleUserEntity.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .userPhotoFileName(userPhotoFileName)
                 .build();
 
@@ -353,14 +357,15 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("Should return user photo file name if user entity was found, new photo was updated and result file list is not empty")
-    void test_12() throws Exception {
+    void test_12() {
         //given
         final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
         final var sampleFileName = "sample-new-file-name";
         final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
         final var userEntity = sampleUserEntity.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .userPhotoFileName(userPhotoFileName)
                 .build();
 
@@ -388,8 +393,9 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("Should throw an exception if user entity not found by provided user email")
-    void test_13() throws Exception {
+    void test_13() {
         //given
         final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
 
@@ -412,14 +418,15 @@ class UserServiceImplementationTest extends AuthenticationSamples {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("Should throw an exception if user entity was found, but updated new photo failed")
-    void test_14() throws Exception {
+    void test_14() {
         //given
         final var sampleMultipartFile = new MockMultipartFile("Sample multipart file name", new byte[] {});
         final var sampleFileName = "sample-new-file-name";
         final var updatedPhotoFileName = String.format("profile-picture-%s.jpg", sampleFileName);
         final var userEntity = sampleUserEntity.toBuilder()
-                .userId(userId)
+                .userId(userIdI)
                 .build();
 
         //when
@@ -441,4 +448,144 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         verify(imageKitConfiguration, never()).deleteFile(anyString());
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    @DisplayName("Should return not company member user dto if user entity was found and company id was provided")
+    void test_15() {
+        //given
+        final var sampleJwtToken = "sample-jwt-token";
+        final var sampleCompanyId = "sample-company-idx";
+        final var sampleFormattedCompanyId = "sample-company-id";
+        final var sampleUri = String.format("http://company-service/v1.0/company/company-members/%s", sampleFormattedCompanyId);
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userIdI)
+                .build();
+        final var userDto = sampleUserDto.toBuilder()
+                .userId(userIdI)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
+        when(userMapper.mapToUserDto(userEntity)).thenReturn(userDto);
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToFlux(UUID.class)).thenReturn(Flux.fromIterable(List.of(userIdII, userIdIII, userIdIV)));
+
+        final var result = userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail);
+
+        //then
+        Assertions.assertThat(result)
+                .isNotNull()
+                .isInstanceOf(UserDto.class);
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(userMapper).mapToUserDto(userEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity was not found by provided user email")
+    void test_16() {
+        //given
+        final var sampleJwtToken = "sample-jwt-token";
+        final var sampleCompanyId = "sample-company-idx";
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(String.format("Can't find %s user", userEmail));
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(userMapper, never()).mapToUserDto(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    @DisplayName("Should throw an exception if members list contain current user id")
+    void test_17() {
+        //given
+        final var sampleJwtToken = "sample-jwt-token";
+        final var sampleCompanyId = "sample-company-idx";
+        final var sampleFormattedCompanyId = "sample-company-id";
+        final var sampleUri = String.format("http://company-service/v1.0/company/company-members/%s", sampleFormattedCompanyId);
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userIdI)
+                .build();
+
+        //when
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToFlux(UUID.class)).thenReturn(Flux.fromIterable(List.of(userIdI, userIdII, userIdIII, userIdIV)));
+
+        final var expectedException = catchThrowable(() -> userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserAlreadyExistException.class)
+                .hasMessageContaining(String.format("User with email %s is already member of company", userEmail));
+        verify(userRepository).findUserByUserEmail(userEmail);
+        verify(userMapper, never()).mapToUserDto(any());
+    }
+
+    @Test
+    @DisplayName("Should return user dto if user entity was found by user id")
+    void test_18() {
+        //given
+        final var userDto = sampleUserDto
+                .toBuilder()
+                .userId(userIdI)
+                .build();
+        final var userEntity = sampleUserEntity
+                .toBuilder()
+                .userId(userIdI)
+                .build();
+
+        //when
+        when(userRepository.findById(userIdI)).thenReturn(Optional.of(userEntity));
+        when(userMapper.mapToUserDto(userEntity)).thenReturn(userDto);
+
+        final var result = userService.getUserDtoByUserId(userIdI.toString());
+
+        //then
+        Assertions.assertThat(result)
+                .isNotNull()
+                .isInstanceOf(UserDto.class)
+                .isEqualTo(userDto);
+        verify(userRepository).findById(userIdI);
+        verify(userMapper).mapToUserDto(userEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if user entity wasn't found by user id")
+    void test_19() {
+        //when
+        when(userRepository.findById(userIdI)).thenReturn(Optional.empty());
+
+        final var expectedException = catchThrowable(() -> userService.getUserDtoByUserId(userIdI.toString()));
+
+        //then
+        Assertions.assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining(String.format("Can't find user with provided id: %s", userIdI));
+        verify(userRepository).findById(userIdI);
+        verify(userMapper, never()).mapToUserDto(any());
+    }
+
 }

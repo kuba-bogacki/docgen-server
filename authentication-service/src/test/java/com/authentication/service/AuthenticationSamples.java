@@ -13,7 +13,10 @@ import java.util.UUID;
 
 class AuthenticationSamples {
 
-    final UUID userId = UUID.fromString("aa849e5e-981a-4311-8d4e-7bff7577bbde");
+    final UUID userIdI = UUID.fromString("aa849e5e-981a-4311-8d4e-7bff7577bbde");
+    final UUID userIdII = UUID.fromString("219c1223-05fa-4083-91c3-459934bf37e9");
+    final UUID userIdIII = UUID.fromString("3c5699db-aba7-4e26-9126-2c1e9a30fbc6");
+    final UUID userIdIV = UUID.fromString("3d7ab3b6-0107-4618-9255-a2324f26aa0d");
     final String userFirstNameI = "John";
     final String userFirstNameII = "Paul";
     final String userLastNameI = "Doe";
@@ -86,7 +89,7 @@ class AuthenticationSamples {
             .build();
 
     UserPrincipalDto sampleUserPrincipalDto = UserPrincipalDto.builder()
-            .userId(userId.toString())
+            .userId(userIdI.toString())
             .userPrincipal(userPrincipal)
             .build();
 }

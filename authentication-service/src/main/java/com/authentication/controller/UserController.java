@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.rmi.NoSuchObjectException;
-
 import static com.authentication.util.ApplicationConstants.API_VERSION;
 
 @RestController
@@ -86,7 +84,7 @@ public class UserController {
         @RequestBody String companyId) {
         try {
             return new ResponseEntity<>(userService.getUserNotCompanyMember(companyId, jwtToken, userEmail), HttpStatus.OK);
-        } catch (NoSuchObjectException e) {
+        } catch (UserNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (UserAlreadyExistException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.ALREADY_REPORTED);
