@@ -27,7 +27,9 @@ public class JwtServiceImplementation implements JwtService {
     private final Integer sessionDuration;
 
     @Autowired
-    public JwtServiceImplementation(@Value("${token.secret.key:}") String secretKey, @Value("${token.session.duration:}") Integer sessionDuration) {
+    public JwtServiceImplementation(
+            @Value("${token.secret.key:}") String secretKey,
+            @Value("${token.session.duration:}") Integer sessionDuration) {
         this.secretKey = secretKey;
         this.sessionDuration = sessionDuration;
     }
