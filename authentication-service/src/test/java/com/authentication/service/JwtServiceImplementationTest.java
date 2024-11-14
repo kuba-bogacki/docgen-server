@@ -26,7 +26,6 @@ class JwtServiceImplementationTest extends AuthenticationSamples {
 
     private final static SimpleDateFormat LOCAL_DATE_FORMATTER = new SimpleDateFormat("HH:mm:ss");
 
-
     private String secretKey;
     private Integer sessionDuration;
     private JwtServiceImplementation jwtServiceImplementation;

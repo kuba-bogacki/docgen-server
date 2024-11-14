@@ -9,16 +9,12 @@ import com.event.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-
-import static com.event.model.type.EventType.VOTING;
 
 @Service
 @RequiredArgsConstructor

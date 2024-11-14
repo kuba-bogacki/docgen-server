@@ -10,6 +10,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -27,16 +28,16 @@ import static com.notification.util.UrlBuilder.addTokenHeader;
 import static com.notification.util.UrlBuilder.buildUrl;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-@Log4j2
+@Slf4j
 @Service
 @RequiredArgsConstructor
-class EmailServiceImplementation implements EmailService {
+public class EmailServiceImplementation implements EmailService {
 
     @Lazy
     private final JavaMailSender javaMailSender;
     private final WebClient.Builder webClientBuilder;
 
-    public String fileFormatterAndReader(String fileName) {
+    private String fileFormatterAndReader(String fileName) {
         var filePath = STATIC_FILE_FOLDER + fileName;
 
         try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
@@ -61,14 +62,21 @@ class EmailServiceImplementation implements EmailService {
 
         String content = fileFormatterAndReader("verify-email.txt");
 
+        StringBuilder verifyUrlStringBuilder = new StringBuilder();
+
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom("for.company.document.generator@gmail.com", "Company document creator");
+        helper.setFrom(FOR_COMPANY_EMAIL_ADDRESS, "Company document creator");
         helper.setTo(userDto.getUserEmail());
         helper.setSubject("Dear user, verify your registration");
         content = content.replace("[[name]]", userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI());
-        String verifyURL = PROTOCOL + "://" + CLIENT_ADDRESS + "/sign-in?verify-code=" + userDto.getUserVerificationCode();
-        content = content.replace("[[URL]]", verifyURL);
+        verifyUrlStringBuilder
+                .append(PROTOCOL)
+                .append("://")
+                .append(CLIENT_ADDRESS)
+                .append("/sign-in?verify-code=")
+                .append(userDto.getUserVerificationCode());
+        content = content.replace("[[URL]]", verifyUrlStringBuilder.toString());
         helper.setText(content, true);
 
         javaMailSender.send(message);
@@ -84,7 +92,7 @@ class EmailServiceImplementation implements EmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom("for.company.document.generator@gmail.com", "Company document creator");
+        helper.setFrom(FOR_COMPANY_EMAIL_ADDRESS, "Company document creator");
         helper.setTo(userDto.getUserEmail());
         helper.setSubject("Dear user, now you can reset your password");
         content = content.replace("[[name]]", userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI());
@@ -131,7 +139,7 @@ class EmailServiceImplementation implements EmailService {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom("for.company.document.generator@gmail.com", "Company document creator");
+        helper.setFrom(FOR_COMPANY_EMAIL_ADDRESS, "Company document creator");
         helper.setTo(invitationDto.getUserEmail());
         helper.setSubject("You've been invited to company");
         content = content.replace("[[name]]", invitationDto.getUserEmail()).replace("[[company]]", currentCompanyDto.getCompanyName());
