@@ -1,6 +1,8 @@
 package com.notification.config.reader;
 
+import com.notification.exception.ReadEmailContentException;
 import jakarta.ws.rs.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 public class DefaultFileReaderConfiguration implements FileReaderConfiguration {
 
     @Override
-    public String emailFormatterAndReader(String fileName) {
+    public String emailFormatterAndReader(String fileName) throws ReadEmailContentException {
         var filePath = STATIC_FILE_FOLDER + fileName;
 
         try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
@@ -30,8 +32,9 @@ public class DefaultFileReaderConfiguration implements FileReaderConfiguration {
             }
             return emailBody.toString();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new NotFoundException(e);
+            var message = String.format("Couldn't read email message from %s file", fileName);
+            log.error(message, e);
+            throw new ReadEmailContentException(message);
         }
     }
 }

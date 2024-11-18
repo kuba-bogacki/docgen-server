@@ -3,6 +3,7 @@ package com.notification.service.implementation;
 import com.notification.config.mail.JavaMailSenderConfiguration;
 import com.notification.config.reader.FileReaderConfiguration;
 import com.notification.exception.InvitationSendFailureException;
+import com.notification.exception.ReadEmailContentException;
 import com.notification.model.dto.CompanyDto;
 import com.notification.model.dto.InvitationDto;
 import com.notification.model.dto.UserDto;
@@ -31,7 +32,7 @@ public class EmailServiceImplementation implements EmailService {
     private final WebClient.Builder webClientBuilder;
 
     @Override
-    public void sendVerificationEmail(UserDto userDto) throws MessagingException, IOException {
+    public void sendVerificationEmail(UserDto userDto) throws MessagingException, IOException, ReadEmailContentException {
 
         var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?verify-code=", userDto.getUserVerificationCode());
         var body = fileReaderConfiguration.emailFormatterAndReader(REGISTRATION_EMAIL_FILE_NAME)
@@ -43,7 +44,7 @@ public class EmailServiceImplementation implements EmailService {
     }
 
     @Override
-    public void sendResetPasswordEmail(UserDto userDto) throws MessagingException, IOException {
+    public void sendResetPasswordEmail(UserDto userDto) throws MessagingException, IOException, ReadEmailContentException {
 
         var url = buildUrl(PROTOCOL,CLIENT_ADDRESS, StringUtils.EMPTY,"/change-password?user-verification-code=",
                 userDto.getUserVerificationCode(), "&user-email=", userDto.getUserEmail());
@@ -56,7 +57,7 @@ public class EmailServiceImplementation implements EmailService {
     }
 
     @Override
-    public void sendInvitationEmail(InvitationDto invitationDto, String jwtToken) throws MessagingException, IOException {
+    public void sendInvitationEmail(InvitationDto invitationDto, String jwtToken) throws MessagingException, IOException, ReadEmailContentException {
         final var currentUserDto = getCurrentUserDto(jwtToken);
         final var currentCompanyDto = getCurrentCompanyDto(jwtToken, invitationDto.getCompanyId());
 

@@ -1,5 +1,6 @@
 package com.notification.controller;
 
+import com.notification.exception.ReadEmailContentException;
 import com.notification.model.dto.InvitationDto;
 import com.notification.model.dto.UserDto;
 import com.notification.service.EmailService;
@@ -26,7 +27,7 @@ public class EmailController {
         try {
             emailService.sendVerificationEmail(userDto);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (MessagingException | IOException | NotFoundException e) {
+        } catch (MessagingException | IOException | ReadEmailContentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -36,7 +37,7 @@ public class EmailController {
         try {
             emailService.sendResetPasswordEmail(userDto);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (MessagingException | IOException e) {
+        } catch (MessagingException | IOException | ReadEmailContentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -46,7 +47,7 @@ public class EmailController {
         try {
             emailService.sendInvitationEmail(invitationDto, jwtToken);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (MessagingException | IOException e) {
+        } catch (MessagingException | IOException | ReadEmailContentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
