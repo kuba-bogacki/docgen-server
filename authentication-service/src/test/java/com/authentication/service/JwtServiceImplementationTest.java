@@ -161,7 +161,7 @@ class JwtServiceImplementationTest extends AuthenticationSamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(String.class)
-                .contains("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUBnbWFpbC5jb20iLCJpYXQiOjE3MzEyN");
+                .contains("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUBnbWFpbC5");
         assertThat(extractClaims(result))
                 .containsEntry("sub", "john.doe@gmail.com");
     }
@@ -180,7 +180,7 @@ class JwtServiceImplementationTest extends AuthenticationSamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(String.class)
-                .contains("eyJhbGciOiJIUzI1NiJ9.eyJyZWdpb24iOiJsZXNzZXIgcG9sYW5kIiwic3ViIjoiam9obi5kb2VAZ21haWwuY29tIiwiaWF0IjoxNzMxM");
+                .contains("eyJhbGciOiJIUzI1NiJ9.eyJyZWdpb24iOiJsZXNzZXIgcG9sYW5kIiwic3ViIjoiam");
         assertThat(extractClaims(result))
                 .containsEntry("region", "lesser poland");
     }
@@ -229,7 +229,7 @@ class JwtServiceImplementationTest extends AuthenticationSamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(String.class)
-                .contains("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUBnbWFpbC5jb20iLCJpYXQiOjE3MzEyN");
+                .contains("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUBnbWFpb");
         assertThat(extractClaims(result))
                 .containsEntry("sub", "john.doe@gmail.com");
     }
