@@ -10,4 +10,8 @@ public class ApplicationConstants {
     public static final String ALLOWED_METHODS = "GET, PUT, POST, DELETE, OPTIONS, PATCH";
     public static final String ALLOWED_ORIGIN = "http://localhost:3000";
     public static final String ALLOWED_CREDENTIALS = "true";
+    public static final String COOKIE = "Cookie";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String ID = "id";
+    public static final String ROLE = "role";
 }

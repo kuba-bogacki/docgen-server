@@ -6,6 +6,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
@@ -24,10 +25,10 @@ import java.util.Objects;
 import static com.gateway.util.ApplicationConstants.*;
 import static org.springframework.web.cors.reactive.CorsUtils.isCorsRequest;
 
+@Slf4j
+@Configuration
 @RefreshScope
 @RequiredArgsConstructor
-@Log4j2
-@Configuration
 public class AuthenticationFilter implements WebFilter {
 
     private final RouterValidator routerValidator;
@@ -81,21 +82,21 @@ public class AuthenticationFilter implements WebFilter {
     }
 
     private String getValidToken(ServerHttpRequest request) {
-        if (request.getHeaders().containsKey("Cookie")) {
-            return request.getHeaders().getOrEmpty("Cookie").get(0).split("=")[1];
+        if (request.getHeaders().containsKey(COOKIE)) {
+            return request.getHeaders().getOrEmpty(COOKIE).get(0).split("=")[1];
         }
-        return request.getHeaders().getOrEmpty("Authorization").get(0).split(" ")[1];
+        return request.getHeaders().getOrEmpty(AUTHORIZATION).get(0).split(" ")[1];
     }
 
     private boolean isAuthMissing(ServerHttpRequest request) {
-        return !request.getHeaders().containsKey("Authorization");
+        return !request.getHeaders().containsKey(AUTHORIZATION);
     }
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {
         Claims claims = jwtUtil.getAllClaimsFromToken(token);
         exchange.getRequest().mutate()
-                .header("id", String.valueOf(claims.get("id")))
-                .header("role", String.valueOf(claims.get("role")))
+                .header(ID, String.valueOf(claims.get(ID)))
+                .header(ROLE, String.valueOf(claims.get(ROLE)))
                 .build();
     }
 

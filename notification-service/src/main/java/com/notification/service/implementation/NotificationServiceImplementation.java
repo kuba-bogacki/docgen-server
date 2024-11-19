@@ -28,7 +28,7 @@ import static com.notification.util.UrlBuilder.buildUrl;
 
 @Service
 @RequiredArgsConstructor
-class NotificationServiceImplementation implements NotificationService {
+public class NotificationServiceImplementation implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
@@ -70,7 +71,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.getUserDtoByUserEmail(userEmail);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(UserDto.class)
                 .isEqualTo(userDto);
@@ -87,7 +88,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.getUserDtoByUserEmail(userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(String.format("Can't find %s user", userEmail));
@@ -121,7 +122,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.sendVerificationEmail(userEmail);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(Boolean.class)
                 .isFalse();
@@ -139,7 +140,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.sendVerificationEmail(userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Impossible to send reset link because user with provide email not exist.");
@@ -173,7 +174,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.sendVerificationEmail(userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserWebClientException.class)
                 .hasMessageContaining("Couldn't send reset email. User account still locked.");
@@ -206,7 +207,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.resetUserPassword(userVerificationCode, sampleAuthenticationRequest);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(Boolean.class)
                 .isTrue();
@@ -225,7 +226,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.resetUserPassword(userVerificationCode, sampleAuthenticationRequest));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("Bad credentials. Impossible to find user with provide email.");
@@ -251,7 +252,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.resetUserPassword(differentVerificationCode, sampleAuthenticationRequest));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserAuthenticationException.class)
                 .hasMessageContaining("Verification codes are different or code already expired.");
@@ -291,7 +292,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.updateUserData(updatedUserDto);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(UserDto.class)
                 .hasFieldOrPropertyWithValue("userFirstNameI", "Michael")
@@ -312,7 +313,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.updateUserData(sampleUserDto));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(String.format("Can't find %s user", userEmail));
@@ -344,7 +345,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.uploadNewUserPhoto(sampleMultipartFile, userEmail);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(String.class)
                 .isEqualTo(updatedPhotoFileName);
@@ -380,7 +381,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.uploadNewUserPhoto(sampleMultipartFile, userEmail);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(String.class)
                 .isEqualTo(updatedPhotoFileName);
@@ -405,7 +406,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.uploadNewUserPhoto(sampleMultipartFile, userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(String.format("Can't find %s user", userEmail));
@@ -437,7 +438,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.uploadNewUserPhoto(sampleMultipartFile, userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserUploadPhotoException.class)
                 .hasMessageContaining("Couldn't upload result file");
@@ -480,7 +481,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail);
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(UserDto.class);
         verify(userRepository).findUserByUserEmail(userEmail);
@@ -500,7 +501,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(String.format("Can't find %s user", userEmail));
@@ -535,7 +536,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.getUserNotCompanyMember(sampleCompanyId, sampleJwtToken, userEmail));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserAlreadyExistException.class)
                 .hasMessageContaining(String.format("User with email %s is already member of company", userEmail));
@@ -563,7 +564,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var result = userService.getUserDtoByUserId(userIdI.toString());
 
         //then
-        Assertions.assertThat(result)
+        assertThat(result)
                 .isNotNull()
                 .isInstanceOf(UserDto.class)
                 .isEqualTo(userDto);
@@ -580,7 +581,7 @@ class UserServiceImplementationTest extends AuthenticationSamples {
         final var expectedException = catchThrowable(() -> userService.getUserDtoByUserId(userIdI.toString()));
 
         //then
-        Assertions.assertThat(expectedException)
+        assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(String.format("Can't find user with provided id: %s", userIdI));
