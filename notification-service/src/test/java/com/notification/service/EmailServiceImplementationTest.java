@@ -2,6 +2,7 @@ package com.notification.service;
 
 import com.notification.config.mail.JavaMailSenderConfiguration;
 import com.notification.config.reader.FileReaderConfiguration;
+import com.notification.exception.InvitationSendFailureException;
 import com.notification.exception.ReadEmailContentException;
 import com.notification.model.dto.CompanyDto;
 import com.notification.model.dto.UserDto;
@@ -183,7 +184,6 @@ class EmailServiceImplementationTest extends NotificationSamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @SneakyThrows
     @DisplayName("Should send an invitation email if invitation dto and jwt token are provided")
     void test_07() {
@@ -199,19 +199,8 @@ class EmailServiceImplementationTest extends NotificationSamples {
         when(fileReaderConfiguration.emailFormatterAndReader(USER_INVITATION_EMAIL_FILE_NAME)).thenReturn(sampleBody);
         doNothing().when(javaMailSender).sendEmail(FOR_COMPANY_EMAIL_ADDRESS, userEmail, USER_INVITATION_SUBJECT, sampleBody);
 
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUserUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(sampleUserDto));
-
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleCompanyUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(CompanyDto.class)).thenReturn(Mono.just(sampleCompanyDto));
+        whenWebClientThenReturn(sampleUserUri, UserDto.class, sampleUserDto);
+        whenWebClientThenReturn(sampleCompanyUri, CompanyDto.class, sampleCompanyDto);
 
         emailService.sendInvitationEmail(sampleInvitationDto, sampleJwtToken);
 
@@ -224,5 +213,123 @@ class EmailServiceImplementationTest extends NotificationSamples {
         assertThat(bodyCaptor.getValue())
                 .isNotNull()
                 .contains(sampleEmailUrl);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should thrown an exception if error occur due sending email")
+    void test_08() {
+        //given
+        final var sampleJwtToken = "sampleJwtToken";
+        final var sampleUserUri = "http://authentication-service/v1.0/authentication/user";
+        final var sampleCompanyUri = "http://company-service/v1.0/company/details/" + companyId;
+        final var sampleEmailUrl = PROTOCOL + "://" + CLIENT_ADDRESS + StringUtils.EMPTY + "/sign-in?join-to-company=";
+        final var sampleEmailMessage = sampleUserDto.getUserFirstNameI() + " " + sampleUserDto.getUserLastNameI();
+        final var sampleBody = sampleEmailUrl + "\n" + sampleEmailMessage;
+
+        //when
+        when(fileReaderConfiguration.emailFormatterAndReader(USER_INVITATION_EMAIL_FILE_NAME)).thenReturn(sampleBody);
+        doThrow(new MessagingException()).when(javaMailSender).sendEmail(FOR_COMPANY_EMAIL_ADDRESS, userEmail, USER_INVITATION_SUBJECT, sampleBody);
+
+        whenWebClientThenReturn(sampleUserUri, UserDto.class, sampleUserDto);
+        whenWebClientThenReturn(sampleCompanyUri, CompanyDto.class, sampleCompanyDto);
+
+        final var expectedException = catchThrowable(() -> emailService.sendInvitationEmail(sampleInvitationDto, sampleJwtToken));
+
+        //then
+        verify(fileReaderConfiguration).emailFormatterAndReader(eq(USER_INVITATION_EMAIL_FILE_NAME));
+        verify(javaMailSender).sendEmail(eq(FOR_COMPANY_EMAIL_ADDRESS), emailCaptor.capture(), eq(USER_INVITATION_SUBJECT), bodyCaptor.capture());
+        assertThat(sampleUserDto.getUserEmail())
+                .isNotNull()
+                .isEqualTo(emailCaptor.getValue());
+        assertThat(bodyCaptor.getValue())
+                .isNotNull()
+                .contains(sampleEmailUrl);
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(MessagingException.class);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should thrown an exception if error occur due reading and formatting an email")
+    void test_09() {
+        //given
+        final var sampleJwtToken = "sampleJwtToken";
+        final var sampleUserUri = "http://authentication-service/v1.0/authentication/user";
+        final var sampleCompanyUri = "http://company-service/v1.0/company/details/" + companyId;
+
+        //when
+        when(fileReaderConfiguration.emailFormatterAndReader(USER_INVITATION_EMAIL_FILE_NAME)).thenThrow(ReadEmailContentException.class);
+
+        whenWebClientThenReturn(sampleUserUri, UserDto.class, sampleUserDto);
+        whenWebClientThenReturn(sampleCompanyUri, CompanyDto.class, sampleCompanyDto);
+
+        final var expectedException = catchThrowable(() -> emailService.sendInvitationEmail(sampleInvitationDto, sampleJwtToken));
+
+        //then
+        verify(fileReaderConfiguration).emailFormatterAndReader(eq(USER_INVITATION_EMAIL_FILE_NAME));
+        verify(javaMailSender, never()).sendEmail(anyString(), anyString(), anyString(), anyString());
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(ReadEmailContentException.class);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should thrown an exception if error occur due getting current company dto")
+    void test_10() {
+        //given
+        final var sampleJwtToken = "sampleJwtToken";
+        final var sampleUserUri = "http://authentication-service/v1.0/authentication/user";
+        final var sampleCompanyUri = "http://company-service/v1.0/company/details/" + companyId;
+
+        //when
+        whenWebClientThenReturn(sampleUserUri, UserDto.class, sampleUserDto);
+        whenWebClientThenReturn(sampleCompanyUri, CompanyDto.class, null);
+
+        final var expectedException = catchThrowable(() -> emailService.sendInvitationEmail(sampleInvitationDto, sampleJwtToken));
+
+        //then
+        verify(fileReaderConfiguration, never()).emailFormatterAndReader(anyString());
+        verify(javaMailSender, never()).sendEmail(anyString(), anyString(), anyString(), anyString());
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(InvitationSendFailureException.class)
+                .hasMessageContaining("Impossible to send invitation - current user or current company is null");
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should thrown an exception if error occur due getting current user dto")
+    void test_11() {
+        //given
+        final var sampleJwtToken = "sampleJwtToken";
+        final var sampleUserUri = "http://authentication-service/v1.0/authentication/user";
+        final var sampleCompanyUri = "http://company-service/v1.0/company/details/" + companyId;
+
+        //when
+        whenWebClientThenReturn(sampleUserUri, UserDto.class, null);
+        whenWebClientThenReturn(sampleCompanyUri, CompanyDto.class, sampleCompanyDto);
+
+        final var expectedException = catchThrowable(() -> emailService.sendInvitationEmail(sampleInvitationDto, sampleJwtToken));
+
+        //then
+        verify(fileReaderConfiguration, never()).emailFormatterAndReader(anyString());
+        verify(javaMailSender, never()).sendEmail(anyString(), anyString(), anyString(), anyString());
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(InvitationSendFailureException.class)
+                .hasMessageContaining("Impossible to send invitation - current user or current company is null");
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void whenWebClientThenReturn(String uri, Class<T> clazz, T dto) {
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(uri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(clazz)).thenReturn(Mono.justOrEmpty(dto));
     }
 }
