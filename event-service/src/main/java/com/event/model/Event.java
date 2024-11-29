@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "event")
@@ -24,9 +24,13 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID eventId;
+    @Column(nullable = false)
     private UUID eventCompany;
+    @Column(nullable = false)
     private String eventTitle;
+    @Column(nullable = false)
     private LocalDate eventDate;
+    @Column(nullable = false)
     private LocalTime eventTime;
     @Enumerated(EnumType.STRING)
     private EventType eventType;

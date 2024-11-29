@@ -7,7 +7,7 @@ import com.event.model.dto.EventDto;
 import com.event.repository.EventRepository;
 import com.event.service.EventService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,9 +16,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class EventServiceImplementation implements EventService {
 
     private final EventRepository eventRepository;
@@ -39,9 +39,9 @@ public class EventServiceImplementation implements EventService {
 
     @Override
     public EventDto createEvent(EventDto eventDto) {
-        Event event = eventRepository.save(eventMapper.mapToEntity(eventDto));
+        var event = eventRepository.save(eventMapper.mapToEntity(eventDto));
         log.info("Event has been created with id : {}", event.getEventId());
-        return eventMapper.mapToDto(eventRepository.save(event));
+        return eventMapper.mapToDto(event);
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventDto {
