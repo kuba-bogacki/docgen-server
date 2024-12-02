@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.format.DateTimeParseException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -166,5 +165,32 @@ class EventServiceImplementationTest extends EventSamples {
         assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Should return dto from created event if valid event dto is provided")
+    void test_08() {
+        //given
+        final var mappedEventDto = sampleEventDtoI.toBuilder()
+                .eventId(eventIdI.toString())
+                .build();
+        final var savedEventEntity = sampleEventEntityI.toBuilder()
+                .eventId(eventIdI)
+                .build();
+
+        //when
+        when(eventMapper.mapToEntity(sampleEventDtoI)).thenReturn(sampleEventEntityI);
+        when(eventMapper.mapToDto(savedEventEntity)).thenReturn(mappedEventDto);
+        when(eventRepository.save(sampleEventEntityI)).thenReturn(savedEventEntity);
+
+        final var result = eventService.createEvent(sampleEventDtoI);
+
+        //then
+        verify(eventRepository).save(sampleEventEntityI);
+        verify(eventMapper).mapToDto(savedEventEntity);
+        verify(eventMapper).mapToEntity(sampleEventDtoI);
+        assertThat(result)
+                .isNotNull()
+                .isInstanceOf(EventDto.class);
     }
 }
