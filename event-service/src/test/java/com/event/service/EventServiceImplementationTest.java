@@ -4,6 +4,7 @@ import com.event.mapper.EventMapper;
 import com.event.model.dto.EventDto;
 import com.event.repository.EventRepository;
 import com.event.service.implementation.EventServiceImplementation;
+import org.hibernate.PropertyValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -192,5 +193,72 @@ class EventServiceImplementationTest extends EventSamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(EventDto.class);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if couldn't map provided dto to entity due to malformed data format")
+    void test_09() {
+        //when
+        when(eventMapper.mapToEntity(sampleEventDtoI)).thenThrow(DateTimeParseException.class);
+
+        final var expectedException = catchException(() -> eventService.createEvent(sampleEventDtoI));
+
+        //then
+        verify(eventMapper).mapToEntity(sampleEventDtoI);
+        verify(eventMapper, never()).mapToDto(any());
+        verify(eventRepository, never()).save(any());
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(DateTimeParseException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if couldn't save entity due to null data")
+    void test_10() {
+        //given
+        final var nullEventTitleDto = sampleEventDtoI.toBuilder()
+                .eventTitle(null)
+                .build();
+        final var nullEventTitleEntity = sampleEventEntityI.toBuilder()
+                .eventTitle(null)
+                .build();
+
+        //when
+        when(eventMapper.mapToEntity(nullEventTitleDto)).thenReturn(nullEventTitleEntity);
+        when(eventRepository.save(nullEventTitleEntity)).thenThrow(NullPointerException.class);
+
+        final var expectedException = catchException(() -> eventService.createEvent(nullEventTitleDto));
+
+        //then
+        verify(eventMapper).mapToEntity(nullEventTitleDto);
+        verify(eventRepository).save(nullEventTitleEntity);
+        verify(eventMapper, never()).mapToDto(any());
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if couldn't map entity into dto")
+    void test_11() {
+        //given
+        final var savedEventEntity = sampleEventEntityI.toBuilder()
+                .eventId(eventIdI)
+                .build();
+
+        //when
+        when(eventMapper.mapToEntity(sampleEventDtoI)).thenReturn(sampleEventEntityI);
+        when(eventRepository.save(sampleEventEntityI)).thenReturn(savedEventEntity);
+        when(eventMapper.mapToDto(savedEventEntity)).thenThrow(DateTimeParseException.class);
+
+        final var expectedException = catchException(() -> eventService.createEvent(sampleEventDtoI));
+
+        //then
+        verify(eventRepository).save(sampleEventEntityI);
+        verify(eventMapper).mapToDto(savedEventEntity);
+        verify(eventMapper).mapToEntity(sampleEventDtoI);
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(DateTimeParseException.class);
     }
 }
