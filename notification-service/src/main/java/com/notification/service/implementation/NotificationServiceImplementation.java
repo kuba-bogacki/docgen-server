@@ -43,10 +43,10 @@ public class NotificationServiceImplementation implements NotificationService {
             throw new InvitationSendFailureException("Impossible to get current user by token credential");
         }
 
-        return notificationRepository.findAll().stream()
+        var currentUserNotificationList = notificationRepository.findAll().stream()
                 .filter(notification -> notification.getNotificationReceiverId().equals(currentUserDto.getUserId()))
-                .map(notificationMapper::toNotificationDto)
                 .toList();
+        return notificationMapper.toNotificationDto(currentUserNotificationList);
     }
 
     @Override
