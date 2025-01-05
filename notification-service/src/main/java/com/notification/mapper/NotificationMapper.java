@@ -11,5 +11,5 @@ public interface NotificationMapper {
 
     Notification toNotificationEntity(NotificationDto notificationDto);
     NotificationDto toNotificationDto(Notification notificationEntity);
-    List<NotificationDto> toNotificationDto(List<Notification> notificationEntity);
+    List<NotificationDto> toNotificationDtoList(List<Notification> notificationEntity);
 }

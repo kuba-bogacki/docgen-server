@@ -18,7 +18,7 @@ public class NotificationController {
     @GetMapping(value = "/get-user-notifications")
     public ResponseEntity<?> getUserNotification(@RequestHeader("Authorization") String jwtToken) {
         try {
-            return new ResponseEntity<>(notificationService.getUserNotification(jwtToken), HttpStatus.OK);
+            return new ResponseEntity<>(notificationService.getUserNotifications(jwtToken), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -7,7 +7,7 @@ import java.security.Principal;
 import java.util.List;
 
 public interface NotificationService {
-    List<NotificationDto> getUserNotification(String jwtToken);
+    List<NotificationDto> getUserNotifications(String jwtToken);
     void sendRefreshToken(String refreshToken, String userPrincipal);
     void sendUserPrincipalName(Principal principal, String jwtToken);
     void deleteUserNotification(String notificationId);

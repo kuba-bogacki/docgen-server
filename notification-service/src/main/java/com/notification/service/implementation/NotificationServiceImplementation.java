@@ -1,5 +1,6 @@
 package com.notification.service.implementation;
 
+import com.notification.exception.CurrentUserNotFoundException;
 import com.notification.exception.EntityNotFoundException;
 import com.notification.exception.EventSendFailureException;
 import com.notification.exception.InvitationSendFailureException;
@@ -36,17 +37,17 @@ public class NotificationServiceImplementation implements NotificationService {
     private final WebClient.Builder webClientBuilder;
 
     @Override
-    public List<NotificationDto> getUserNotification(String jwtToken) {
+    public List<NotificationDto> getUserNotifications(String jwtToken) {
         var currentUserDto = getCurrentUserDto(jwtToken);
 
-        if (Objects.isNull(currentUserDto)) {
-            throw new InvitationSendFailureException("Impossible to get current user by token credential");
+        if (Objects.isNull(currentUserDto.getUserId())) {
+            throw new CurrentUserNotFoundException("Impossible to get current user id by token credential");
         }
-
-        var currentUserNotificationList = notificationRepository.findAll().stream()
-                .filter(notification -> notification.getNotificationReceiverId().equals(currentUserDto.getUserId()))
-                .toList();
-        return notificationMapper.toNotificationDto(currentUserNotificationList);
+//        var currentUserNotificationList = notificationRepository.findAll().stream()
+//                .filter(notification -> notification.getNotificationReceiverId().equals(currentUserDto.getUserId()))
+//                .toList();
+        var currentUserNotificationList = notificationRepository.findNotificationsByNotificationReceiverId(currentUserDto.getUserId());
+        return notificationMapper.toNotificationDtoList(currentUserNotificationList);
     }
 
     @Override
