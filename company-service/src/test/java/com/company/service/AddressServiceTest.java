@@ -226,21 +226,21 @@ class AddressServiceTest extends AddressSamples {
         verify(addressRepository).findAddressByAddressId(addressIdI);
     }
 
-//    @Test
-//    @DisplayName("Should throw an exception if address entity to update was not found")
-//    void test_09() {
-//        //when
-//        when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
-//
-//        final var expectedException = catchException(() -> addressService.getAddressByAddressId(addressIdII));
-//
-//        //then
-//        assertThat(expectedException)
-//                .isNotNull()
-//                .isInstanceOf(AddressNotFoundException.class)
-//                .hasMessageContaining("Address with provided id does not exist");
-//        verify(addressMapper, never()).mapToEntity(any());
-//        verify(addressRepository, never()).save(any());
-//        verify(addressMapper, never()).mapToDto(any());
-//    }
+    @Test
+    @DisplayName("Should throw an exception if address entity to update was not found")
+    void test_09() {
+        //when
+        when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
+
+        final var expectedException = catchException(() -> addressService.getAddressByAddressId(addressIdII));
+
+        //then
+        assertThat(expectedException)
+                .isNotNull()
+                .isInstanceOf(AddressNotFoundException.class)
+                .hasMessageContaining("Address with provided id does not exist");
+        verify(addressMapper, never()).mapToEntity(any());
+        verify(addressRepository, never()).save(any());
+        verify(addressMapper, never()).mapToDto(any());
+    }
 }
