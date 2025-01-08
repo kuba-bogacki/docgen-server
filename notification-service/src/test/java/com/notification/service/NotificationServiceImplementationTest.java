@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -127,5 +128,19 @@ class NotificationServiceImplementationTest extends NotificationSamples {
                 .isNotNull()
                 .isInstanceOf(CurrentUserNotFoundException.class)
                 .hasMessageContaining("Impossible to get current user id by token credential");
+    }
+
+    @Test
+    @DisplayName("Should send refresh token to user if new generated token and user principal was provided")
+    void test_04() {
+        //given
+        final var refreshToken = "refreshToken";
+
+        //when
+        final var expectedException = catchException(() -> notificationService.sendRefreshToken(refreshToken, userPrincipal));
+
+        //then
+        assertThat(expectedException)
+                .isNull();
     }
 }
