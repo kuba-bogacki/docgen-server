@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,8 +37,10 @@ class NotificationServiceImplementationTest extends NotificationSamples {
 
     @SuppressWarnings("rawtypes")
     @Mock private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
+    @Mock private WebClient.RequestBodyUriSpec requestBodyUriSpec;
     @SuppressWarnings("rawtypes")
     @Mock private WebClient.RequestHeadersSpec requestHeadersSpec;
+    @Mock private WebClient.RequestBodySpec requestBodySpec;
     @Mock private WebClient.ResponseSpec responseSpec;
     @Mock private WebClient.Builder webClientBuilder;
     @Mock private WebClient webClient;
@@ -138,6 +142,38 @@ class NotificationServiceImplementationTest extends NotificationSamples {
 
         //when
         final var expectedException = catchException(() -> notificationService.sendRefreshToken(refreshToken, userPrincipal));
+
+        //then
+        assertThat(expectedException)
+                .isNull();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    @DisplayName("Should send user principal name if principal number and jwt token was provided")
+    void test_05() {
+        //given
+        final var sampleJwtToken = "sampleJwtToken";
+        final var getUserUri = "http://authentication-service/v1.0/authentication/user";
+        final var addPrincipalNameUri = "http://authentication-service/v1.0/authentication/add-user-principal";
+
+        //when
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(getUserUri)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(sampleUserDto));
+
+        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.put()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri(addPrincipalNameUri)).thenReturn(requestBodySpec);
+        when(requestBodySpec.bodyValue(userPrincipalDto)).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.toEntity(ResponseEntity.class)).thenReturn(Mono.just(new ResponseEntity<>(HttpStatus.OK)));
+
+        final var expectedException = catchException(() -> notificationService.sendUserPrincipalName(PrincipalTestRecord.of(), sampleJwtToken));
 
         //then
         assertThat(expectedException)

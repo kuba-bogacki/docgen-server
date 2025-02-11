@@ -43,9 +43,7 @@ public class NotificationServiceImplementation implements NotificationService {
         if (Objects.isNull(currentUserDto.getUserId())) {
             throw new CurrentUserNotFoundException("Impossible to get current user id by token credential");
         }
-//        var currentUserNotificationList = notificationRepository.findAll().stream()
-//                .filter(notification -> notification.getNotificationReceiverId().equals(currentUserDto.getUserId()))
-//                .toList();
+
         var currentUserNotificationList = notificationRepository.findNotificationsByNotificationReceiverId(currentUserDto.getUserId());
         return notificationMapper.toNotificationDtoList(currentUserNotificationList);
     }

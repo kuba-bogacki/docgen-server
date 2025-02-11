@@ -1,12 +1,13 @@
 package com.notification.service;
 
 import com.notification.model.Notification;
-import com.notification.model.dto.CompanyDto;
-import com.notification.model.dto.InvitationDto;
-import com.notification.model.dto.NotificationDto;
-import com.notification.model.dto.UserDto;
+import com.notification.model.dto.*;
 import com.notification.model.type.NotificationType;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+import java.security.Principal;
 import java.util.UUID;
 
 class NotificationSamples {
@@ -88,4 +89,22 @@ class NotificationSamples {
             .notificationMessage(notificationMessage2)
             .notificationType(notificationType.name())
             .build();
+
+    UserPrincipalDto userPrincipalDto = UserPrincipalDto.builder()
+            .userId(userId)
+            .userPrincipal(userPrincipal)
+            .build();
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    static class PrincipalTestRecord implements Principal {
+
+        @Override
+        public String getName() {
+            return "cf8579c0-b0f1-4f8a-bbc3-cb5e00f1a929";
+        }
+
+        public static PrincipalTestRecord of() {
+            return new PrincipalTestRecord();
+        }
+    }
 }
