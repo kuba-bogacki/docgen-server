@@ -1,12 +1,11 @@
 package com.notification.config.reader;
 
 import com.notification.exception.ReadEmailContentException;
-import jakarta.ws.rs.NotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
@@ -31,7 +30,7 @@ public class DefaultFileReaderConfiguration implements FileReaderConfiguration {
                 emailBody.append(line);
             }
             return emailBody.toString();
-        } catch (Exception e) {
+        } catch (IOException e) {
             var message = String.format("Couldn't read email message from %s file", fileName);
             log.error(message, e);
             throw new ReadEmailContentException(message);

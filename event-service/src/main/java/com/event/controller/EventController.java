@@ -18,38 +18,22 @@ public class EventController {
 
     @GetMapping(value = "/get/{companyId}/{date}")
     public ResponseEntity<?> getCompanyEventsByDate(@PathVariable("companyId") String companyId, @PathVariable("date") String date) {
-        try {
-            return new ResponseEntity<>(eventService.getCompanyEventsByDate(companyId, date), HttpStatus.OK);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(eventService.getCompanyEventsByDate(companyId, date), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-all/{companyId}")
     public ResponseEntity<?> getCompanyEvents(@PathVariable String companyId) {
-        try {
-            return new ResponseEntity<>(eventService.getCompanyEvents(companyId), HttpStatus.OK);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(eventService.getCompanyEvents(companyId), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create")
     public ResponseEntity<?> createEvent(@RequestBody EventDto eventDto) {
-        try {
-            return new ResponseEntity<>(eventService.createEvent(eventDto), HttpStatus.CREATED);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(exception.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
-        }
+        return new ResponseEntity<>(eventService.createEvent(eventDto), HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "/delete/{eventId}")
     public ResponseEntity<?> deleteCompanyEvent(@PathVariable("eventId") String eventId) {
-        try {
-            eventService.deleteCompanyEvent(eventId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception exception) {
-            return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        eventService.deleteCompanyEvent(eventId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

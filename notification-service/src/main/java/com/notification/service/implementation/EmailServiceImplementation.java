@@ -32,7 +32,7 @@ public class EmailServiceImplementation implements EmailService {
     private final WebClient.Builder webClientBuilder;
 
     @Override
-    public void sendVerificationEmail(UserDto userDto) throws MessagingException, IOException, ReadEmailContentException {
+    public void sendVerificationEmail(UserDto userDto) {
 
         var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?verify-code=", userDto.getUserVerificationCode());
         var body = fileReaderConfiguration.emailFormatterAndReader(REGISTRATION_EMAIL_FILE_NAME)
@@ -44,7 +44,7 @@ public class EmailServiceImplementation implements EmailService {
     }
 
     @Override
-    public void sendResetPasswordEmail(UserDto userDto) throws MessagingException, IOException, ReadEmailContentException {
+    public void sendResetPasswordEmail(UserDto userDto) {
 
         var url = buildUrl(PROTOCOL,CLIENT_ADDRESS, StringUtils.EMPTY,"/change-password?user-verification-code=",
                 userDto.getUserVerificationCode(), "&user-email=", userDto.getUserEmail());
@@ -57,7 +57,7 @@ public class EmailServiceImplementation implements EmailService {
     }
 
     @Override
-    public void sendInvitationEmail(InvitationDto invitationDto, String jwtToken) throws MessagingException, IOException, ReadEmailContentException {
+    public void sendInvitationEmail(InvitationDto invitationDto, String jwtToken) {
         final var currentUserDto = getCurrentUserDto(jwtToken);
         final var currentCompanyDto = getCurrentCompanyDto(jwtToken, invitationDto.getCompanyId());
 
