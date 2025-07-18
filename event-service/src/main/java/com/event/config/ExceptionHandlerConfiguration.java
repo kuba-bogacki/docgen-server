@@ -1,13 +1,13 @@
-package com.event.exception;
+package com.event.config;
 
+import com.event.exception.EventNotExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class ExceptionHandlerConfiguration {
 
     @ExceptionHandler(EventNotExistException.class)
     public ResponseEntity<?> handleEventNotExistException(EventNotExistException exception) {

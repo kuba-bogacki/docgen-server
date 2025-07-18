@@ -1,12 +1,13 @@
 package com.company.service.implementation;
 
-import com.company.service.CompanyService;
+import com.company.exception.CompanyMemberAdditionException;
 import com.company.exception.CompanyNonExistException;
 import com.company.mapper.CompanyMapper;
 import com.company.model.Company;
 import com.company.model.dto.CompanyDto;
 import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
+import com.company.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -104,7 +105,7 @@ public class CompanyServiceImplementation implements CompanyService {
         Optional<Company> entity = companyRepository.findCompanyByCompanyId(UUID.fromString(companyId));
 
         if (entity.isEmpty()) {
-            throw new CompanyNonExistException("Company with provided id is not exist");
+            throw new CompanyMemberAdditionException("New member addition failed, company with provided id is not exist");
         }
         entity.get().getCompanyMembers().add(UUID.fromString(userId));
         companyRepository.save(entity.get());

@@ -7,16 +7,16 @@ import com.company.model.dto.AddressDto;
 import com.company.repository.AddressRepository;
 import com.company.service.AddressService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class AddressServiceImplementation implements AddressService {
 
     private final AddressRepository addressRepository;

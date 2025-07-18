@@ -1,6 +1,5 @@
 package com.company.controller;
 
-import com.company.exception.CompanyNonExistException;
 import com.company.model.dto.CompanyDto;
 import com.company.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -24,83 +23,47 @@ public class CompanyController {
 
     @GetMapping(value = "/{companyName}")
     public ResponseEntity<?> getCompanyByCompanyName(@PathVariable String companyName) {
-        try {
-            return new ResponseEntity<>(companyService.getCompanyByName(companyName), HttpStatus.OK);
-        } catch (CompanyNonExistException exception) {
-            return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(companyService.getCompanyByName(companyName), HttpStatus.OK);
     }
 
     @GetMapping(value = "/details/{companyId}")
     public ResponseEntity<?> getCompanyByCompanyId(@PathVariable String companyId) {
-        try {
-            return new ResponseEntity<>(companyService.getCompanyByCompanyId(companyId), HttpStatus.OK);
-        } catch (CompanyNonExistException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(companyService.getCompanyByCompanyId(companyId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-by-krs/{krsNumber}")
     public ResponseEntity<?> getCompanyByCompanyKrsNumber(@PathVariable String krsNumber) {
-        try {
-            return new ResponseEntity<>(companyService.getCompanyByCompanyKrsNumber(krsNumber), HttpStatus.OK);
-        } catch (CompanyNonExistException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(companyService.getCompanyByCompanyKrsNumber(krsNumber), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create")
     public ResponseEntity<?> createCompany(@RequestBody CompanyDto companyDto, @RequestHeader("Authorization") String jwtToken) {
-        try {
-            return new ResponseEntity<>(companyService.createCompany(companyDto, jwtToken), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
-        }
+        return new ResponseEntity<>(companyService.createCompany(companyDto, jwtToken), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/update")
     public ResponseEntity<?> updateCompany(@RequestBody CompanyDto companyDto) {
-        try {
-            return new ResponseEntity<>(companyService.updateCompany(companyDto), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(companyService.updateCompany(companyDto), HttpStatus.OK);
     }
 
     @GetMapping(value = "/current-user-companies")
     public ResponseEntity<?> getAllCompanies(@RequestHeader("Authorization") String jwtToken) {
-        try {
-            return new ResponseEntity<>(companyService.getCurrentUserCompanies(jwtToken), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
-        }
+        return new ResponseEntity<>(companyService.getCurrentUserCompanies(jwtToken), HttpStatus.OK);
     }
 
     @GetMapping(value = "/company-members/{companyId}")
     public ResponseEntity<?> getCompanyMemberIdList(@PathVariable("companyId") String companyId) {
-        try {
-            return new ResponseEntity<>(companyService.getCompanyMemberIdList(companyId), HttpStatus.OK);
-        } catch (CompanyNonExistException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(companyService.getCompanyMemberIdList(companyId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/members-details/{companyId}")
     public ResponseEntity<?> getDetailMembersList(@PathVariable("companyId") String companyId, @RequestHeader("Authorization") String jwtToken) {
-        try {
-            return new ResponseEntity<>(companyService.getDetailMembersList(companyId, jwtToken), HttpStatus.OK);
-        } catch (CompanyNonExistException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(companyService.getDetailMembersList(companyId, jwtToken), HttpStatus.OK);
     }
 
     @PutMapping(value = "/add-new-member/{companyId}")
     public ResponseEntity<?> addNewMemberToCompany(@PathVariable("companyId") String companyId, @RequestBody String userId) {
-        try {
-            companyService.addNewMemberToCompany(companyId, userId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        companyService.addNewMemberToCompany(companyId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

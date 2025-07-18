@@ -1,5 +1,6 @@
 package com.company.service;
 
+import com.company.exception.CompanyMemberAdditionException;
 import com.company.exception.CompanyNonExistException;
 import com.company.service.implementation.CompanyServiceImplementation;
 import com.company.mapper.CompanyMapper;
@@ -474,8 +475,8 @@ class CompanyServiceTest extends CompanySamples {
         //then
         assertThat(expectedException)
                 .isNotNull()
-                .isInstanceOf(CompanyNonExistException.class)
-                .hasMessageContaining("Company with provided id is not exist");
+                .isInstanceOf(CompanyMemberAdditionException.class)
+                .hasMessageContaining("New member addition failed, company with provided id is not exist");
         verify(companyRepository).findCompanyByCompanyId(UUID.fromString(nonExistingCompanyId));
         verify(companyRepository, never()).save(any());
     }

@@ -15,8 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.authentication.util.ApplicationConstants.API_VERSION;
-import static com.authentication.util.ApplicationConstants.EMAIL_PATTERN;
+import static com.authentication.util.ApplicationConstants.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -76,7 +75,7 @@ public class AuthenticationController {
     @GetMapping(value = "/validate")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String jwtToken) {
         jwtService.validateToken(jwtToken.substring(7));
-        return new ResponseEntity<>("Token is valid", HttpStatus.OK);
+        return new ResponseEntity<>(VALID_TOKEN, HttpStatus.OK);
     }
 
     @PostMapping(value = "/confirm-membership/{companyId}")
