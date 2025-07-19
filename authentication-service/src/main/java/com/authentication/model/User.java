@@ -27,34 +27,50 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
+
     @Size(min = 2, max = 15)
     @Column(nullable = false)
     private String userFirstNameI;
+
     private String userFirstNameII;
+
     @Size(min = 2, max = 15)
     @Column(nullable = false)
     private String userLastNameI;
+
     private String userLastNameII;
+
     @Size(min = 7, max = 25)
     @Column(nullable = false, unique = true)
     private String userEmail;
+
     @Column(nullable = false)
     private String userPassword;
+
     @Enumerated(EnumType.STRING)
     private Gender userGender;
+
     @Enumerated(EnumType.STRING)
     private Role userRole;
+
     @Size(max = 64)
     @Column(nullable = false)
     private String userVerificationCode;
+
     @Size(max = 64)
     @Column(unique = true)
     private String userPrincipal;
+
     private String userPhotoFileName;
+
     private Boolean termsAndCondition;
+
     private Boolean accountNonExpired;
+
     private Boolean accountNonLocked;
+
     private Boolean credentialsNonExpired;
+
     private Boolean enabled;
 
     @Override

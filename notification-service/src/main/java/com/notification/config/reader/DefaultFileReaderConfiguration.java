@@ -17,11 +17,11 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 public class DefaultFileReaderConfiguration implements FileReaderConfiguration {
 
     @Override
-    public String emailFormatterAndReader(String fileName) throws ReadEmailContentException {
+    public String emailFormatterAndReader(String fileName) {
         var filePath = STATIC_FILE_FOLDER + fileName;
 
         try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
-             var bufferedReader = new BufferedReader(reader);
+             var bufferedReader = new BufferedReader(reader)
         ) {
             String line;
             var emailBody = new StringBuilder();

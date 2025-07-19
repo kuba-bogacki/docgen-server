@@ -16,12 +16,15 @@ public interface EventMapper {
     @Mapping(source = "eventDate", target = "eventDate", dateFormat = "dd-MM-yyyy")
     @Mapping(source = "eventTime", target = "eventTime", dateFormat = "HH:mm")
     Event mapToEntity(EventDto eventDto);
+
     @Mapping(source = "eventDate", target = "eventDate", dateFormat = "dd-MM-yyyy")
     @Mapping(source = "eventTime", target = "eventTime", dateFormat = "HH:mm")
     EventDto mapToDto(Event event);
+
     @Mapping(source = "eventDate", target = "eventDate", dateFormat = "dd-MM-yyyy")
     @Mapping(source = "eventTime", target = "eventTime", dateFormat = "HH:mm")
     List<Event> mapToEntities(List<EventDto> eventDtos);
+
     @Mapping(source = "eventDate", target = "eventDate", dateFormat = "dd-MM-yyyy")
     @Mapping(source = "eventTime", target = "eventTime", dateFormat = "HH:mm")
     List<EventDto> mapToDtos(List<Event> events);

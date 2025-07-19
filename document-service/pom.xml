@@ -31,6 +31,9 @@
         <spring.kafka.version>3.0.9</spring.kafka.version>
         <mockito.core.version>5.14.1</mockito.core.version>
         <assertj.core.version>3.26.3</assertj.core.version>
+        <org.docx4j.version>11.5.3</org.docx4j.version>
+        <jakarta.validation.version>3.1.1</jakarta.validation.version>
+        <org.glassfish.jaxb.version>4.0.5</org.glassfish.jaxb.version>
     </properties>
 
     <dependencies>
@@ -141,6 +144,27 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj.core.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-core -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-core</artifactId>
+            <version>${org.docx4j.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${org.glassfish.jaxb.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.version}</version>
         </dependency>
     </dependencies>
 </project>

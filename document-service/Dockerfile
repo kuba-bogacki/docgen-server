@@ -18,4 +18,4 @@ RUN mvn clean package -Dmaven.test.skip
 FROM openjdk:17-alpine
 WORKDIR /document-service
 COPY --from=builder /docgenserver/document-service/target/document-service-1.0-SNAPSHOT.jar ./
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "document-service-1.0-SNAPSHOT.jar"]
+CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5004", "-jar", "document-service-1.0-SNAPSHOT.jar"]

@@ -25,6 +25,7 @@ services:
       - authentication-service
       - company-service
       - event-service
+      - document-service
       - notification-service
     networks:
       - my_network
@@ -87,14 +88,32 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${spring_datasource_password}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
+  document-service:
+    build:
+      context: .
+      dockerfile: document-service/Dockerfile
+    ports:
+      - "5004:5004" #Debug port
+    depends_on:
+      - document-database
+      - discovery-server
+    networks:
+      - my_network
+    dns:
+      - 8.8.8.8
+      - 8.8.5.5
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://document-database:27017/document-service
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
+
   notification-service:
     build:
       context: .
       dockerfile: notification-service/Dockerfile
     ports:
-      - "5004:5004" #Debug port
+      - "5005:5005" #Debug port
     depends_on:
-      - mongo-database
+      - notification-database
       - discovery-server
     networks:
       - my_network
@@ -102,7 +121,7 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo-database:27017/notification-service
+      SPRING_DATA_MONGODB_URI: mongodb://notification-database:27017/notification-service
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
       SPRING_MAIL_USERNAME: for.company.document.generator@gmail.com
@@ -147,10 +166,19 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${spring_datasource_password}
 
-  mongo-database:
+  document-database:
     image: mongo:6
     volumes:
-      - mongo_service_data:/data/db
+      - document_service_data:/data/db
+    networks:
+      - my_network
+    environment:
+      MONGO_DB: document-service
+
+  notification-database:
+    image: mongo:6
+    volumes:
+      - notification_service_data:/data/db
     networks:
       - my_network
     environment:
@@ -164,4 +192,5 @@ volumes:
   authentication_service_data:
   company_service_data:
   event_service_data:
-  mongo_service_data:
+  document_service_data:
+  notification_service_data:

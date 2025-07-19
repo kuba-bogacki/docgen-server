@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EvidenceRepository extends MongoRepository<Evidence, String> {
 
-    Evidence findByEvidenceName(String evidenceName);
+    Evidence findByEvidenceId(String evidenceId);
 }

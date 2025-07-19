@@ -1,13 +1,14 @@
 package com.document.service;
 
+import com.document.model.dto.EvidenceDetailsDto;
 import com.document.model.dto.EvidenceDto;
-import org.springframework.web.reactive.function.client.WebClientException;
+import com.document.model.dto.FinancialStatementDto;
 
 import java.util.List;
 
 public interface EvidenceService {
 
-    void createEvidence(EvidenceDto evidenceDto) throws WebClientException;
-    EvidenceDto getEvidenceByName(String evidenceName);
-    List<EvidenceDto> getAllEvidences();
+    void createFinancialStatement(FinancialStatementDto financialStatementDto, String jwtToken);
+    EvidenceDetailsDto getEvidenceDetailsById(String evidenceId);
+    List<EvidenceDto> getAllCompanyEvidences(String companyId);
 }
