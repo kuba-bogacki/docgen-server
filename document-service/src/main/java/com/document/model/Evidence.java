@@ -1,48 +1,80 @@
 package com.document.model;
 
 import com.document.model.type.EvidenceType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.sql.Timestamp;
-import java.time.Instant;
+
+import static java.util.Objects.requireNonNull;
 
 @Data
-@Builder
 @Document(value = "evidence")
-@AllArgsConstructor
 @NoArgsConstructor
 public class Evidence {
 
     @MongoId(targetType = FieldType.STRING)
     private String evidenceId;
 
-    private String evidenceName;
-
     private EvidenceType evidenceType;
+
+    private String evidenceName;
 
     private String companyId;
 
+    @CreatedDate
     private Timestamp createDateTime;
 
     private byte[] evidenceContent;
 
-    @Builder(builderMethodName = "internalBuilder")
-    public static Evidence buildEvidence(EvidenceType type, String evidenceName, String companyId, byte[] evidenceContent) {
-        if (type == null || evidenceName == null) {
-            throw new IllegalArgumentException("Evidence type and evidence name cannot be null");
-        }
-        var evidenceFullName = String.format("%s_%s", type.getDescription(), evidenceName).replaceAll(" ", "_");
-
-        return new Evidence(null, evidenceFullName, type, companyId, Timestamp.from(Instant.now()), evidenceContent);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static EvidenceBuilder builder() {
-        return internalBuilder();
+    public Evidence(Builder builder) {
+        this.evidenceName = builder.evidenceName;
+        this.evidenceType = builder.evidenceType;
+        this.companyId = builder.companyId;
+        this.evidenceContent = builder.evidenceContent;
+    }
+
+    public static class Builder {
+
+        private EvidenceType evidenceType;
+        private String evidenceName;
+        private String companyId;
+        private byte[] evidenceContent;
+
+        public Builder evidenceType(EvidenceType evidenceType) {
+            requireNonNull(evidenceType, "Evidence type cannot be null");
+            this.evidenceType = evidenceType;
+            return this;
+        }
+
+        public Builder evidenceName(String evidenceName) {
+            requireNonNull(evidenceName, "Evidence name cannot be null");
+            this.evidenceName = String.format("%s_%s", this.evidenceType.getDescription(), evidenceName).replaceAll(" ", "_");
+            return this;
+        }
+
+        public Builder companyId(String companyId) {
+            requireNonNull(companyId, "Company Id cannot be null");
+            this.companyId = companyId;
+            return this;
+        }
+
+        public Builder evidenceContent(byte[] evidenceContent) {
+            requireNonNull(evidenceContent, "Evidence content cannot be null");
+            this.evidenceContent = evidenceContent;
+            return this;
+        }
+
+        public Evidence build() {
+            return new Evidence(this);
+        }
     }
 }

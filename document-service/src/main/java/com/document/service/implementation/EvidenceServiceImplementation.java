@@ -29,7 +29,7 @@ import static com.document.util.UrlBuilder.buildUrl;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-class EvidenceServiceImplementation implements EvidenceService {
+public class EvidenceServiceImplementation implements EvidenceService {
 
     private final EvidenceRepository evidenceRepository;
     private final EvidenceMapper evidenceMapper;
@@ -52,8 +52,8 @@ class EvidenceServiceImplementation implements EvidenceService {
         var document = docxReader.generateDocument(placeholders, FINANCIAL_STATEMENT_FILE_NAME);
 
         final var evidence = Evidence.builder()
-                .evidenceName(currentCompanyDto.getCompanyName())
                 .evidenceType(FINANCIAL_STATEMENT)
+                .evidenceName(currentCompanyDto.getCompanyName())
                 .companyId(financialStatementDto.getCompanyId())
                 .evidenceContent(document.getContent())
                 .build();

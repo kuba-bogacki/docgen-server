@@ -31,7 +31,9 @@
         <spring.kafka.version>3.0.9</spring.kafka.version>
         <mockito.core.version>5.14.1</mockito.core.version>
         <assertj.core.version>3.26.3</assertj.core.version>
-        <org.docx4j.version>11.5.3</org.docx4j.version>
+        <org.docx4j.core.version>11.5.3</org.docx4j.core.version>
+        <org.docx4j.export.version>11.5.3</org.docx4j.export.version>
+        <org.docx4j.jaxb.version>11.5.3</org.docx4j.jaxb.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <org.glassfish.jaxb.version>4.0.5</org.glassfish.jaxb.version>
     </properties>
@@ -150,7 +152,21 @@
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-core</artifactId>
-            <version>${org.docx4j.version}</version>
+            <version>${org.docx4j.core.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-export-fo -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-export-fo</artifactId>
+            <version>${org.docx4j.export.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-JAXB-ReferenceImpl -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+            <version>${org.docx4j.jaxb.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->

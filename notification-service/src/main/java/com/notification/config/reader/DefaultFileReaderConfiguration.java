@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import static com.notification.util.ApplicationConstants.STATIC_FILE_FOLDER;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Component
@@ -20,7 +21,7 @@ public class DefaultFileReaderConfiguration implements FileReaderConfiguration {
     public String emailFormatterAndReader(String fileName) {
         var filePath = STATIC_FILE_FOLDER + fileName;
 
-        try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
+        try (var reader = new InputStreamReader(requireNonNull(getClass().getClassLoader().getResourceAsStream(filePath)), ISO_8859_1);
              var bufferedReader = new BufferedReader(reader)
         ) {
             String line;
