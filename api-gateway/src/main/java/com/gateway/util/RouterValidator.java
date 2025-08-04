@@ -14,7 +14,7 @@ public class RouterValidator {
             "/v1.0/authentication/create",
             "/v1.0/authentication/login",
             "/v1.0/authentication/verify/{id}",
-            "/v1.0/authentication/reset-password",
+            "/v1.0/authentication/reset-password/{id}",
             "/v1.0/authentication/confirm-membership/{id}",
             "/v1.0/authentication/send-email-to-reset-password",
             "/v1.0/notification/verification",

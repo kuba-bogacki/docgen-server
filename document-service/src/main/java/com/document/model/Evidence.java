@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,7 +27,7 @@ public class Evidence {
     private String companyId;
 
     @CreatedDate
-    private Timestamp createDateTime;
+    private LocalDateTime createDateTime;
 
     private byte[] evidenceContent;
 
