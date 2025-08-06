@@ -96,11 +96,11 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         if (!user.get().getUserVerificationCode().equals(registrationCode)) {
             throw new UserAuthenticationException("Verification codes are different or code already expired");
         }
-        authenticateUser(authenticationRequest);
 
         user.get().setEnabled(true);
         userRepository.save(user.get());
 
+        authenticateUser(authenticationRequest);
         String jwtToken = jwtService.generateJwtToken(user.get());
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
