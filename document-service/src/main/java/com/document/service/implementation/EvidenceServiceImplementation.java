@@ -2,6 +2,7 @@ package com.document.service.implementation;
 
 import com.document.config.docx.DocxReaderConfiguration;
 import com.document.exception.CompanyNotFoundException;
+import com.document.exception.EvidenceNotFoundException;
 import com.document.exception.UserNotFoundException;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
@@ -16,10 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
 import static com.document.util.ApplicationConstants.*;
@@ -35,6 +33,17 @@ public class EvidenceServiceImplementation implements EvidenceService {
     private final EvidenceMapper evidenceMapper;
     private final DocxReaderConfiguration docxReader;
     private final WebClient.Builder webClientBuilder;
+
+    @Override
+    public void deleteEvidenceById(String evidenceId) {
+        var evidenceEntity = evidenceRepository.findByEvidenceId(evidenceId);
+
+        if (Optional.ofNullable(evidenceEntity).isEmpty()) {
+            log.warn("Couldn't delete entity because evidence with provided id [{}] is not exist", evidenceId);
+            throw new EvidenceNotFoundException(evidenceId);
+        }
+        evidenceRepository.delete(evidenceEntity);
+    }
 
     @Override
     public void createFinancialStatement(FinancialStatementDto financialStatementDto, String jwtToken) {
@@ -63,12 +72,21 @@ public class EvidenceServiceImplementation implements EvidenceService {
 
     @Override
     public EvidenceDetailsDto getEvidenceDetailsById(String evidenceId) {
-        return evidenceMapper.mapToDetailDto(evidenceRepository.findByEvidenceId(evidenceId));
+        var evidenceEntity = evidenceRepository.findByEvidenceId(evidenceId);
+
+        if (Optional.ofNullable(evidenceEntity).isEmpty()) {
+            log.warn("Evidence with provided id [{}] not exist", evidenceId);
+            throw new EvidenceNotFoundException(evidenceId);
+        }
+        return evidenceMapper.mapToDetailDto(evidenceEntity);
     }
 
     @Override
     public List<EvidenceDto> getAllCompanyEvidences(String companyId) {
-        return evidenceMapper.mapToDtos(evidenceRepository.findAll());
+        return evidenceRepository.findAllByCompanyId(companyId).stream()
+                .sorted(Comparator.comparing(Evidence::getCreateDateTime).reversed())
+                .map(evidenceMapper::mapToDto)
+                .toList();
     }
 
     private Map<String, String> createPlaceholdersMap(FinancialStatementDto financialStatementDto, CompanyDto companyDto, UserDto userDto) {
@@ -84,7 +102,7 @@ public class EvidenceServiceImplementation implements EvidenceService {
             put("supervisoryBoardMembers", getMembers(financialStatementDto.getSupervisoryBoardMembers()));
             put("addressStreetName", companyDto.getCompanyAddressDto().getAddressStreetName());
             put("addressStreetNumber", companyDto.getCompanyAddressDto().getAddressStreetNumber());
-            put("addressLocalNumber", companyDto.getCompanyAddressDto().getAddressLocalNumber());
+            put("addressLocalNumber", getAddressLocalNumber(companyDto));
             put("addressPostalCode", companyDto.getCompanyAddressDto().getAddressPostalCode());
             put("addressCity", companyDto.getCompanyAddressDto().getAddressCity());
             put("companyName", companyDto.getCompanyName());
@@ -97,7 +115,12 @@ public class EvidenceServiceImplementation implements EvidenceService {
     }
 
     private String getMembers(List<String> supervisoryBoardMembers) {
-        return supervisoryBoardMembers.isEmpty() ? StringUtils.EMPTY : String.join("\n", supervisoryBoardMembers);
+        return supervisoryBoardMembers.isEmpty() ? StringUtils.EMPTY : String.join(", \n", supervisoryBoardMembers);
+    }
+
+    private String getAddressLocalNumber(CompanyDto companyDto) {
+        return companyDto.getCompanyAddressDto().getAddressLocalNumber() != null ?
+                companyDto.getCompanyAddressDto().getAddressLocalNumber() : StringUtils.EMPTY;
     }
 
     private String concatCurrentUserNames(UserDto userDto) {

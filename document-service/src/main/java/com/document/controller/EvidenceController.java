@@ -32,4 +32,10 @@ public class EvidenceController {
     public ResponseEntity<?> getAllCompanyEvidences(@PathVariable String companyId) {
         return new ResponseEntity<>(evidenceService.getAllCompanyEvidences(companyId), HttpStatus.OK);
     }
+
+    @DeleteMapping(value = "/{evidenceId}")
+    public ResponseEntity<?> deleteEvidenceById(@PathVariable String evidenceId) {
+        evidenceService.deleteEvidenceById(evidenceId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

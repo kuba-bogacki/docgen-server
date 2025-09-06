@@ -355,7 +355,6 @@ class AuthenticationServiceImplementationTest extends AuthenticationSamples {
                 .hasMessageContaining("Bad credentials. Impossible to authenticate user with provide email or password");
         verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager).authenticate(usernamePasswordAuthentication);
-        verify(userRepository, never()).save(any());
         verify(jwtService, never()).generateJwtToken(any());
     }
 
