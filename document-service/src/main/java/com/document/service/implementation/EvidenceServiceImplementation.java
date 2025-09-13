@@ -66,8 +66,8 @@ public class EvidenceServiceImplementation implements EvidenceService {
                 .companyId(financialStatementDto.getCompanyId())
                 .evidenceContent(document.getContent())
                 .build();
-        Evidence savedEntity = evidenceRepository.save(evidence);
-        log.info("Evidence has been created with id : {}", savedEntity.getEvidenceId());
+        final var savedEvidenceEntity = evidenceRepository.save(evidence);
+        log.info("Evidence has been created with id : {}", savedEvidenceEntity.getEvidenceId());
     }
 
     @Override
@@ -124,10 +124,10 @@ public class EvidenceServiceImplementation implements EvidenceService {
     }
 
     private String concatCurrentUserNames(UserDto userDto) {
-        return userDto.getUserFirstNameI() + " " +
+        return (userDto.getUserFirstNameI() + " " +
                 (userDto.getUserFirstNameII() != null ? userDto.getUserFirstNameII() + " " : StringUtils.EMPTY) +
                 userDto.getUserLastNameI() + " " +
-                (userDto.getUserLastNameII() != null ? userDto.getUserLastNameII() + " " : StringUtils.EMPTY);
+                (userDto.getUserLastNameII() != null ? userDto.getUserLastNameII() : StringUtils.EMPTY)).trim();
     }
 
     private String parseCustomLocalDate() {
