@@ -23,8 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
 import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
@@ -44,6 +45,7 @@ class EvidenceServiceImplementationTest extends EvidenceSamples {
     @Mock private WebClient webClient;
     @Mock private DocxReaderConfiguration docxReader;
     @Mock private EvidenceRepository evidenceRepository;
+    @Mock private EvidenceMapper evidenceMapper;
     @Captor private ArgumentCaptor<Evidence> evidenceCaptor;
     @Captor private ArgumentCaptor<Map<String, String>> placeholdersCaptor;
     @InjectMocks private EvidenceServiceImplementation evidenceService;
@@ -203,5 +205,67 @@ class EvidenceServiceImplementationTest extends EvidenceSamples {
         verify(evidenceRepository, never()).save(any(Evidence.class));
         assertThat(expectedException)
                 .isInstanceOf(DocxEvidenceReaderException.class);
+    }
+
+    @Test
+    @DisplayName("Should return evidence detail dto if evidence id is provide")
+    void test_07() {
+        //when
+        when(evidenceRepository.findByEvidenceId(evidenceIdNo1)).thenReturn(evidenceEntity);
+        when(evidenceMapper.mapToDetailDto(evidenceEntity)).thenReturn(evidenceDetailsDto);
+
+        final var result = evidenceService.getEvidenceDetailsById(evidenceIdNo1);
+
+        //then
+        assertThat(result)
+                .isEqualTo(evidenceDetailsDto);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception if evidence entity not found using provided evidence id")
+    void test_08() {
+        //when
+        when(evidenceRepository.findByEvidenceId(evidenceIdNo1)).thenReturn(null);
+
+        final var expectedException = catchException(() -> evidenceService.getEvidenceDetailsById(evidenceIdNo1));
+
+        //then
+        assertThat(expectedException)
+                .isInstanceOf(EvidenceNotFoundException.class)
+                .hasMessageContaining("Evidence with provided id not exist");
+    }
+
+    @Test
+    @DisplayName("Should return company evidences list sorted by creation date if company id is provided")
+    void test_09() {
+        //given
+        final var evidenceNo1 = createEvidenceEntity(evidenceIdNo1, 2025, 12, 12, 13, 20);
+        final var evidenceNo2 = createEvidenceEntity(evidenceIdNo2, 2024, 5, 5, 13, 50);
+        final var evidenceNo3 = createEvidenceEntity(evidenceIdNo3, 2025, 2, 1, 15, 15);
+
+        //when
+        when(evidenceRepository.findAllByCompanyId(companyIdNo1)).thenReturn(List.of(evidenceNo1, evidenceNo2, evidenceNo3));
+        when(evidenceMapper.mapToDto(evidenceNo1)).thenReturn(evidenceDtoNo1);
+        when(evidenceMapper.mapToDto(evidenceNo2)).thenReturn(evidenceDtoNo2);
+        when(evidenceMapper.mapToDto(evidenceNo3)).thenReturn(evidenceDtoNo3);
+
+        final var result = evidenceService.getAllCompanyEvidences(companyIdNo1);
+
+        //then
+        assertThat(result)
+                .containsExactly(evidenceDtoNo1, evidenceDtoNo3, evidenceDtoNo2);
+    }
+
+    @Test
+    @DisplayName("Should return empty list if company has no evidence")
+    void test_10() {
+        //when
+        when(evidenceRepository.findAllByCompanyId(companyIdNo1)).thenReturn(Collections.emptyList());
+
+        final var result = evidenceService.getAllCompanyEvidences(companyIdNo1);
+
+        //then
+        assertThat(result)
+                .isEmpty();
     }
 }
