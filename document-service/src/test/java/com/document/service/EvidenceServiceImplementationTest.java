@@ -217,6 +217,8 @@ class EvidenceServiceImplementationTest extends EvidenceSamples {
         final var result = evidenceService.getEvidenceDetailsById(evidenceIdNo1);
 
         //then
+        verify(evidenceRepository, times(1)).findByEvidenceId(anyString());
+        verify(evidenceMapper, times(1)).mapToDetailDto(any(Evidence.class));
         assertThat(result)
                 .isEqualTo(evidenceDetailsDto);
     }
