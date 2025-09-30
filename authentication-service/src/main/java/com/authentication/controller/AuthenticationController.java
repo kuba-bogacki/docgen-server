@@ -49,7 +49,7 @@ public class AuthenticationController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAccountDisableException | UserAuthorizationException e) {
+        } catch (UserNotFoundException | UserAccountDisableException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
         }
     }
