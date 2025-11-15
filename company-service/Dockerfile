@@ -15,7 +15,7 @@ RUN mvn dependency:go-offline
 COPY . .
 RUN mvn clean compile -Dmaven.test.skip && mvn clean package -Dmaven.test.skip
 
-FROM openjdk:17-alpine
+FROM amazoncorretto:17-alpine-jdk
 WORKDIR /company-service
 COPY --from=builder /docgenserver/company-service/target/company-service-1.0-SNAPSHOT.jar ./
 CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002", "-jar", "company-service-1.0-SNAPSHOT.jar"]

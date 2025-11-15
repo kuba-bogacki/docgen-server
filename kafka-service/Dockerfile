@@ -15,7 +15,7 @@
 #COPY . .
 #RUN mvn clean package -pl kafka-service -am -DskipTests
 #
-#FROM openjdk:17-alpine
+#FROM amazoncorretto:17-alpine-jdk
 #WORKDIR /kafka-service
 #COPY --from=builder /docgenserver/kafka-service/target/kafka-service-1.0-SNAPSHOT.jar ./
 #CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "kafka-service-1.0-SNAPSHOT.jar"]

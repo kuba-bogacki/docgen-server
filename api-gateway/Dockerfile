@@ -15,7 +15,7 @@ RUN mvn dependency:go-offline
 COPY . .
 RUN mvn clean compile -Dmaven.test.skip && mvn clean package -Dmaven.test.skip
 
-FROM openjdk:17-alpine
+FROM amazoncorretto:17-alpine-jdk
 WORKDIR /api-gateway
 COPY --from=builder /docgenserver/api-gateway/target/api-gateway-1.0-SNAPSHOT.jar ./
 CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000", "-jar", "api-gateway-1.0-SNAPSHOT.jar"]
