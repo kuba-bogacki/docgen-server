@@ -50,6 +50,7 @@ services:
       IMAGE_KIT_URL_ENDPOINT: https://ik.imagekit.io/forcompany/user-profile-pictures
       IMAGE_KIT_PRIVATE_KEY: ${image_kit_private_key}
       IMAGE_KEY_PUBLIC_KEY: public_bM8atLKI6NBIJe6fYt23sBBIzTs=
+      STRIPE_PAYMENT_PRIVATE_KEY: ${stripe_payment_private_key}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
   company-service:

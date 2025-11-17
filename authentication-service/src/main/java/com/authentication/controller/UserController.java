@@ -3,6 +3,7 @@ package com.authentication.controller;
 import com.authentication.exception.UserAlreadyExistException;
 import com.authentication.exception.UserNotFoundException;
 import com.authentication.exception.UserUploadPhotoException;
+import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.UserDto;
 import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
@@ -89,5 +90,10 @@ public class UserController {
         } catch (UserAlreadyExistException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.ALREADY_REPORTED);
         }
+    }
+
+    @PostMapping(value = "/create-payment-session")
+    public ResponseEntity<?> createPaymentSession(@RequestBody PaymentDto paymentDto) {
+        return new ResponseEntity<>(userService.createPaymentSession(paymentDto), HttpStatus.CREATED);
     }
 }

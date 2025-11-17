@@ -19,5 +19,10 @@
       "name": "image.kit.public.key",
       "type": "java.lang.String",
       "description": "Description for image.kit.public.key."
+    },
+    {
+      "name": "stripe.payment.private.key",
+      "type": "java.lang.String",
+      "description": "Description for stripe.payment.private.key."
     }
   ] }

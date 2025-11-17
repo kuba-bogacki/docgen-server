@@ -1,9 +1,11 @@
 package com.authentication.service.implementation;
 
 import com.authentication.config.imagekit.ImageKitConfiguration;
+import com.authentication.config.stripe.StripeConfiguration;
 import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
+import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.UserDto;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
@@ -36,6 +38,7 @@ public class UserServiceImplementation implements UserService {
     private final NumberGenerator numberGenerator;
     private final WebClient.Builder webClientBuilder;
     private final ImageKitConfiguration imageKitConfiguration;
+    private final StripeConfiguration stripeConfiguration;
 
     @Override
     public UserDto getUserDtoByUserEmail(String userEmail) {
@@ -167,5 +170,10 @@ public class UserServiceImplementation implements UserService {
             throw new UserNotFoundException("Can't find user with provided id: " + userId);
         }
         return userMapper.mapToUserDto(user.get());
+    }
+
+    @Override
+    public String createPaymentSession(PaymentDto paymentDto) {
+        return "";
     }
 }
