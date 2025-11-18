@@ -1,6 +1,7 @@
 package com.authentication.model;
 
 import com.authentication.model.type.Gender;
+import com.authentication.model.type.Membership;
 import com.authentication.model.type.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -52,6 +53,9 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role userRole;
+
+    @Enumerated(EnumType.STRING)
+    private Membership userMembership;
 
     @Size(max = 64)
     @Column(nullable = false)

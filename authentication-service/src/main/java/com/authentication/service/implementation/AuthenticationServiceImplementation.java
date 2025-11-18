@@ -5,6 +5,7 @@ import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.model.type.Gender;
+import com.authentication.model.type.Membership;
 import com.authentication.model.type.Role;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
@@ -54,6 +55,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .userPassword(passwordEncoder.encode(registerRequest.getUserPassword()))
                 .userGender(Gender.valueOf(registerRequest.getUserGender().toUpperCase()))
                 .userRole(Role.USER)
+                .userMembership(Membership.NONE)
                 .userVerificationCode(numberGenerator.generateVerificationCode(64))
                 .termsAndCondition(registerRequest.getTermsAndCondition())
                 .accountNonExpired(true)

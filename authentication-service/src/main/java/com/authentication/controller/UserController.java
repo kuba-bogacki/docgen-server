@@ -93,7 +93,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/create-payment-session")
-    public ResponseEntity<?> createPaymentSession(@RequestBody PaymentDto paymentDto) {
-        return new ResponseEntity<>(userService.createPaymentSession(paymentDto), HttpStatus.CREATED);
+    public ResponseEntity<?> createPaymentSession(@RequestBody PaymentDto paymentDto, @RequestHeader("Authorization") String jwtToken) {
+        final var userEmail = jwtService.extractUsername(jwtToken.substring(7));
+        return new ResponseEntity<>(userService.createPaymentSession(paymentDto, userEmail), HttpStatus.CREATED);
     }
 }

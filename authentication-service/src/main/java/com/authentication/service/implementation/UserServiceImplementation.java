@@ -173,7 +173,16 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public String createPaymentSession(PaymentDto paymentDto) {
-        return "";
+    public String createPaymentSession(PaymentDto paymentDto, String userEmail) {
+        final var user = userRepository.findUserByUserEmail(userEmail);
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Can't find " + userEmail + " user");
+        }
+        final var clientSecret = stripeConfiguration.createThePaymentIntent(paymentDto);
+
+        user.get().setUserMembership(paymentDto.getMembership());
+        userRepository.save(user.get());
+        return clientSecret;
     }
 }
