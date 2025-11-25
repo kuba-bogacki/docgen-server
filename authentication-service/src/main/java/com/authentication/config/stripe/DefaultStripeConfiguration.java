@@ -1,7 +1,7 @@
 package com.authentication.config.stripe;
 
-import com.authentication.exception.UserPaymentSessionException;
 import com.authentication.model.dto.PaymentDto;
+import com.authentication.model.dto.PaymentIntentDto;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -19,17 +19,13 @@ public class DefaultStripeConfiguration implements StripeConfiguration {
 
     private static final int CENTS = 100;
 
-    private final String secretKey;
-
     @Autowired
     public DefaultStripeConfiguration(@Value("${stripe.payment.private.key:}") String secretKey) {
-        this.secretKey = secretKey;
+        Stripe.apiKey = secretKey;
     }
 
     @Override
-    public String createThePaymentIntent(PaymentDto paymentDto) {
-        Stripe.apiKey = this.secretKey;
-
+    public PaymentIntentDto createPaymentIntent(PaymentDto paymentDto) throws StripeException {
         final var automaticPaymentMethods = PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                 .setEnabled(true)
                 .build();
@@ -38,12 +34,19 @@ public class DefaultStripeConfiguration implements StripeConfiguration {
                 .setCurrency(paymentDto.getPriceCurrency().getDescription())
                 .setAutomaticPaymentMethods(automaticPaymentMethods)
                 .build();
-        try {
-            return PaymentIntent.create(paymentIntentCreateParams).getClientSecret();
-        } catch (StripeException exception) {
-            var message = String.format("Error due creating stripe payment intent: %s", exception.getMessage());
-            log.error(message);
-            throw new UserPaymentSessionException(message);
-        }
+        final var createdPaymentIntent = PaymentIntent.create(paymentIntentCreateParams);
+        final var paymentIntentId = createdPaymentIntent.getId();
+        final var paymentClientSecret = createdPaymentIntent.getClientSecret();
+        return PaymentIntentDto.builder()
+                .paymentIntentId(paymentIntentId)
+                .paymentClientSecret(paymentClientSecret)
+                .build();
+    }
+
+    @Override
+    public String cancelPaymentIntent(String paymentIntentId) throws StripeException {
+        final var paymentIntent = PaymentIntent.retrieve(paymentIntentId);
+        final var canceledIntent = paymentIntent.cancel();
+        return canceledIntent.getStatus();
     }
 }

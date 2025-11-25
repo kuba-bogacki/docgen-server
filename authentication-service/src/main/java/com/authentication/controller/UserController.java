@@ -3,6 +3,7 @@ package com.authentication.controller;
 import com.authentication.exception.UserAlreadyExistException;
 import com.authentication.exception.UserNotFoundException;
 import com.authentication.exception.UserUploadPhotoException;
+import com.authentication.model.dto.MembershipDto;
 import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.UserDto;
 import com.authentication.service.JwtService;
@@ -92,9 +93,21 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "/create-payment-session")
+    @PostMapping(value = "/create-payment")
     public ResponseEntity<?> createPaymentSession(@RequestBody PaymentDto paymentDto, @RequestHeader("Authorization") String jwtToken) {
         final var userEmail = jwtService.extractUsername(jwtToken.substring(7));
         return new ResponseEntity<>(userService.createPaymentSession(paymentDto, userEmail), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping(value = "/cancel-payment/{paymentIntentId}")
+    public ResponseEntity<?> cancelPaymentSession(@PathVariable("paymentIntentId") String paymentIntentId) {
+        return new ResponseEntity<>(userService.cancelPaymentSession(paymentIntentId), HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping(value = "/update-user-membership")
+    public ResponseEntity<?> updateUserMembership(@RequestBody MembershipDto membershipDto, @RequestHeader("Authorization") String jwtToken) {
+        final var userEmail = jwtService.extractUsername(jwtToken.substring(7));
+        userService.updateUserMembership(membershipDto.getMembership(), userEmail);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

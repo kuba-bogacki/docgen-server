@@ -6,12 +6,16 @@ import com.authentication.exception.*;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.PaymentDto;
+import com.authentication.model.dto.PaymentIntentDto;
 import com.authentication.model.dto.UserDto;
+import com.authentication.model.type.Membership;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
 import com.authentication.util.NumberGenerator;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ import static com.authentication.util.ApplicationConstants.PROTOCOL;
 import static com.authentication.util.UrlBuilder.addTokenHeader;
 import static com.authentication.util.UrlBuilder.buildUrl;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
@@ -173,16 +178,38 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public String createPaymentSession(PaymentDto paymentDto, String userEmail) {
-        final var user = userRepository.findUserByUserEmail(userEmail);
+    public PaymentIntentDto createPaymentSession(PaymentDto paymentDto, String userEmail) {
+        try {
+            final var paymentIntent = stripeConfiguration.createPaymentIntent(paymentDto);
+            log.info("Payment intent session with id {} was successfully created.", paymentIntent.getPaymentIntentId());
+            return paymentIntent;
+        } catch (StripeException exception) {
+            log.error("Error due creating stripe payment intent session: {}", exception.getMessage());
+            throw new UserPaymentSessionException(exception.getMessage());
+        }
+    }
 
+    @Override
+    public void updateUserMembership(Membership membership, String userEmail) {
+        final var user = userRepository.findUserByUserEmail(userEmail);
         if (user.isEmpty()) {
             throw new UserNotFoundException("Can't find " + userEmail + " user");
         }
-        final var clientSecret = stripeConfiguration.createThePaymentIntent(paymentDto);
 
-        user.get().setUserMembership(paymentDto.getMembership());
+        user.get().setUserMembership(membership);
         userRepository.save(user.get());
-        return clientSecret;
+        log.info("User {} membership was successfully updated.", membership.getDescription());
+    }
+
+    @Override
+    public String cancelPaymentSession(String paymentIntentId) {
+        try {
+            final var status = stripeConfiguration.cancelPaymentIntent(paymentIntentId);
+            log.info("Payment intent session with id {} was successfully canceled.", paymentIntentId);
+            return status;
+        } catch (StripeException exception) {
+            log.error("Error due cancelling stripe payment intent session: {}", exception.getMessage());
+            throw new UserPaymentSessionException(exception.getMessage());
+        }
     }
 }
