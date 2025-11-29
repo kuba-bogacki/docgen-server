@@ -50,7 +50,7 @@ public class UserServiceImplementation implements UserService {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find " + userEmail + " user");
+            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
         }
         return userMapper.mapToUserDto(user.get());
     }
@@ -103,7 +103,7 @@ public class UserServiceImplementation implements UserService {
         Optional<User> user = userRepository.findUserByUserEmail(userDto.getUserEmail());
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find " + userDto.getUserEmail() + " user");
+            throw new UserNotFoundException(String.format("Can't find %s user", userDto.getUserEmail()));
         }
 
         user.get().setUserFirstNameI(userDto.getUserFirstNameI());
@@ -120,7 +120,7 @@ public class UserServiceImplementation implements UserService {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find " + userEmail + " user");
+            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
         }
         final var resultFileName = uploadNewMultipartFile(multipartFile, user.get().getUserPhotoFileName());
 
@@ -149,7 +149,7 @@ public class UserServiceImplementation implements UserService {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find " + userEmail + " user");
+            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
         }
 
         List<UUID> membersList = webClientBuilder
@@ -162,7 +162,7 @@ public class UserServiceImplementation implements UserService {
                 .block();
 
         if (Objects.nonNull(membersList) && membersList.contains(user.get().getUserId())) {
-            throw new UserAlreadyExistException("User with email " + userEmail + " is already member of company");
+            throw new UserAlreadyExistException(String.format("User with email %s is already member of company", userEmail));
         }
         return userMapper.mapToUserDto(user.get());
     }
@@ -193,7 +193,7 @@ public class UserServiceImplementation implements UserService {
     public void updateUserMembership(Membership membership, String userEmail) {
         final var user = userRepository.findUserByUserEmail(userEmail);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find " + userEmail + " user");
+            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
         }
 
         user.get().setUserMembership(membership);
