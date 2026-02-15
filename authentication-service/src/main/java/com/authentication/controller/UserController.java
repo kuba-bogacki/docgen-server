@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/user/{userEmail}")
-    public ResponseEntity<?> getUserDtoByUserEmail(@PathVariable("userEmail") String userEmail) {
+    public ResponseEntity<?> getUserDtoByUserEmail(@PathVariable String userEmail) {
         try {
             return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
         } catch (UserNotFoundException e) {
@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/get-by-id/{userId}")
-    public ResponseEntity<?> getUserDtoByUserId(@PathVariable("userId") String userId) {
+    public ResponseEntity<?> getUserDtoByUserId(@PathVariable String userId) {
         try {
             return new ResponseEntity<>(userService.getUserDtoByUserId(userId), HttpStatus.OK);
         } catch (UserNotFoundException e) {
@@ -82,8 +82,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/company-member/{userEmail}")
-    public ResponseEntity<?> getCompanyMember(@PathVariable("userEmail") String userEmail, @RequestHeader("Authorization") String jwtToken,
-        @RequestBody String companyId) {
+    public ResponseEntity<?> getCompanyMember(@PathVariable String userEmail, @RequestHeader("Authorization") String jwtToken, @RequestBody String companyId) {
         try {
             return new ResponseEntity<>(userService.getUserNotCompanyMember(companyId, jwtToken, userEmail), HttpStatus.OK);
         } catch (UserNotFoundException e) {
@@ -100,7 +99,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/cancel-payment/{paymentIntentId}")
-    public ResponseEntity<?> cancelPaymentSession(@PathVariable("paymentIntentId") String paymentIntentId) {
+    public ResponseEntity<?> cancelPaymentSession(@PathVariable String paymentIntentId) {
         return new ResponseEntity<>(userService.cancelPaymentSession(paymentIntentId), HttpStatus.ACCEPTED);
     }
 

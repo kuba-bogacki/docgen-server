@@ -5,6 +5,7 @@ import com.authentication.model.dto.UserDto;
 import com.authentication.model.dto.UserEventDto;
 import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.model.type.Gender;
+import com.authentication.model.type.Membership;
 import com.authentication.model.type.Role;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.RegisterRequest;
@@ -26,6 +27,7 @@ class AuthenticationSamples {
     final String userEncodedPassword = "$2a$10$SnbHHtWU07v8K6k";
     final Gender userGender = Gender.MALE;
     final Role userRole = Role.USER;
+    final Membership userMembership = Membership.NONE;
     final boolean termsAndCondition = true;
     final String userVerificationCode = "HDoLh86MBCMB4uEc3jWkgHfUTGxhbGDZjkgyS2Dm46tysfylyVYhyxJUEvpKDTQf";
     final String userPhotoFileName = "profile-picture-current-photo-file-name.jpg";
@@ -57,6 +59,7 @@ class AuthenticationSamples {
             .userPassword(userEncodedPassword)
             .userGender(userGender)
             .userRole(userRole)
+            .userMembership(userMembership)
             .userVerificationCode(userVerificationCode)
             .termsAndCondition(termsAndCondition)
             .accountNonExpired(true)
