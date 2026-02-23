@@ -8,7 +8,6 @@ COPY company-service/pom.xml ./company-service/
 COPY discovery-server/pom.xml ./discovery-server/
 COPY document-service/pom.xml ./document-service/
 COPY event-service/pom.xml ./event-service/
-#COPY kafka-service/pom.xml ./kafka-service/
 COPY notification-service/pom.xml ./notification-service/
 
 RUN mvn dependency:go-offline

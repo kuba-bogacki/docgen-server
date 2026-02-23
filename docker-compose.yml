@@ -5,9 +5,12 @@ services:
       dockerfile: discovery-server/Dockerfile
     ports:
       - "8761:8761"
+      - "2137:2137" #Debug port
     networks:
       - my_network
     environment:
+      EUREKA_USERNAME: eureka
+      EUREKA_PASSWORD: ${eureka_password}
       EUREKA_INSTANCE_HOSTNAME: discovery-server
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
