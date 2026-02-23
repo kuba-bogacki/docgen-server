@@ -25,4 +25,5 @@
       "type": "java.lang.String",
       "description": "Description for stripe.payment.private.key."
     }
-  ] }
+  ]
+}

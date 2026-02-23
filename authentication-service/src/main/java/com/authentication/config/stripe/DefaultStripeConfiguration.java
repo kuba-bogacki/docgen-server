@@ -14,7 +14,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Slf4j
 @Configuration
-@PropertySource(value = {"classpath:application.properties"})
+@PropertySource(value = {"classpath:application.properties"}, ignoreResourceNotFound = true)
 public class DefaultStripeConfiguration implements StripeConfiguration {
 
     private static final int CENTS = 100;

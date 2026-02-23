@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource(value = {"classpath:application.properties"})
+@PropertySource(value = {"classpath:application.properties"}, ignoreResourceNotFound = true)
 public class DefaultImageKitConfiguration implements ImageKitConfiguration {
 
     private final ImageKit imageKitConnector;
