@@ -48,11 +48,11 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://authentication-database:5432/authentication-service
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${spring_datasource_password}
+      SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       TOKEN_SECRET_KEY: ${token_secret_key}
       IMAGE_KIT_URL_ENDPOINT: https://ik.imagekit.io/forcompany/user-profile-pictures
       IMAGE_KIT_PRIVATE_KEY: ${image_kit_private_key}
-      IMAGE_KEY_PUBLIC_KEY: public_bM8atLKI6NBIJe6fYt23sBBIzTs=
+      IMAGE_KEY_PUBLIC_KEY: ${image_kit_public_key}
       STRIPE_PAYMENT_PRIVATE_KEY: ${stripe_payment_private_key}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
@@ -70,7 +70,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://company-database:5432/company-service
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${spring_datasource_password}
+      SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
   event-service:
@@ -87,7 +87,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://event-database:5432/event-service
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${spring_datasource_password}
+      SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
   document-service:
@@ -144,7 +144,7 @@ services:
     environment:
       POSTGRES_DB: authentication-service
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${spring_datasource_password}
+      POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   company-database:
     image: postgres:15
@@ -155,7 +155,7 @@ services:
     environment:
       POSTGRES_DB: company-service
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${spring_datasource_password}
+      POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   event-database:
     image: postgres:15
@@ -166,7 +166,7 @@ services:
     environment:
       POSTGRES_DB: event-service
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${spring_datasource_password}
+      POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   document-database:
     image: mongo:6
