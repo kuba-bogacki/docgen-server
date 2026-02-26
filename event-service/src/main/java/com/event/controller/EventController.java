@@ -17,7 +17,7 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping(value = "/get/{companyId}/{date}")
-    public ResponseEntity<?> getCompanyEventsByDate(@PathVariable("companyId") String companyId, @PathVariable("date") String date) {
+    public ResponseEntity<?> getCompanyEventsByDate(@PathVariable String companyId, @PathVariable String date) {
         return new ResponseEntity<>(eventService.getCompanyEventsByDate(companyId, date), HttpStatus.OK);
     }
 
@@ -32,7 +32,7 @@ public class EventController {
     }
 
     @DeleteMapping(value = "/delete/{eventId}")
-    public ResponseEntity<?> deleteCompanyEvent(@PathVariable("eventId") String eventId) {
+    public ResponseEntity<?> deleteCompanyEvent(@PathVariable String eventId) {
         eventService.deleteCompanyEvent(eventId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
