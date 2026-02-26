@@ -1,0 +1,45 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-database-service
+spec:
+  selector:
+    app: document-database
+  ports:
+    - port: 27017
+
+---
+# Stateful Set
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: document-database
+spec:
+  serviceName: "document-database-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-database
+  template:
+    metadata:
+      labels:
+        app: document-database
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:6
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_DB
+          value: "document-service"
+        volumeMounts:
+        - name: document-service-data-storage
+          mountPath: /data/db
+      volumes:
+      - name: document-service-data-storage
+        persistentVolumeClaim:
+          claimName: pvc-document

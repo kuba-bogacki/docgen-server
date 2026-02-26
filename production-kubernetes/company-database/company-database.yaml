@@ -1,0 +1,50 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: company-database-service
+spec:
+  selector:
+    app: company-database
+  ports:
+    - port: 5432
+
+---
+# Stateful Set
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: company-database
+spec:
+  serviceName: "company-database-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: company-database
+  template:
+    metadata:
+      labels:
+        app: company-database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_DB
+          value: "company-service"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: postgres_datasource_password
+        volumeMounts:
+        - name: company-service-data-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: company-service-data-storage
+        persistentVolumeClaim:
+          claimName: pvc-company

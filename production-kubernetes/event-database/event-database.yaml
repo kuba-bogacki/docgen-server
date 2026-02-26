@@ -1,0 +1,50 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-database-service
+spec:
+  selector:
+    app: event-database
+  ports:
+    - port: 5432
+
+---
+# Stateful Set
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: event-database
+spec:
+  serviceName: "event-database-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-database
+  template:
+    metadata:
+      labels:
+        app: event-database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_DB
+          value: "event-service"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: postgres_datasource_password
+        volumeMounts:
+        - name: event-service-data-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: event-service-data-storage
+        persistentVolumeClaim:
+          claimName: pvc-event

@@ -31,6 +31,6 @@ public class RouterValidator {
     }
 
     public Predicate<ServerHttpRequest> isSecured =
-            request -> openApiPatterns.stream().noneMatch(pattern -> pattern.matcher(request.getURI().getPath()).matches());
-
+            request -> openApiPatterns.stream()
+                    .noneMatch(pattern -> pattern.matcher(request.getURI().getPath()).matches());
 }

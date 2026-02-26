@@ -5,7 +5,6 @@ import com.gateway.util.RouterValidator;
 import io.jsonwebtoken.Claims;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.context.config.annotation.RefreshScope;

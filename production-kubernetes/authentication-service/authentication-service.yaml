@@ -1,0 +1,78 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication-service
+spec:
+  selector:
+    app: authentication
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+
+---
+# Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentication
+  template:
+    metadata:
+      labels:
+        app: authentication
+    spec:
+      containers:
+      - name: authentication
+        image: spaceavocado34/authentication-service:1.0-SNAPSHOT
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "production"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://authentication-database-service:5432/authentication-service"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "postgres"
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: postgres_datasource_password
+        - name: TOKEN_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: token_secret_key
+        - name: IMAGE_KIT_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: image_kit_private_key
+        - name: IMAGE_KEY_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: image_kit_public_key
+        - name: STRIPE_PAYMENT_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: stripe_payment_private_key
+        - name: IMAGE_KIT_URL_ENDPOINT
+          value: "https://ik.imagekit.io/forcompany/user-profile-pictures"

@@ -1,0 +1,70 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  selector:
+    app: notification
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+
+---
+# Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+      - name: notification
+        image: spaceavocado34/notification-service:1.0-SNAPSHOT
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "production"
+        - name: SPRING_DATA_MONGODB_URI
+          value: "mongodb://notification-database-service:27017/notification-service"
+        - name: SPRING_MAIL_HOST
+          value: "smtp.gmail.com"
+        - name: SPRING_MAIL_PORT
+          value: "587"
+        - name: SPRING_MAIL_USERNAME
+          value: "for.company.document.generator@gmail.com"
+        - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+          value: "true"
+        - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+          value: "true"
+        - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTION_TIMEOUT
+          value: "10000"
+        - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT
+          value: "10000"
+        - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITE_TIMEOUT
+          value: "10000"
+        - name: SPRING_MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: spring_mail_password

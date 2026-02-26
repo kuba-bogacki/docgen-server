@@ -1,0 +1,50 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication-database-service
+spec:
+  selector:
+    app: authentication-database
+  ports:
+    - port: 5432
+
+---
+# Stateful Set
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: authentication-database
+spec:
+  serviceName: "authentication-database-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentication-database
+  template:
+    metadata:
+      labels:
+        app: authentication-database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_DB
+          value: "authentication-service"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: doc-gen-secrets
+              key: postgres_datasource_password
+        volumeMounts:
+        - name: authentication-service-data-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: authentication-service-data-storage
+        persistentVolumeClaim:
+          claimName: pvc-authentication

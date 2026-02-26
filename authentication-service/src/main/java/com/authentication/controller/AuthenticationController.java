@@ -78,7 +78,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/confirm-membership/{companyId}")
-    public ResponseEntity<?> confirmCompanyMembership(@PathVariable("companyId") String companyId, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> confirmCompanyMembership(@PathVariable String companyId, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
         try {
             return new ResponseEntity<>(authenticationService.confirmCompanyMembership(companyId, authenticationRequest), HttpStatus.OK);
         } catch (UserNotFoundException | UserAuthorizationException e) {

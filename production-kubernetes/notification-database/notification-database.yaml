@@ -1,0 +1,45 @@
+# Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-database-service
+spec:
+  selector:
+    app: notification-database
+  ports:
+    - port: 27017
+
+---
+# Stateful Set
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: notification-database
+spec:
+  serviceName: "notification-database-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-database
+  template:
+    metadata:
+      labels:
+        app: notification-database
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:6
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_DB
+          value: "notification-service"
+        volumeMounts:
+        - name: notification-service-data-storage
+          mountPath: /data/db
+      volumes:
+      - name: notification-service-data-storage
+        persistentVolumeClaim:
+          claimName: pvc-notification
