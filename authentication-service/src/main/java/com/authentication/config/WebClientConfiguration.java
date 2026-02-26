@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfiguration {
 
     @Bean
-    @LoadBalanced
     @Profile("production")
     public WebClient.Builder loadBalancedWebClientBuilderProduction() {
         return WebClient.builder();
