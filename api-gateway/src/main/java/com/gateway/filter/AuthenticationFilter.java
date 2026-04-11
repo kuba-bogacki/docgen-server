@@ -37,28 +37,28 @@ public class AuthenticationFilter implements WebFilter {
     public @NotNull Mono<Void> filter(ServerWebExchange exchange, @Nullable WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-        if (isCorsRequest(request) && !isWebSocketConnection(request)) {
-            ServerHttpResponse response = exchange.getResponse();
-            HttpHeaders headers = response.getHeaders();
-
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_HEADERS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_HEADERS, ALLOWED_HEADERS);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_ORIGIN))) {
-                headers.add(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_METHODS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_CREDENTIALS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_CREDENTIALS, ALLOWED_CREDENTIALS);
-            }
-
-            if (request.getMethod() == HttpMethod.OPTIONS) {
-                response.setStatusCode(HttpStatus.OK);
-                return Mono.empty();
-            }
-        }
+//        if (isCorsRequest(request) && !isWebSocketConnection(request)) {
+//            ServerHttpResponse response = exchange.getResponse();
+//            HttpHeaders headers = response.getHeaders();
+//
+//            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_HEADERS))) {
+//                headers.add(ACCESS_CONTROL_ALLOW_HEADERS, ALLOWED_HEADERS);
+//            }
+//            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_ORIGIN))) {
+//                headers.add(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN);
+//            }
+//            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_METHODS))) {
+//                headers.add(ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS);
+//            }
+//            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_CREDENTIALS))) {
+//                headers.add(ACCESS_CONTROL_ALLOW_CREDENTIALS, ALLOWED_CREDENTIALS);
+//            }
+//
+//            if (request.getMethod() == HttpMethod.OPTIONS) {
+//                response.setStatusCode(HttpStatus.OK);
+//                return Mono.empty();
+//            }
+//        }
 
         if (routerValidator.isSecured.test(request)) {
             if (this.isAuthMissing(request))

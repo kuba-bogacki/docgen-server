@@ -52,17 +52,17 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/company-members/{companyId}")
-    public ResponseEntity<?> getCompanyMemberIdList(@PathVariable("companyId") String companyId) {
+    public ResponseEntity<?> getCompanyMemberIdList(@PathVariable String companyId) {
         return new ResponseEntity<>(companyService.getCompanyMemberIdList(companyId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/members-details/{companyId}")
-    public ResponseEntity<?> getDetailMembersList(@PathVariable("companyId") String companyId, @RequestHeader("Authorization") String jwtToken) {
+    public ResponseEntity<?> getDetailMembersList(@PathVariable String companyId, @RequestHeader("Authorization") String jwtToken) {
         return new ResponseEntity<>(companyService.getDetailMembersList(companyId, jwtToken), HttpStatus.OK);
     }
 
     @PutMapping(value = "/add-new-member/{companyId}")
-    public ResponseEntity<?> addNewMemberToCompany(@PathVariable("companyId") String companyId, @RequestBody String userId) {
+    public ResponseEntity<?> addNewMemberToCompany(@PathVariable String companyId, @RequestBody String userId) {
         companyService.addNewMemberToCompany(companyId, userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

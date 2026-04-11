@@ -4,21 +4,21 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @Configuration
-public class WebClientConfiguration {
+public class RestClientConfiguration {
 
     @Bean
     @Profile("production")
-    public WebClient.Builder loadBalancedWebClientBuilderProduction() {
-        return WebClient.builder();
+    public RestClient.Builder loadBalancedRestClientBuilderProduction() {
+        return RestClient.builder();
     }
 
     @Bean
     @LoadBalanced
     @Profile("development")
-    public WebClient.Builder loadBalancedWebClientBuilderDevelopment() {
-        return WebClient.builder();
+    public RestClient.Builder loadBalancedRestClientBuilderDevelopment() {
+        return RestClient.builder();
     }
 }
