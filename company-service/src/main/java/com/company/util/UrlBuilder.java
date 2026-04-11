@@ -1,8 +1,7 @@
 package com.company.util;
 
-import org.apache.http.HttpHeaders;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 import java.util.Arrays;
 
@@ -15,16 +14,14 @@ public class UrlBuilder {
         return url.toString();
     }
 
-    public static ExchangeFilterFunction addTokenHeader(String token) {
-        return (clientRequest, next) -> {
+    public static ClientHttpRequestInterceptor addTokenHeader(String token) {
+        return (clientRequest, body, execution) -> {
             if (!token.isBlank()) {
-                ClientRequest.Builder requestBuilder = ClientRequest.from(clientRequest);
-                requestBuilder.headers(httpHeaders -> httpHeaders.remove(HttpHeaders.AUTHORIZATION));
-                return next.exchange(requestBuilder
-                        .header(HttpHeaders.AUTHORIZATION, token)
-                        .build());
+                HttpHeaders httpHeaders = clientRequest.getHeaders();
+                httpHeaders.remove(HttpHeaders.AUTHORIZATION);
+                httpHeaders.add(HttpHeaders.AUTHORIZATION, token);
             }
-            return next.exchange(clientRequest);
+            return execution.execute(clientRequest, body);
         };
     }
 }

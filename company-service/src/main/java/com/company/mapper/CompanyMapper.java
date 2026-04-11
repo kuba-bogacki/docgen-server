@@ -13,11 +13,14 @@ public interface CompanyMapper {
     @Mapping(source = "companyAddressDto", target = "companyAddress")
     @Mapping(source = "companyRegistrationDate", target = "companyRegistrationDate", dateFormat = "dd.MM.yyyy")
     Company mapToEntity(CompanyDto companyDto);
+
     @Mapping(source = "companyAddress", target = "companyAddressDto")
     CompanyDto mapToDto(Company company);
+
     @Mapping(source = "companyAddressDto", target = "companyAddress")
     @Mapping(source = "companyRegistrationDate", target = "companyRegistrationDate", dateFormat = "dd.MM.yyyy")
     List<Company> mapToEntities(List<CompanyDto> companyDtos);
+
     @Mapping(source = "companyAddress", target = "companyAddressDto")
     List<CompanyDto> mapToDtos(List<Company> companies);
 }

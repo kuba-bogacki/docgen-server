@@ -26,7 +26,6 @@
         <spring.jjwt.api.version>0.11.5</spring.jjwt.api.version>
         <spring.jjwt.impl.version>0.11.5</spring.jjwt.impl.version>
         <spring.jjwt.jackson.version>0.11.5</spring.jjwt.jackson.version>
-        <spring.netflix.hystrix.version>2.2.10.RELEASE</spring.netflix.hystrix.version>
         <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
     </properties>
 

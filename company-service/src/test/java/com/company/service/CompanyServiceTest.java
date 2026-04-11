@@ -2,11 +2,11 @@ package com.company.service;
 
 import com.company.exception.CompanyMemberAdditionException;
 import com.company.exception.CompanyNonExistException;
-import com.company.service.implementation.CompanyServiceImplementation;
 import com.company.mapper.CompanyMapper;
 import com.company.model.dto.CompanyDto;
 import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
+import com.company.service.implementation.CompanyServiceImplementation;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -32,15 +27,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CompanyServiceTest extends CompanySamples {
 
-    @SuppressWarnings("rawtypes")
-    @Mock private RequestHeadersUriSpec requestHeadersUriSpec;
-    @SuppressWarnings("rawtypes")
-    @Mock private RequestHeadersSpec requestHeadersSpec;
-    @Mock private ResponseSpec responseSpec;
-    @Mock private WebClient webClient;
-    @Mock private WebClient.Builder webClientBuilder;
     @Mock private CompanyMapper companyMapper;
     @Mock private CompanyRepository companyRepository;
+    @Mock private RestClientService restClientService;
     @InjectMocks private CompanyServiceImplementation companyService;
 
     @Test
@@ -77,12 +66,10 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should return saved company if valid company dto and founded current user")
     void test_03() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
         final var companyDto = sampleDtoCompanyI;
         final var savedCompanyDto = sampleDtoCompanyI.toBuilder()
                 .companyId(companyIdI)
@@ -96,13 +83,7 @@ class CompanyServiceTest extends CompanySamples {
                 .build();
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
-
+        when(restClientService.getCurrentUserId(sampleToken)).thenReturn(currentUserId);
         when(companyMapper.mapToEntity(companyDto)).thenReturn(companyEntity);
         when(companyRepository.save(companyEntity)).thenReturn(savedCompanyEntity);
         when(companyMapper.mapToDto(savedCompanyEntity)).thenReturn(savedCompanyDto);
@@ -121,21 +102,14 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should throw an exception if issue appear due getting user id")
     void test_04() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
         final var companyDto = sampleDtoCompanyI;
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenThrow(WebClientResponseException.Unauthorized.class);
+        when(restClientService.getCurrentUserId(sampleToken)).thenThrow(WebClientResponseException.Unauthorized.class);
 
         final var expectedException = catchThrowable(() -> companyService.createCompany(companyDto, sampleToken));
 
@@ -149,25 +123,17 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should throw an exception if issue appear due mapping malformed company registration date")
     void test_05() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
         final var malformedCompanyRegistrationDate = "123-error;2137";
         final var companyDto = sampleDtoCompanyI.toBuilder()
                 .companyRegistrationDate(malformedCompanyRegistrationDate)
                 .build();
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
-
+        when(restClientService.getCurrentUserId(sampleToken)).thenReturn(currentUserId);
         when(companyMapper.mapToEntity(companyDto)).thenThrow(DateTimeParseException.class);
 
         final var expectedException = catchThrowable(() -> companyService.createCompany(companyDto, sampleToken));
@@ -181,12 +147,10 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should throw an exception if issue appear due null company krs number")
     void test_06() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
         final var companyDto = sampleDtoCompanyI.toBuilder()
                 .companyKrsNumber(null)
                 .build();
@@ -195,13 +159,7 @@ class CompanyServiceTest extends CompanySamples {
                 .build();
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
-
+        when(restClientService.getCurrentUserId(sampleToken)).thenReturn(currentUserId);
         when(companyMapper.mapToEntity(companyDto)).thenReturn(companyEntity);
         when(companyRepository.save(companyEntity)).thenThrow(ConstraintViolationException.class);
 
@@ -354,21 +312,13 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should return list of founded company dtos when company members contain current user id")
     void test_13() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
-
+        when(restClientService.getCurrentUserId(sampleToken)).thenReturn(currentUserId);
         when(companyRepository.findCompaniesByCompanyMembersContaining(currentUserId)).thenReturn(List.of(sampleEntityCompanyII, sampleEntityCompanyIII));
         when(companyMapper.mapToDtos(List.of(sampleEntityCompanyII, sampleEntityCompanyIII))).thenReturn(List.of(sampleDtoCompanyII, sampleDtoCompanyIII));
 
@@ -385,21 +335,13 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should return empty list when any company members not contain current user id")
     void test_14() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenReturn(Mono.just(currentUserId));
-
+        when(restClientService.getCurrentUserId(sampleToken)).thenReturn(currentUserId);
         when(companyRepository.findCompaniesByCompanyMembersContaining(currentUserId)).thenReturn(Collections.emptyList());
         when(companyMapper.mapToDtos(any())).thenReturn(Collections.emptyList());
 
@@ -416,20 +358,13 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should throw an exception if issue appear due getting current user id")
     void test_15() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-id";
 
         //when
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UUID.class)).thenThrow(WebClientResponseException.Unauthorized.class);
+        when(restClientService.getCurrentUserId(sampleToken)).thenThrow(WebClientResponseException.Unauthorized.class);
 
         final var expectedException = catchThrowable(() -> companyService.getCurrentUserCompanies(sampleToken));
 
@@ -486,7 +421,6 @@ class CompanyServiceTest extends CompanySamples {
     void test_18() {
         //given
         final var sampleToken = "sample-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-by-id/";
         final var companyEntity = sampleEntityCompanyII.toBuilder()
                 .companyId(companyIdII)
                 .companyMembers(Set.of(currentUserId, companyMemberId))
@@ -496,7 +430,7 @@ class CompanyServiceTest extends CompanySamples {
         when(companyRepository.findCompanyByCompanyId(companyIdII)).thenReturn(Optional.of(companyEntity));
         var uuidMembersList = companyEntity.getCompanyMembers().stream().toList();
         for (int i = 0; i < uuidMembersList.size(); i++) {
-            callWebFluxUserDto(sampleUri + uuidMembersList.get(i).toString(), userDtoList.get(i));
+            callWebFluxUserDto(uuidMembersList.get(i).toString(), userDtoList.get(i));
         }
 
         final var result = companyService.getDetailMembersList(companyIdII.toString(), sampleToken);
@@ -532,24 +466,16 @@ class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Should throw an exception when some error occur due getting user dto list")
     void test_20() {
         final var wrongToken = "wrong-token";
-        final var sampleUri = "http://authentication-service/v1.0/authentication/get-by-id/";
         final var companyEntity = sampleEntityCompanyII.toBuilder()
                 .companyId(companyIdII)
                 .build();
 
         //when
         when(companyRepository.findCompanyByCompanyId(companyIdII)).thenReturn(Optional.of(companyEntity));
-
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(sampleUri + currentUserId)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UserDto.class)).thenThrow(WebClientResponseException.Unauthorized.class);
+        when(restClientService.getAuthenticationServiceUserDto(currentUserId.toString(), wrongToken)).thenThrow(WebClientResponseException.Unauthorized.class);
 
         final var expectedException = catchThrowable(() -> companyService.getDetailMembersList(companyIdII.toString(), wrongToken));
 
@@ -559,13 +485,7 @@ class CompanyServiceTest extends CompanySamples {
                 .isInstanceOf(WebClientResponseException.Unauthorized.class);
     }
 
-    @SuppressWarnings("unchecked")
     private void callWebFluxUserDto(String url, UserDto userDto) {
-        when(webClientBuilder.filter(any())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(url)).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(userDto));
+        when(restClientService.getAuthenticationServiceUserDto(eq(url), anyString())).thenReturn(userDto);
     }
 }
