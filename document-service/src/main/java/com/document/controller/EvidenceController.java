@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.document.util.ApplicationConstants.API_VERSION;
+import static com.document.util.ApplicationConstants.USER_EMAIL_HEADER;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +24,8 @@ public class EvidenceController {
     }
 
     @PostMapping(value = "/create-financial-statement")
-    public ResponseEntity<?> createFinancialStatement(@Valid @RequestBody FinancialStatementDto financialStatementDto, @RequestHeader("Authorization") String jwtToken) {
-        evidenceService.createFinancialStatement(financialStatementDto, jwtToken);
+    public ResponseEntity<?> createFinancialStatement(@Valid @RequestBody FinancialStatementDto financialStatementDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        evidenceService.createFinancialStatement(financialStatementDto, userEmail);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

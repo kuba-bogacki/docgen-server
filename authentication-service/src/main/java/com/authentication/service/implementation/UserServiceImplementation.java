@@ -1,18 +1,20 @@
 package com.authentication.service.implementation;
 
-import com.authentication.config.imagekit.ImageKitConfiguration;
-import com.authentication.config.stripe.StripeConfiguration;
+import com.authentication.client.imagekit.ImageKitClient;
+import com.authentication.client.stripe.StripeClient;
 import com.authentication.exception.*;
+import com.authentication.infrastructure.HttpClient;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.PaymentIntentDto;
 import com.authentication.model.dto.UserDto;
+import com.authentication.model.dto.UserEventDto;
 import com.authentication.model.type.Membership;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
-import com.authentication.util.NumberGenerator;
+import com.authentication.util.random.DefaultNumberGenerator;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,17 +22,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.authentication.util.ApplicationConstants.API_VERSION;
-import static com.authentication.util.ApplicationConstants.PROTOCOL;
-import static com.authentication.util.UrlBuilder.addTokenHeader;
-import static com.authentication.util.UrlBuilder.buildUrl;
 
 @Slf4j
 @Service
@@ -40,10 +36,10 @@ public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final NumberGenerator numberGenerator;
-    private final WebClient.Builder webClientBuilder;
-    private final ImageKitConfiguration imageKitConfiguration;
-    private final StripeConfiguration stripeConfiguration;
+    private final DefaultNumberGenerator numberGenerator;
+    private final HttpClient httpClient;
+    private final ImageKitClient imageKitClient;
+    private final StripeClient stripeClient;
 
     @Override
     public UserDto getUserDtoByUserEmail(String userEmail) {
@@ -57,23 +53,19 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public Boolean sendVerificationEmail(String userEmail) throws UserNotFoundException, UserWebClientException {
-        Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
             throw new UserNotFoundException("Impossible to send reset link because user with provide email not exist.");
         }
 
-        ResponseEntity<?> emailStatus = webClientBuilder.build().post()
-                .uri(buildUrl(PROTOCOL, "notification-service", API_VERSION, "/notification/reset"))
-                .bodyValue(userMapper.mapToUserEventDto(user.get()))
-                .retrieve()
-                .toEntity(ResponseEntity.class)
-                .block();
-        if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
+        final UserEventDto userEventDto = userMapper.mapToUserEventDto(user.get());
+        final ResponseEntity<?> emailStatus = httpClient.getEmailStatus(userEventDto);
+        if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserWebClientException("Couldn't send reset email. User account still locked.");
         }
         user.get().setAccountNonLocked(false);
-        User savedUser = userRepository.save(user.get());
+        final User savedUser = userRepository.save(user.get());
 
         return savedUser.getAccountNonLocked();
     }
@@ -133,10 +125,10 @@ public class UserServiceImplementation implements UserService {
     private String uploadNewMultipartFile(MultipartFile multipartFile, String currentUserPhotoFileName) {
         try {
             final var fileName = String.format("profile-picture-%s.jpg", numberGenerator.generateUserPhotoFileName(26));
-            final var resultFileName = imageKitConfiguration.uploadImage(multipartFile.getBytes(), fileName);
+            final var resultFileName = imageKitClient.uploadImage(multipartFile.getBytes(), fileName);
 
-            if (!imageKitConfiguration.resultFileListIsEmpty(currentUserPhotoFileName)) {
-                imageKitConfiguration.deleteFile(currentUserPhotoFileName);
+            if (!imageKitClient.resultFileListIsEmpty(currentUserPhotoFileName)) {
+                imageKitClient.deleteFile(currentUserPhotoFileName);
             }
             return resultFileName;
         } catch (Exception exception) {
@@ -145,21 +137,14 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDto getUserNotCompanyMember(String companyId, String jwtToken, String userEmail) throws UserNotFoundException, UserAlreadyExistException {
-        Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+    public UserDto getUserNotCompanyMember(String companyId, String userEmail) throws UserNotFoundException, UserAlreadyExistException {
+        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
             throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
         }
 
-        List<UUID> membersList = webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().get()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/company-members/" + companyId.substring(0, companyId.length() - 1)))
-                .retrieve()
-                .bodyToFlux(UUID.class)
-                .collectList()
-                .block();
+        final List<UUID> membersList = httpClient.getMemberUuidList(companyId, userEmail);
 
         if (Objects.nonNull(membersList) && membersList.contains(user.get().getUserId())) {
             throw new UserAlreadyExistException(String.format("User with email %s is already member of company", userEmail));
@@ -180,7 +165,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public PaymentIntentDto createPaymentSession(PaymentDto paymentDto, String userEmail) {
         try {
-            final var paymentIntent = stripeConfiguration.createPaymentIntent(paymentDto);
+            final var paymentIntent = stripeClient.createPaymentIntent(paymentDto);
             log.info("Payment intent session with id {} was successfully created.", paymentIntent.getPaymentIntentId());
             return paymentIntent;
         } catch (StripeException exception) {
@@ -204,7 +189,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public String cancelPaymentSession(String paymentIntentId) {
         try {
-            final var status = stripeConfiguration.cancelPaymentIntent(paymentIntentId);
+            final var status = stripeClient.cancelPaymentIntent(paymentIntentId);
             log.info("Payment intent session with id {} was successfully canceled.", paymentIntentId);
             return status;
         } catch (StripeException exception) {

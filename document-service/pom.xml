@@ -19,6 +19,7 @@
         <java.version>17</java.version>
         <spring.web.version>3.1.2</spring.web.version>
         <spring.webflux.version>3.1.2</spring.webflux.version>
+        <spring.security.version>3.1.0</spring.security.version>
         <spring.mongodb.version>3.1.2</spring.mongodb.version>
         <spring.starter.version>3.1.2</spring.starter.version>
         <org.projectlombok.version>1.18.28</org.projectlombok.version>
@@ -65,6 +66,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${spring.webflux.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->

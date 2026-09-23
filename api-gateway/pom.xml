@@ -27,6 +27,7 @@
         <spring.jjwt.impl.version>0.11.5</spring.jjwt.impl.version>
         <spring.jjwt.jackson.version>0.11.5</spring.jjwt.jackson.version>
         <jetbrains.annotations.version>24.0.1</jetbrains.annotations.version>
+        <assertj.core.version>3.26.3</assertj.core.version>
     </properties>
 
     <dependencies>
@@ -49,6 +50,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
             <version>${spring.starter.security.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -87,6 +95,14 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>${jetbrains.annotations.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.core.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

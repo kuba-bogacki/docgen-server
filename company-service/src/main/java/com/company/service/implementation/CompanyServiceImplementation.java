@@ -8,7 +8,7 @@ import com.company.model.dto.CompanyDto;
 import com.company.model.dto.UserDto;
 import com.company.repository.CompanyRepository;
 import com.company.service.CompanyService;
-import com.company.service.RestClientService;
+import com.company.infrastructure.HttpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class CompanyServiceImplementation implements CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
-    private final RestClientService restClientService;
+    private final HttpClient httpClient;
 
     @Override
     public Boolean checkIfCompanyAlreadyExist(String companyKrsNumber) {
@@ -34,8 +34,8 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public CompanyDto createCompany(CompanyDto companyDto, String jwtToken) {
-        UUID currentUserId = restClientService.getCurrentUserId(jwtToken);
+    public CompanyDto createCompany(CompanyDto companyDto, String userEmail) {
+        UUID currentUserId = httpClient.getCurrentUserId(userEmail);
         companyDto.getCompanyMembers().add(currentUserId);
         Company company = companyRepository.save(companyMapper.mapToEntity(companyDto));
         log.debug("Company has been created with id : {}", company.getCompanyId());
@@ -79,9 +79,9 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public List<CompanyDto> getCurrentUserCompanies(String jwtToken) {
-        UUID currentUserId = restClientService.getCurrentUserId(jwtToken);
-        List<Company> companyList = companyRepository.findCompaniesByCompanyMembersContaining(currentUserId);
+    public List<CompanyDto> getCurrentUserCompanies(String userEmail) {
+        final UUID currentUserId = httpClient.getCurrentUserId(userEmail);
+        final List<Company> companyList = companyRepository.findCompaniesByCompanyMembersContaining(currentUserId);
         return companyMapper.mapToDtos(companyList);
     }
 
@@ -107,14 +107,14 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public List<UserDto> getDetailMembersList(String companyId, String jwtToken) throws CompanyNonExistException {
+    public List<UserDto> getDetailMembersList(String companyId, String userEmail) throws CompanyNonExistException {
         Optional<Company> entity = companyRepository.findCompanyByCompanyId(UUID.fromString(companyId));
 
         if (entity.isEmpty()) {
             throw new CompanyNonExistException("Company with provided id is not exist");
         }
         return entity.get().getCompanyMembers().stream()
-                .map(memberId -> restClientService.getAuthenticationServiceUserDto(memberId.toString(), jwtToken))
+                .map(memberId -> httpClient.getAuthenticationServiceUserDto(memberId.toString(), userEmail))
                 .toList();
     }
 }

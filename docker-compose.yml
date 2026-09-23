@@ -32,6 +32,8 @@ services:
       - my_network
     environment:
       SPRING_PROFILES_ACTIVE: development
+      CORS_CLIENT_HOST: localhost
+      CORS_CLIENT_PORT: 3000
       TOKEN_SECRET_KEY: ${token_secret_key}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
@@ -129,6 +131,7 @@ services:
       - 8.8.4.4
     environment:
       SPRING_PROFILES_ACTIVE: development
+      TOKEN_SECRET_KEY: ${token_secret_key}
       SPRING_DATA_MONGODB_URI: mongodb://notification-database:27017/notification-service
       SPRING_MAIL_PORT: 587
       SPRING_MAIL_HOST: smtp.gmail.com

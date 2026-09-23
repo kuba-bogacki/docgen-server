@@ -19,12 +19,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.mail.version>3.1.1</spring.mail.version>
         <spring.web.version>3.1.0</spring.web.version>
+        <spring.security.version>3.1.0</spring.security.version>
         <spring.mongodb.version>3.1.2</spring.mongodb.version>
         <spring.webflux.version>3.1.2</spring.webflux.version>
         <spring.starter.test.version>3.1.0</spring.starter.test.version>
         <spring.starter.websocket>3.3.0</spring.starter.websocket>
         <spring.eureka.client.version>4.0.3</spring.eureka.client.version>
         <spring.kafka.version>3.0.9</spring.kafka.version>
+        <spring.jjwt.api.version>0.11.5</spring.jjwt.api.version>
+        <spring.jjwt.impl.version>0.11.5</spring.jjwt.impl.version>
+        <spring.jjwt.jackson.version>0.11.5</spring.jjwt.jackson.version>
         <org.projectlombok.version>1.18.28</org.projectlombok.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <org.mapstruct.binding.version>0.2.0</org.mapstruct.binding.version>
@@ -44,6 +48,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.web.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
@@ -116,6 +127,29 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
             <version>${spring.starter.websocket}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${spring.jjwt.api.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${spring.jjwt.impl.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${spring.jjwt.jackson.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
     </dependencies>

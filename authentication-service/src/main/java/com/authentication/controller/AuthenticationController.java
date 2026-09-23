@@ -5,7 +5,6 @@ import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.RegisterRequest;
 import com.authentication.service.AuthenticationService;
-import com.authentication.service.JwtService;
 import com.authentication.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -22,7 +21,6 @@ import static com.authentication.util.ApplicationConstants.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final JwtService jwtService;
     private final UserService userService;
 
     @PostMapping(value = "/create")
@@ -46,10 +44,16 @@ public class AuthenticationController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
+        return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/refresh")
+    public ResponseEntity<?> refreshToken(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         try {
-            return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAccountDisableException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
+            authenticationService.refreshToken(userEmail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (UserAccountDisableException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -69,12 +73,6 @@ public class AuthenticationController {
         } catch (UserNotFoundException | UserAuthenticationException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @GetMapping(value = "/validate")
-    public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String jwtToken) {
-        jwtService.validateToken(jwtToken.substring(7));
-        return new ResponseEntity<>(VALID_TOKEN, HttpStatus.OK);
     }
 
     @PostMapping(value = "/confirm-membership/{companyId}")

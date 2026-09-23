@@ -9,14 +9,14 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface CompanyService {
-    CompanyDto createCompany(CompanyDto companyDto, String jwtToken);
+    CompanyDto createCompany(CompanyDto companyDto, String userEmail);
     CompanyDto getCompanyByName(String companyName) throws CompanyNonExistException;
     CompanyDto getCompanyByCompanyId(String companyId) throws CompanyNonExistException;
     CompanyDto getCompanyByCompanyKrsNumber(String krsNumber) throws CompanyNonExistException;
     CompanyDto updateCompany(CompanyDto companyDto);
-    List<CompanyDto> getCurrentUserCompanies(String jwtToken);
+    List<CompanyDto> getCurrentUserCompanies(String userEmail);
     Boolean checkIfCompanyAlreadyExist(String companyKrsNumber);
     Set<UUID> getCompanyMemberIdList(String companyId) throws CompanyNonExistException;
     void addNewMemberToCompany(String companyId, String userId);
-    List<UserDto> getDetailMembersList(String companyId, String jwtToken) throws CompanyNonExistException;
+    List<UserDto> getDetailMembersList(String companyId, String userEmail) throws CompanyNonExistException;
 }

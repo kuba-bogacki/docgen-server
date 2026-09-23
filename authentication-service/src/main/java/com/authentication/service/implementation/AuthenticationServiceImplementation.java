@@ -1,6 +1,7 @@
 package com.authentication.service.implementation;
 
 import com.authentication.exception.*;
+import com.authentication.infrastructure.HttpClient;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserPrincipalDto;
@@ -13,35 +14,28 @@ import com.authentication.security.AuthenticationResponse;
 import com.authentication.security.RegisterRequest;
 import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
-import com.authentication.util.NumberGenerator;
+import com.authentication.util.random.NumberGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.authentication.util.ApplicationConstants.API_VERSION;
-import static com.authentication.util.ApplicationConstants.PROTOCOL;
-import static com.authentication.util.UrlBuilder.addTokenHeader;
-import static com.authentication.util.UrlBuilder.buildUrl;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImplementation implements AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final HttpClient httpClient;
     private final UserMapper userMapper;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final NumberGenerator numberGenerator;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final WebClient.Builder webClientBuilder;
 
     @Override
     public void register(RegisterRequest registerRequest) throws UserAlreadyExistException, UserAuthenticationException {
@@ -63,13 +57,9 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .credentialsNonExpired(true)
                 .enabled(false)
                 .build();
-        ResponseEntity<?> emailStatus = webClientBuilder.build().post()
-                .uri(buildUrl(PROTOCOL, "notification-service", API_VERSION, "/notification/verification"))
-                .bodyValue(userMapper.mapToUserEventDto(user))
-                .retrieve()
-                .toEntity(ResponseEntity.class)
-                .block();
-        if (Objects.isNull(emailStatus) || !emailStatus.getStatusCode().is2xxSuccessful()) {
+        var userEventDto = userMapper.mapToUserEventDto(user);
+        ResponseEntity<?> emailStatus = httpClient.getEmailStatus(userEventDto);
+        if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException("Couldn't send verification email. New user is not saved in database.");
         }
         userRepository.save(user);
@@ -77,7 +67,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
     @Override
     public void addUserPrincipal(UserPrincipalDto userPrincipalDto) throws UserNotFoundException {
-        Optional<User> user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()));
+        final Optional<User> user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()));
 
         if (user.isEmpty()) {
             throw new UserNotFoundException("Impossible to find user with provide id");
@@ -103,9 +93,11 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         userRepository.save(user.get());
 
         authenticateUser(authenticationRequest);
-        String jwtToken = jwtService.generateJwtToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user.get());
+        final String refreshToken = jwtService.generateRefreshToken(user.get());
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -122,39 +114,61 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         }
 
         authenticateUser(authenticationRequest);
-        String jwtToken = jwtService.generateJwtToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user.get());
+        final String refreshToken = jwtService.generateRefreshToken(user.get());
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    public void refreshToken(String userEmail) {
+        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Impossible to find user with provided email");
+        }
+
+        final String userPrincipal = user.get().getUserPrincipal();
+        final String jwtToken = jwtService.generateJwtToken(user.get());
+        final String refreshToken = jwtService.generateRefreshToken(user.get());
+
+        final AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .jwtToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+        final ResponseEntity<?> refreshTokenStatus =
+                httpClient.sendRefreshToken(userPrincipal, authenticationResponse, userEmail);
+
+        if (refreshTokenStatus.getStatusCode().is4xxClientError()) {
+            throw new UserAuthenticationException(
+                    String.format("Couldn't send refresh token to client with principal name - [%s]", userPrincipal));
+        }
     }
 
     @Override
     public AuthenticationResponse confirmCompanyMembership(String companyId, AuthenticationRequest authenticationRequest)
             throws UserNotFoundException, UserAuthorizationException {
-        Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
+        final Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
             throw new UserNotFoundException("Impossible to find user with provided email");
         }
 
         authenticateUser(authenticationRequest);
-        String jwtToken = jwtService.generateJwtToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user.get());
+        final String refreshToken = jwtService.generateRefreshToken(user.get());
 
-        ResponseEntity<?> joiningStatus = webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().put()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/add-new-member/" + companyId))
-                .bodyValue(user.get().getUserId().toString())
-                .retrieve()
-                .toEntity(ResponseEntity.class)
-                .block();
+        final ResponseEntity<?> joiningStatus = httpClient.getJoiningStatus(user.get(), companyId, authenticationRequest.getUserEmail());
 
-        if (Objects.isNull(joiningStatus) || !joiningStatus.getStatusCode().is2xxSuccessful()) {
+        if (!joiningStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException(String.format("Couldn't add user as a member to company with id: %s.", companyId));
         }
 
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

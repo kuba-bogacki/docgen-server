@@ -22,6 +22,7 @@
         <spring.webflux.version>3.1.2</spring.webflux.version>
         <spring.starter.version>3.1.2</spring.starter.version>
         <spring.starter.test.version>3.1.0</spring.starter.test.version>
+        <spring.security.version>3.1.0</spring.security.version>
         <spring.postgresql.version>42.6.0</spring.postgresql.version>
         <org.projectlombok.version>1.18.28</org.projectlombok.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
@@ -69,6 +70,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <version>${spring.starter.test.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
