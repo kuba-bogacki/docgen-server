@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface EvidenceService {
     void deleteEvidenceById(String evidenceId);
-    void createFinancialStatement(FinancialStatementDto financialStatementDto, String jwtToken);
+    void createFinancialStatement(FinancialStatementDto financialStatementDto, String userEmail);
     EvidenceDetailsDto getEvidenceDetailsById(String evidenceId);
     List<EvidenceDto> getAllCompanyEvidences(String companyId);
 }

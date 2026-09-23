@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
+import static com.notification.util.ApplicationConstants.AUTHORIZATION_HEADER;
+
 @RestController
 @RequiredArgsConstructor
 public class WebSocketController {
@@ -17,22 +19,22 @@ public class WebSocketController {
     private final NotificationService notificationService;
 
     @MessageMapping("/get-principal-name")
-    public void sendBackPrincipalNameToUser(@Header("Authorization") String jwtToken, Principal principal) {
-        notificationService.sendUserPrincipalName(principal, jwtToken);
+    public void sendBackPrincipalNameToUser(@Header(AUTHORIZATION_HEADER) String jwtToken, Principal principal) {
+        notificationService.sendUserPrincipalName(jwtToken, principal);
     }
 
     @MessageMapping("/send-membership-petition")
-    public void sendMembershipPetition(@Header("Authorization") String jwtToken, @Payload NotificationRequest notificationRequest) {
+    public void sendMembershipPetition(@Header(AUTHORIZATION_HEADER) String jwtToken, @Payload NotificationRequest notificationRequest) {
         notificationService.sendMembershipPetition(notificationRequest, jwtToken);
     }
 
     @MessageMapping("/accept-membership-petition")
-    public void acceptMembershipPetition(@Header("Authorization") String jwtToken, @Payload NotificationRequest notificationRequest) {
+    public void acceptMembershipPetition(@Header(AUTHORIZATION_HEADER) String jwtToken, @Payload NotificationRequest notificationRequest) {
         notificationService.acceptMembershipPetition(notificationRequest, jwtToken);
     }
 
     @MessageMapping("/send-new-event-info")
-    public void sendNewEventInfo(@Header("Authorization") String jwtToken, @Payload NotificationRequest notificationRequest) {
+    public void sendNewEventInfo(@Header(AUTHORIZATION_HEADER) String jwtToken, @Payload NotificationRequest notificationRequest) {
         notificationService.sendNewEventInfo(notificationRequest, jwtToken);
     }
 

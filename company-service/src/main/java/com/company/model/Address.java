@@ -1,15 +1,13 @@
 package com.company.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,4 +31,16 @@ public class Address {
 
     @Column(nullable = false)
     private String addressCity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Address other)) return false;
+        return this.addressId != null && this.addressId.equals(other.getAddressId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

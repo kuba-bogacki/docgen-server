@@ -1,10 +1,7 @@
 package com.company.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -12,10 +9,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Builder(toBuilder = true)
 @Table(name = "company")
 public class Company {
 
@@ -45,4 +43,16 @@ public class Company {
 
     @ElementCollection
     private Set<UUID> companyMembers = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Company other)) return false;
+        return this.companyId != null && this.companyId.equals(other.getCompanyId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -6,6 +6,11 @@
       "description": "Description for token.session.duration."
     },
     {
+      "name": "token.refresh.expiration",
+      "type": "java.lang.Integer",
+      "description": "Description for token.refresh.expiration."
+    },
+    {
       "name": "image.kit.url.endpoint",
       "type": "java.lang.String",
       "description": "Description for image.kit.url.endpoint."

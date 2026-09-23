@@ -1,8 +1,9 @@
 package com.document.model;
 
 import com.document.model.type.EvidenceType;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 
 import static java.util.Objects.requireNonNull;
 
-@Data
+@Getter
+@Setter
 @Document(value = "evidence")
 @NoArgsConstructor
 public class Evidence {
@@ -57,7 +59,7 @@ public class Evidence {
 
         public Builder evidenceName(String evidenceName) {
             requireNonNull(evidenceName, "Evidence name cannot be null");
-            this.evidenceName = String.format("%s_%s", this.evidenceType.getDescription(), evidenceName).replaceAll(" ", "_");
+            this.evidenceName = String.format("%s_%s", this.evidenceType.getDescription(), evidenceName).replace(" ", "_");
             return this;
         }
 
@@ -76,5 +78,17 @@ public class Evidence {
         public Evidence build() {
             return new Evidence(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Evidence other)) return false;
+        return this.evidenceId != null && this.evidenceId.equals(other.getEvidenceId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

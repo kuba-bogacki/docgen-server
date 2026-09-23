@@ -11,6 +11,7 @@ import com.authentication.model.dto.UserPrincipalDto;
 
 public interface AuthenticationService {
     void register(RegisterRequest registerRequest) throws UserAlreadyExistException, UserAuthenticationException;
+    void refreshToken(String userEmail);
     void addUserPrincipal(UserPrincipalDto userPrincipalDto) throws UserNotFoundException;
     AuthenticationResponse verifyUserRegistrationCode(String registrationCode, AuthenticationRequest authenticationRequest) throws UserNotFoundException, UserAuthenticationException;
     AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) throws UserNotFoundException, UserAccountDisableException;

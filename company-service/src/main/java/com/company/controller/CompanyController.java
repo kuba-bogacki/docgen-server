@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.company.util.ApplicationConstants.API_VERSION;
+import static com.company.util.ApplicationConstants.USER_EMAIL_HEADER;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,8 +38,8 @@ public class CompanyController {
     }
 
     @PostMapping(value = "/create")
-    public ResponseEntity<?> createCompany(@RequestBody CompanyDto companyDto, @RequestHeader("Authorization") String jwtToken) {
-        return new ResponseEntity<>(companyService.createCompany(companyDto, jwtToken), HttpStatus.CREATED);
+    public ResponseEntity<?> createCompany(@RequestBody CompanyDto companyDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(companyService.createCompany(companyDto, userEmail), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/update")
@@ -47,8 +48,8 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/current-user-companies")
-    public ResponseEntity<?> getAllCompanies(@RequestHeader("Authorization") String jwtToken) {
-        return new ResponseEntity<>(companyService.getCurrentUserCompanies(jwtToken), HttpStatus.OK);
+    public ResponseEntity<?> getAllCompanies(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(companyService.getCurrentUserCompanies(userEmail), HttpStatus.OK);
     }
 
     @GetMapping(value = "/company-members/{companyId}")
@@ -57,8 +58,8 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/members-details/{companyId}")
-    public ResponseEntity<?> getDetailMembersList(@PathVariable String companyId, @RequestHeader("Authorization") String jwtToken) {
-        return new ResponseEntity<>(companyService.getDetailMembersList(companyId, jwtToken), HttpStatus.OK);
+    public ResponseEntity<?> getDetailMembersList(@PathVariable String companyId, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(companyService.getDetailMembersList(companyId, userEmail), HttpStatus.OK);
     }
 
     @PutMapping(value = "/add-new-member/{companyId}")

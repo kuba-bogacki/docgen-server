@@ -1,9 +1,10 @@
 package com.document.service.implementation;
 
-import com.document.config.docx.DocxReaderConfiguration;
+import com.document.client.docx.DocxReaderClient;
 import com.document.exception.CompanyNotFoundException;
 import com.document.exception.EvidenceNotFoundException;
 import com.document.exception.UserNotFoundException;
+import com.document.infrastructure.HttpClient;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
 import com.document.model.dto.*;
@@ -13,26 +14,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
-import static com.document.util.ApplicationConstants.*;
-import static com.document.util.UrlBuilder.addTokenHeader;
-import static com.document.util.UrlBuilder.buildUrl;
+import static com.document.util.ApplicationConstants.DEFAULT_DATE_PATTERN;
+import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class EvidenceServiceImplementation implements EvidenceService {
 
-    private final EvidenceRepository evidenceRepository;
+    private final HttpClient httpClient;
+    private final DocxReaderClient docxReader;
     private final EvidenceMapper evidenceMapper;
-    private final DocxReaderConfiguration docxReader;
-    private final WebClient.Builder webClientBuilder;
+    private final EvidenceRepository evidenceRepository;
 
     @Override
     public void deleteEvidenceById(String evidenceId) {
@@ -46,13 +45,13 @@ public class EvidenceServiceImplementation implements EvidenceService {
     }
 
     @Override
-    public void createFinancialStatement(FinancialStatementDto financialStatementDto, String jwtToken) {
-        var currentUserDto = getCurrentUserDto(jwtToken);
+    public void createFinancialStatement(FinancialStatementDto financialStatementDto, String userEmail) {
+        var currentUserDto = httpClient.getCurrentUserDto(userEmail);
 
         if (Optional.ofNullable(currentUserDto).isEmpty()) {
             throw new UserNotFoundException("Couldn't find current user with provided id in database");
         }
-        var currentCompanyDto = getCurrentCompanyDto(jwtToken, financialStatementDto.getCompanyId());
+        var currentCompanyDto = httpClient.getCurrentCompanyDto(financialStatementDto.getCompanyId(), userEmail);
 
         if (Optional.ofNullable(currentCompanyDto).isEmpty()) {
             throw new CompanyNotFoundException("Couldn't find company with provided id in database");
@@ -132,25 +131,5 @@ public class EvidenceServiceImplementation implements EvidenceService {
 
     private String parseCustomLocalDate() {
         return LocalDate.now().format(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN));
-    }
-
-    private UserDto getCurrentUserDto(String jwtToken) {
-        return webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/user"))
-                .retrieve()
-                .bodyToMono(UserDto.class)
-                .block();
-    }
-
-    private CompanyDto getCurrentCompanyDto(String jwtToken, String companyId) {
-        return webClientBuilder
-                .filter(addTokenHeader(jwtToken))
-                .build().get()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/details/" + companyId))
-                .retrieve()
-                .bodyToMono(CompanyDto.class)
-                .block();
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.notification.util.ApplicationConstants.API_VERSION;
+import static com.notification.util.ApplicationConstants.USER_EMAIL_HEADER;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,8 +31,8 @@ public class EmailController {
     }
 
     @PostMapping(value = "/invite")
-    public ResponseEntity<?> sendInvitationEmail(@RequestBody InvitationDto invitationDto, @RequestHeader("Authorization") String jwtToken) {
-        emailService.sendInvitationEmail(invitationDto, jwtToken);
+    public ResponseEntity<?> sendInvitationEmail(@RequestBody InvitationDto invitationDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        emailService.sendInvitationEmail(invitationDto, userEmail);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
