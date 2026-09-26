@@ -251,12 +251,12 @@ public class UserServiceImplementationTest extends AuthenticationSamples {
                 .userLastNameI("Corleone")
                 .userLastNameII("Hamilton")
                 .build();
-        final var foundedEntity = sampleUserEntity.toBuilder()
+        final var foundEntity = sampleUserEntity.toBuilder()
                 .userId(userIdI)
                 .build();
 
         //when
-        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(foundedEntity));
+        when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(foundEntity));
         when(userRepository.save(updatedUserEntity)).thenReturn(updatedUserEntity);
         when(userMapper.mapToUserDto(updatedUserEntity)).thenReturn(updatedUserDto);
 

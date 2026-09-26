@@ -35,13 +35,13 @@ public class AddressServiceTest extends AddressSamples {
         var expectedDto = sampleDtoAddressI.toBuilder()
                 .addressId(addressIdI)
                 .build();
-        var foundedEntity = sampleEntityAddressI.toBuilder()
+        var foundEntity = sampleEntityAddressI.toBuilder()
                 .addressId(addressIdI)
                 .build();
 
         //when
-        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundedEntity));
-        when(addressMapper.mapToDto(foundedEntity)).thenReturn(expectedDto);
+        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundEntity));
+        when(addressMapper.mapToDto(foundEntity)).thenReturn(expectedDto);
 
         final var result = addressService.getAddressByAddressId(addressIdI);
 
@@ -197,7 +197,7 @@ public class AddressServiceTest extends AddressSamples {
         var providedDto = sampleDtoAddressII.toBuilder()
                 .addressId(addressIdI)
                 .build();
-        var foundedEntity = sampleEntityAddressI.toBuilder()
+        var foundEntity = sampleEntityAddressI.toBuilder()
                 .addressId(addressIdI)
                 .build();
         var savedEntity = sampleEntityAddressII.toBuilder()
@@ -208,7 +208,7 @@ public class AddressServiceTest extends AddressSamples {
                 .build();
 
         //when
-        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundedEntity));
+        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundEntity));
         when(addressMapper.mapToEntity(providedDto)).thenReturn(savedEntity);
         when(addressRepository.save(savedEntity)).thenReturn(savedEntity);
         when(addressMapper.mapToDto(savedEntity)).thenReturn(expectedDto);
