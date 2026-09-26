@@ -30,47 +30,27 @@ public class UserController {
 
     @GetMapping(value = "/user/{userEmail}")
     public ResponseEntity<?> getUserDtoByUserEmail(@PathVariable String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-by-id/{userId}")
     public ResponseEntity<?> getUserDtoByUserId(@PathVariable String userId) {
-        try {
-            return new ResponseEntity<>(userService.getUserDtoByUserId(userId), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(userService.getUserDtoByUserId(userId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-id")
-    public ResponseEntity<?> getUserIdFromToken(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail).getUserId(), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> getUserIdFromToken(@Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail).getUserId(), HttpStatus.OK);
     }
 
     @PutMapping(value = "/user")
     public ResponseEntity<?> updateUserData(@RequestBody UserDto userDto) {
-        try {
-            return new ResponseEntity<>(userService.updateUserData(userDto), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(userService.updateUserData(userDto), HttpStatus.OK);
     }
 
     @PostMapping(value = "/photo")
-    public ResponseEntity<?> uploadNewUserPhoto(@RequestParam("loadedImage") MultipartFile multipartFile, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.uploadNewUserPhoto(multipartFile, userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException | UserUploadPhotoException  e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<?> uploadNewUserPhoto(@RequestParam(LOADED_IMAGE) MultipartFile multipartFile, @Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(userService.uploadNewUserPhoto(multipartFile, userEmail), HttpStatus.OK);
     }
 
     @PostMapping(value = "/company-member/{userEmail}")

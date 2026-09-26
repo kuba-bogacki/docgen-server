@@ -6,6 +6,7 @@ import com.authentication.model.type.Gender;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.AuthenticationResponse;
 import com.authentication.security.RegisterRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -15,12 +16,14 @@ class AuthenticationSamples {
     final String userId = "3fe91e6c-e5f4-4dc2-990a-0f68cf415740";;
     final String userFirstNameI = "John";
     final String userLastNameI = "Paul";
+    final String updatedUserLastNameI = "Biden";
     final String userEmail = "john.paul@wp.pl";
     final String userPassword = "secret";
     final String userPrincipal = "0123456789";
     final String jwtToken = "jwtToken";
     final String refreshToken = "refreshToken";
     final String registrationCode = "registrationCode";
+    final String userPhotoFileName = "photo_01.jpg";
     final String userVerificationCode = "userVerificationCode";
 
     final RegisterRequest registerRequest = RegisterRequest.builder()
