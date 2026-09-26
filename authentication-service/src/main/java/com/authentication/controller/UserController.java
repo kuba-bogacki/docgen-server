@@ -1,20 +1,20 @@
 package com.authentication.controller;
 
-import com.authentication.exception.UserAlreadyExistException;
-import com.authentication.exception.UserNotFoundException;
-import com.authentication.exception.UserUploadPhotoException;
+import com.authentication.exception.*;
 import com.authentication.model.dto.MembershipDto;
 import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.UserDto;
+import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.authentication.util.ApplicationConstants.API_VERSION;
-import static com.authentication.util.ApplicationConstants.USER_EMAIL_HEADER;
+import static com.authentication.util.ApplicationConstants.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,12 +24,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping(value = "/user")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> getCurrentUser(@Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        return new ResponseEntity<>(userService.getUserDtoByUserEmail(userEmail), HttpStatus.OK);
     }
 
     @GetMapping(value = "/user/{userEmail}")
@@ -102,5 +98,23 @@ public class UserController {
     public ResponseEntity<?> updateUserMembership(@RequestBody MembershipDto membershipDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         userService.updateUserMembership(membershipDto.getMembership(), userEmail);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/send-email-to-reset-password")
+    public ResponseEntity<?> sendEmailWithResetPasswordLink(@Email(regexp = EMAIL_PATTERN) @RequestParam("userEmail") String userEmail) {
+        try {
+            return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
+        } catch (UserNotFoundException | UserWebClientException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/reset-password/{verificationCode}")
+    public ResponseEntity<?> resetCustomerPassword(@PathVariable String verificationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
+        try {
+            return new ResponseEntity<>(userService.resetUserPassword(verificationCode, authenticationRequest), HttpStatus.OK);
+        } catch (UserNotFoundException | UserAuthenticationException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

@@ -30,6 +30,7 @@ public class RegisterRequest {
     @Email(message = "User email should be valid", regexp = EMAIL_PATTERN)
     private String userEmail;
 
+    @NotBlank(message = "User password can't be blank")
     private String userPassword;
 
     @Pattern(regexp = "MALE|FEMALE|OTHER", message = "User gender should be MALE, FEMALE or OTHER")

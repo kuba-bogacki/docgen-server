@@ -29,8 +29,8 @@ public class CompanyServiceImplementation implements CompanyService {
 
     @Override
     public Boolean checkIfCompanyAlreadyExist(String companyKrsNumber) {
-        Optional<Company> foundedCompany = companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber);
-        return foundedCompany.isPresent();
+        Optional<Company> foundCompany = companyRepository.findCompanyByCompanyKrsNumber(companyKrsNumber);
+        return foundCompany.isPresent();
     }
 
     @Override

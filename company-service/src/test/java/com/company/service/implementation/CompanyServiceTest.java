@@ -66,7 +66,7 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @DisplayName("Should return saved company if valid company dto and founded current user")
+    @DisplayName("Should return saved company if valid company dto and found current user")
     void test_03() {
         //given
         final var companyDto = sampleDtoCompanyI;
@@ -170,7 +170,7 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @DisplayName("Should return founded company dto if company entity exist and company name is valid")
+    @DisplayName("Should return found company dto if company entity exist and company name is valid")
     void test_07() {
         //given
         final var companyDto = sampleDtoCompanyI.toBuilder()
@@ -216,7 +216,7 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @DisplayName("Should return founded company dto if company entity exist and company id is valid")
+    @DisplayName("Should return found company dto if company entity exist and company id is valid")
     void test_09() {
         //given
         final var companyDto = sampleDtoCompanyI.toBuilder()
@@ -262,7 +262,7 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @DisplayName("Should return founded company dto if company entity exist and company krs number is valid")
+    @DisplayName("Should return found company dto if company entity exist and company krs number is valid")
     void test_11() {
         //given
         final var companyDto = sampleDtoCompanyI.toBuilder()
@@ -308,7 +308,7 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     @Test
-    @DisplayName("Should return list of founded company dtos when company members contain current user id")
+    @DisplayName("Should return list of found company dtos when company members contain current user id")
     void test_13() {
         //when
         when(httpClient.getCurrentUserId(userOneEmail)).thenReturn(currentUserId);

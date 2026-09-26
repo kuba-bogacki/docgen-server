@@ -38,7 +38,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public void register(RegisterRequest registerRequest) throws UserAlreadyExistException, UserAuthenticationException {
+    public void register(RegisterRequest registerRequest) {
         checkIfUserExist(registerRequest.getUserEmail());
         User user = User.builder()
                 .userFirstNameI(registerRequest.getUserFirstNameI())
@@ -66,7 +66,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
-    public void addUserPrincipal(UserPrincipalDto userPrincipalDto) throws UserNotFoundException {
+    public void addUserPrincipal(UserPrincipalDto userPrincipalDto) {
         final Optional<User> user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()));
 
         if (user.isEmpty()) {
@@ -78,8 +78,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
-    public AuthenticationResponse verifyUserRegistrationCode(String registrationCode, AuthenticationRequest authenticationRequest)
-            throws UserNotFoundException, UserAuthenticationException, UserAuthorizationException {
+    public AuthenticationResponse verifyUserRegistrationCode(String registrationCode, AuthenticationRequest authenticationRequest) {
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
@@ -102,8 +101,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) throws UserNotFoundException,
-            UserAccountDisableException, UserAuthorizationException {
+    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
@@ -148,8 +146,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
-    public AuthenticationResponse confirmCompanyMembership(String companyId, AuthenticationRequest authenticationRequest)
-            throws UserNotFoundException, UserAuthorizationException {
+    public AuthenticationResponse confirmCompanyMembership(String companyId, AuthenticationRequest authenticationRequest) {
         final Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
@@ -172,14 +169,14 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .build();
     }
 
-    private void checkIfUserExist(final String userEmail) throws UserAlreadyExistException {
+    private void checkIfUserExist(final String userEmail) {
         final Optional<User> userFromDatabase = userRepository.findUserByUserEmail(userEmail);
         if (userFromDatabase.isPresent()) {
             throw new UserAlreadyExistException("User " + userEmail + " already exist in database.");
         }
     }
 
-    private void authenticateUser(AuthenticationRequest authenticationRequest) throws UserAuthorizationException {
+    private void authenticateUser(AuthenticationRequest authenticationRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getUserEmail(), authenticationRequest.getUserPassword()));

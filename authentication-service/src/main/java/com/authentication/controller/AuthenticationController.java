@@ -1,11 +1,9 @@
 package com.authentication.controller;
 
-import com.authentication.exception.*;
 import com.authentication.model.dto.UserPrincipalDto;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.RegisterRequest;
 import com.authentication.service.AuthenticationService;
-import com.authentication.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +19,16 @@ import static com.authentication.util.ApplicationConstants.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final UserService userService;
 
     @PostMapping(value = "/create")
     public ResponseEntity<?> createNewUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
-            authenticationService.register(registerRequest);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (UserAlreadyExistException | UserAuthenticationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        authenticationService.register(registerRequest);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/verify/{registrationCode}")
     public ResponseEntity<?> verifyUser(@PathVariable String registrationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
-        try {
-            return new ResponseEntity<>(authenticationService.verifyUserRegistrationCode(registrationCode, authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAuthenticationException | UserAuthorizationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-        }
+        return new ResponseEntity<>(authenticationService.verifyUserRegistrationCode(registrationCode, authenticationRequest), HttpStatus.OK);
     }
 
     @PostMapping(value = "/login")
@@ -48,49 +37,19 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
-        try {
-            authenticationService.refreshToken(userEmail);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserAccountDisableException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-    @PostMapping(value = "/send-email-to-reset-password")
-    public ResponseEntity<?> sendEmailWithResetPasswordLink(@Email(regexp = EMAIL_PATTERN) @RequestParam("userEmail") String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException | UserWebClientException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PostMapping(value = "/reset-password/{verificationCode}")
-    public ResponseEntity<?> resetCustomerPassword(@PathVariable String verificationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
-        try {
-            return new ResponseEntity<>(userService.resetUserPassword(verificationCode, authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAuthenticationException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> refreshToken(@Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        authenticationService.refreshToken(userEmail);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/confirm-membership/{companyId}")
     public ResponseEntity<?> confirmCompanyMembership(@PathVariable String companyId, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
-        try {
-            return new ResponseEntity<>(authenticationService.confirmCompanyMembership(companyId, authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAuthorizationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-        }
+        return new ResponseEntity<>(authenticationService.confirmCompanyMembership(companyId, authenticationRequest), HttpStatus.OK);
     }
 
     @PutMapping(value = "/add-user-principal")
     public ResponseEntity<?> addUserPrincipal(@Valid @RequestBody UserPrincipalDto userPrincipalDto) {
-        try {
-            authenticationService.addUserPrincipal(userPrincipalDto);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        authenticationService.addUserPrincipal(userPrincipalDto);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
