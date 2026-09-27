@@ -183,7 +183,7 @@ public class UserServiceImplementation implements UserService {
 
         user.get().setUserMembership(membership);
         userRepository.save(user.get());
-        log.info("User {} membership was successfully updated.", membership.getDescription());
+        log.info("User {} membership was successfully updated.", membership.name());
     }
 
     @Override

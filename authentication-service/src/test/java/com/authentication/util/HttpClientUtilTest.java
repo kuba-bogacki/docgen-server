@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class HttpClientUtilTest {
+class HttpClientUtilTest {
 
     private MockClientHttpRequest clientHttpRequest;
     @Mock private ClientHttpRequestExecution clientHttpRequestExecution;

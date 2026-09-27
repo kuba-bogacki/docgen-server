@@ -31,7 +31,7 @@ public class DefaultStripeClient implements StripeClient {
                 .build();
         final var paymentIntentCreateParams = PaymentIntentCreateParams.builder()
                 .setAmount(((long) paymentDto.getPackagePrice() * CENTS))
-                .setCurrency(paymentDto.getPriceCurrency().getDescription())
+                .setCurrency(paymentDto.getPriceCurrency().name())
                 .setAutomaticPaymentMethods(automaticPaymentMethods)
                 .build();
         final var createdPaymentIntent = PaymentIntent.create(paymentIntentCreateParams);

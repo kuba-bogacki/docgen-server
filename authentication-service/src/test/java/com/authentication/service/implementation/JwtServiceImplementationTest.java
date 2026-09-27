@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-public class JwtServiceImplementationTest extends AuthenticationSamples {
+class JwtServiceImplementationTest extends AuthenticationSamples {
 
     private String secretKey;
     private JwtServiceImplementation jwtServiceImplementation;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         secretKey = "secretKeySecretKeySecretKeySecretKeySecretKeySecretKeySecretKey";
         jwtServiceImplementation = new JwtServiceImplementation(secretKey, tokenSessionDuration, tokenRefreshExpiration);
     }
@@ -177,14 +177,5 @@ public class JwtServiceImplementationTest extends AuthenticationSamples {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private String generateTokenForTestPurposes(long currentTimeMillis, UserDetails userDetails) {
-        return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(currentTimeMillis))
-                .setExpiration(new Date(currentTimeMillis + TimeUnit.MINUTES.toMillis(tokenSessionDuration)))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
     }
 }

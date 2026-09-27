@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PaymentDto {
 
-    @NotBlank(message = "Membership can't be null or blank")
+    @NotNull(message = "Membership can't be null")
     private Membership membership;
 
     @NotNull(message = "Package price can't be null")
     private Integer packagePrice;
 
-    @NotBlank(message = "Price currency can't be null or blank")
+    @NotNull(message = "Price currency can't be null")
     private Currency priceCurrency;
 }

@@ -5,10 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class PaymentIntentDto {
 
-    private final String paymentIntentId;
-    private final String paymentClientSecret;
+    private String paymentIntentId;
+    private String paymentClientSecret;
 }

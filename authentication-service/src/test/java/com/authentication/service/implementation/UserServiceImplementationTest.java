@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplementationTest extends AuthenticationSamples {
+class UserServiceImplementationTest extends AuthenticationSamples {
 
     @Mock private HttpClient httpClient;
     @Mock private UserMapper userMapper;

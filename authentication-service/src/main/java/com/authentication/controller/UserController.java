@@ -1,6 +1,5 @@
 package com.authentication.controller;
 
-import com.authentication.exception.*;
 import com.authentication.model.dto.MembershipDto;
 import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.UserDto;
@@ -49,23 +48,17 @@ public class UserController {
     }
 
     @PostMapping(value = "/photo")
-    public ResponseEntity<?> uploadNewUserPhoto(@RequestParam(LOADED_IMAGE) MultipartFile multipartFile, @Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<?> uploadNewUserPhoto(@RequestParam(LOADED_IMAGE_PARAM) MultipartFile multipartFile, @Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         return new ResponseEntity<>(userService.uploadNewUserPhoto(multipartFile, userEmail), HttpStatus.OK);
     }
 
     @PostMapping(value = "/company-member/{userEmail}")
     public ResponseEntity<?> getCompanyMember(@PathVariable String userEmail, @RequestBody String companyId) {
-        try {
-            return new ResponseEntity<>(userService.getUserNotCompanyMember(companyId, userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (UserAlreadyExistException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.ALREADY_REPORTED);
-        }
+        return new ResponseEntity<>(userService.getUserNotCompanyMember(companyId, userEmail), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create-payment")
-    public ResponseEntity<?> createPaymentSession(@RequestBody PaymentDto paymentDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<?> createPaymentSession(@Valid @RequestBody PaymentDto paymentDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         return new ResponseEntity<>(userService.createPaymentSession(paymentDto, userEmail), HttpStatus.CREATED);
     }
 
@@ -75,26 +68,18 @@ public class UserController {
     }
 
     @PutMapping(value = "/update-user-membership")
-    public ResponseEntity<?> updateUserMembership(@RequestBody MembershipDto membershipDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<?> updateUserMembership(@Valid @RequestBody MembershipDto membershipDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         userService.updateUserMembership(membershipDto.getMembership(), userEmail);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/send-email-to-reset-password")
-    public ResponseEntity<?> sendEmailWithResetPasswordLink(@Email(regexp = EMAIL_PATTERN) @RequestParam("userEmail") String userEmail) {
-        try {
-            return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
-        } catch (UserNotFoundException | UserWebClientException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> sendEmailWithResetPasswordLink(@Email(regexp = EMAIL_PATTERN) @RequestParam(USER_EMAIL_PARAM) String userEmail) {
+        return new ResponseEntity<>(userService.sendVerificationEmail(userEmail), HttpStatus.OK);
     }
 
     @PostMapping(value = "/reset-password/{verificationCode}")
     public ResponseEntity<?> resetCustomerPassword(@PathVariable String verificationCode, @Valid @RequestBody AuthenticationRequest authenticationRequest) {
-        try {
-            return new ResponseEntity<>(userService.resetUserPassword(verificationCode, authenticationRequest), HttpStatus.OK);
-        } catch (UserNotFoundException | UserAuthenticationException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(userService.resetUserPassword(verificationCode, authenticationRequest), HttpStatus.OK);
     }
 }
