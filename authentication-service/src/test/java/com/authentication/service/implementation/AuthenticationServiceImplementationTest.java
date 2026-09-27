@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceImplementationTest extends AuthenticationSamples {
+class AuthenticationServiceImplementationTest extends Samples {
 
     @Mock private HttpClient httpClient;
     @Mock private JwtService jwtService;

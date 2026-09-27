@@ -12,7 +12,7 @@ import com.authentication.security.RegisterRequest;
 
 import java.util.UUID;
 
-class AuthenticationSamples {
+class Samples {
 
     final UUID userIdI = UUID.fromString("aa849e5e-981a-4311-8d4e-7bff7577bbde");
     final UUID userIdII = UUID.fromString("219c1223-05fa-4083-91c3-459934bf37e9");

@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(UserController.class)
-class UserControllerTest extends AuthenticationSamples {
+class UserControllerTest extends Samples {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
@@ -149,7 +149,8 @@ class UserControllerTest extends AuthenticationSamples {
                         .header(USER_EMAIL_HEADER, userEmail))
         //then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(userId));    }
+                .andExpect(jsonPath("$").value(userId));
+    }
 
     @Test
     @SneakyThrows

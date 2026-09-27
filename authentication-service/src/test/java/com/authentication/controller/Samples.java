@@ -10,7 +10,7 @@ import com.authentication.security.RegisterRequest;
 
 import java.util.UUID;
 
-class AuthenticationSamples {
+class Samples {
 
     final String userId = "3fe91e6c-e5f4-4dc2-990a-0f68cf415740";
     final String companyId = "039561e3-a151-46f3-945c-16dc4f7535e9";

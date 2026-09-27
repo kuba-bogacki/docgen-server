@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-class JwtServiceImplementationTest extends AuthenticationSamples {
+class JwtServiceImplementationTest extends Samples {
 
     private String secretKey;
     private JwtServiceImplementation jwtServiceImplementation;

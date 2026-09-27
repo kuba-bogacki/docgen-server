@@ -7,24 +7,24 @@ import java.util.UUID;
 
 class AddressSamples {
 
-    final static UUID addressIdI = UUID.fromString("28278ee7-b5ec-4449-aa81-c8a47c60660f");
-    final static UUID addressIdII = UUID.fromString("67a86ffd-fa68-42a7-ae70-1f303e821483");
-    final static UUID addressIdIII = UUID.fromString("0d50267e-5a05-49ef-8d46-f40f93416f2b");
-    final static String addressStreetNameI = "A. Lincoln";
-    final static String addressStreetNameII = "M. McArthur";
-    final static String addressStreetNameIII = "A. Downey";
-    final static String addressStreetNumberI = "16";
-    final static String addressStreetNumberII = "77";
-    final static String addressStreetNumberIII = "47";
-    final static String addressLocalNumberI = "23";
-    final static String addressLocalNumberII = "14";
-    final static String addressLocalNumberIII = "2";
-    final static String addressPostalCodeI = "30-040";
-    final static String addressPostalCodeII = "32-708";
-    final static String addressPostalCodeIII = "30-123";
-    final static String addressCityI = "New York";
-    final static String addressCityII = "Paris";
-    final static String addressCityIII = "New Orleans";
+    final UUID addressIdI = UUID.fromString("28278ee7-b5ec-4449-aa81-c8a47c60660f");
+    final UUID addressIdII = UUID.fromString("67a86ffd-fa68-42a7-ae70-1f303e821483");
+    final UUID addressIdIII = UUID.fromString("0d50267e-5a05-49ef-8d46-f40f93416f2b");
+    final String addressStreetNameI = "A. Lincoln";
+    final String addressStreetNameII = "M. McArthur";
+    final String addressStreetNameIII = "A. Downey";
+    final String addressStreetNumberI = "16";
+    final String addressStreetNumberII = "77";
+    final String addressStreetNumberIII = "47";
+    final String addressLocalNumberI = "23";
+    final String addressLocalNumberII = "14";
+    final String addressLocalNumberIII = "2";
+    final String addressPostalCodeI = "30-040";
+    final String addressPostalCodeII = "32-708";
+    final String addressPostalCodeIII = "30-123";
+    final String addressCityI = "New York";
+    final String addressCityII = "Paris";
+    final String addressCityIII = "New Orleans";
 
     AddressDto sampleDtoAddressI = AddressDto.builder()
             .addressStreetName(addressStreetNameI)

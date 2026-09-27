@@ -20,23 +20,22 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping(value = "/address/{addressId}")
-    public ResponseEntity<?> getAddressByAddressId(@PathVariable String addressId) {
+    public ResponseEntity<AddressDto> getAddressByAddressId(@PathVariable String addressId) {
         return new ResponseEntity<>(addressService.getAddressByAddressId(UUID.fromString(addressId)), HttpStatus.OK);
     }
 
     @PostMapping(value = "/address/create")
-    public ResponseEntity<?> createAddress(@RequestBody AddressDto addressDto) {
+    public ResponseEntity<AddressDto> createAddress(@RequestBody AddressDto addressDto) {
         return new ResponseEntity<>(addressService.createAddress(addressDto), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/address/update")
-    public ResponseEntity<?> updateAddress(@RequestBody AddressDto addressDto) {
+    public ResponseEntity<AddressDto> updateAddress(@RequestBody AddressDto addressDto) {
         return new ResponseEntity<>(addressService.updateAddress(addressDto), HttpStatus.OK);
     }
 
     @GetMapping(value = "/address/get-all")
-    public ResponseEntity<?> getAllAddresses() {
-        List<AddressDto> addresses = addressService.getAllAddresses();
-        return new ResponseEntity<>(addresses, HttpStatus.OK);
+    public ResponseEntity<List<AddressDto>> getAllAddresses() {
+        return new ResponseEntity<>(addressService.getAllAddresses(), HttpStatus.OK);
     }
 }
