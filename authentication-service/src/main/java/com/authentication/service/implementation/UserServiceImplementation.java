@@ -33,6 +33,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
 
+    private static final String USER_NOT_FOUND = "Can't find %s user";
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -46,13 +48,13 @@ public class UserServiceImplementation implements UserService {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
+            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
         }
         return userMapper.mapToUserDto(user.get());
     }
 
     @Override
-    public Boolean sendVerificationEmail(String userEmail) throws UserNotFoundException, UserWebClientException {
+    public Boolean sendVerificationEmail(String userEmail) {
         final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
@@ -71,8 +73,7 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public Boolean resetUserPassword(String verificationCode, AuthenticationRequest authenticationRequest)
-        throws UserNotFoundException, UserAuthenticationException {
+    public Boolean resetUserPassword(String verificationCode, AuthenticationRequest authenticationRequest) {
         Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
 
         if (user.isEmpty()) {
@@ -91,11 +92,11 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDto updateUserData(UserDto userDto) throws UserNotFoundException {
+    public UserDto updateUserData(UserDto userDto) {
         Optional<User> user = userRepository.findUserByUserEmail(userDto.getUserEmail());
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Can't find %s user", userDto.getUserEmail()));
+            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userDto.getUserEmail()));
         }
 
         user.get().setUserFirstNameI(userDto.getUserFirstNameI());
@@ -108,11 +109,11 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) throws UserNotFoundException, UserUploadPhotoException {
+    public String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) {
         Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
+            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
         }
         final var resultFileName = uploadNewMultipartFile(multipartFile, user.get().getUserPhotoFileName());
 
@@ -127,7 +128,7 @@ public class UserServiceImplementation implements UserService {
             final var fileName = String.format("profile-picture-%s.jpg", numberGenerator.generateUserPhotoFileName(26));
             final var resultFileName = imageKitClient.uploadImage(multipartFile.getBytes(), fileName);
 
-            if (!imageKitClient.resultFileListIsEmpty(currentUserPhotoFileName)) {
+            if (Boolean.FALSE.equals(imageKitClient.resultFileListIsEmpty(currentUserPhotoFileName))) {
                 imageKitClient.deleteFile(currentUserPhotoFileName);
             }
             return resultFileName;
@@ -137,11 +138,11 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDto getUserNotCompanyMember(String companyId, String userEmail) throws UserNotFoundException, UserAlreadyExistException {
+    public UserDto getUserNotCompanyMember(String companyId, String userEmail) {
         final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
 
         if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
+            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
         }
 
         final List<UUID> membersList = httpClient.getMemberUuidList(companyId, userEmail);
@@ -153,7 +154,7 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDto getUserDtoByUserId(String userId) throws UserNotFoundException {
+    public UserDto getUserDtoByUserId(String userId) {
         Optional<User> user = userRepository.findById(UUID.fromString(userId));
 
         if (user.isEmpty()) {
@@ -178,7 +179,7 @@ public class UserServiceImplementation implements UserService {
     public void updateUserMembership(Membership membership, String userEmail) {
         final var user = userRepository.findUserByUserEmail(userEmail);
         if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format("Can't find %s user", userEmail));
+            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
         }
 
         user.get().setUserMembership(membership);

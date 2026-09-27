@@ -1,6 +1,7 @@
 package com.authentication.client.imagekit;
 
 import io.imagekit.sdk.ImageKit;
+import io.imagekit.sdk.exceptions.*;
 import io.imagekit.sdk.models.FileCreateRequest;
 import io.imagekit.sdk.models.GetFileListRequest;
 import io.imagekit.sdk.models.results.ResultList;

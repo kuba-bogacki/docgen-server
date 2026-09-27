@@ -7,7 +7,6 @@ import com.authentication.model.type.Membership;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.security.AuthenticationResponse;
 import com.authentication.security.RegisterRequest;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
