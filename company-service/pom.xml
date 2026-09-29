@@ -32,7 +32,8 @@
         <spring.starter.actuator.version>3.1.2</spring.starter.actuator.version>
         <spring.kafka.version>3.0.9</spring.kafka.version>
         <mockito.core.version>5.14.1</mockito.core.version>
-        <assertj.core.version>3.26.3</assertj.core.version>
+        <assertj.core.version>3.27.7</assertj.core.version>
+        <jakarta.validation.version>3.1.1</jakarta.validation.version>
     </properties>
 
     <dependencies>
@@ -159,6 +160,13 @@
             <version>${assertj.core.version}</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+
+        <!-- https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.version}</version>
+        </dependency>
+	</dependencies>
 
 </project>

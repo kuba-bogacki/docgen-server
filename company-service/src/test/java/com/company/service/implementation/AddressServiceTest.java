@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AddressServiceTest extends AddressSamples {
+class AddressServiceTest extends AddressSamples {
 
     @Mock private AddressRepository addressRepository;
     @Mock private AddressMapper addressMapper;
@@ -184,7 +184,6 @@ public class AddressServiceTest extends AddressSamples {
         assertThat(result)
                 .isNotNull()
                 .isInstanceOf(List.class)
-                .hasSize(0)
                 .isEmpty();
         verify(addressMapper).mapToDtos(Collections.emptyList());
         verify(addressRepository).findAll();

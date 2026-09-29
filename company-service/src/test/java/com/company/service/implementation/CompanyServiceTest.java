@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CompanyServiceTest extends CompanySamples {
+class CompanyServiceTest extends CompanySamples {
 
     @Mock private CompanyMapper companyMapper;
     @Mock private CompanyRepository companyRepository;
@@ -341,7 +341,6 @@ public class CompanyServiceTest extends CompanySamples {
         assertThat(result)
                 .isInstanceOf(List.class)
                 .isNotNull()
-                .hasSize(0)
                 .isEmpty();
         verify(companyRepository).findCompaniesByCompanyMembersContaining(currentUserId);
         verify(companyMapper).mapToDtos(Collections.emptyList());
@@ -470,6 +469,6 @@ public class CompanyServiceTest extends CompanySamples {
     }
 
     private void callUserDto(String url, UserDto userDto) {
-        when(httpClient.getAuthenticationServiceUserDto(eq(url), eq(userOneEmail))).thenReturn(userDto);
+        when(httpClient.getAuthenticationServiceUserDto(url, userOneEmail)).thenReturn(userDto);
     }
 }
