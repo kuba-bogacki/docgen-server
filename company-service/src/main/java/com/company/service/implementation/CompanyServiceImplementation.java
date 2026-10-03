@@ -43,7 +43,7 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public CompanyDto getCompanyByName(String companyName) throws CompanyNonExistException {
+    public CompanyDto getCompanyByName(String companyName) {
         Optional<Company> companyEntity = companyRepository.findCompanyByCompanyName(companyName);
 
         if (companyEntity.isEmpty()) {
@@ -107,7 +107,7 @@ public class CompanyServiceImplementation implements CompanyService {
     }
 
     @Override
-    public List<UserDto> getDetailMembersList(String companyId, String userEmail) throws CompanyNonExistException {
+    public List<UserDto> getDetailMembersList(String companyId, String userEmail) {
         Optional<Company> entity = companyRepository.findCompanyByCompanyId(UUID.fromString(companyId));
 
         if (entity.isEmpty()) {

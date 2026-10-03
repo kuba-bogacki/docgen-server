@@ -1,12 +1,12 @@
 package com.authentication.service.implementation;
 
-import com.authentication.client.imagekit.DefaultImageKitClient;
+import com.authentication.client.imagekit.ImageKitClient;
 import com.authentication.exception.*;
 import com.authentication.infrastructure.HttpClient;
 import com.authentication.mapper.UserMapper;
 import com.authentication.model.dto.UserDto;
 import com.authentication.repository.UserRepository;
-import com.authentication.util.random.DefaultNumberGenerator;
+import com.authentication.util.random.NumberGenerator;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,8 +34,8 @@ class UserServiceImplementationTest extends Samples {
     @Mock private UserMapper userMapper;
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private DefaultNumberGenerator numberGenerator;
-    @Mock private DefaultImageKitClient imageKitConfiguration;
+    @Mock private NumberGenerator numberGenerator;
+    @Mock private ImageKitClient imageKitConfiguration;
     @InjectMocks private UserServiceImplementation userService;
 
     @Test

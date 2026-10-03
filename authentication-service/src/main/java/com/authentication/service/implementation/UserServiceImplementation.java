@@ -14,7 +14,7 @@ import com.authentication.model.type.Membership;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
 import com.authentication.service.UserService;
-import com.authentication.util.random.DefaultNumberGenerator;
+import com.authentication.util.random.NumberGenerator;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class UserServiceImplementation implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final DefaultNumberGenerator numberGenerator;
+    private final NumberGenerator numberGenerator;
     private final HttpClient httpClient;
     private final ImageKitClient imageKitClient;
     private final StripeClient stripeClient;

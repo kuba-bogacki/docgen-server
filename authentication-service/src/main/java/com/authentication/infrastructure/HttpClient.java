@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface HttpClient {
+
     ResponseEntity<?> getEmailStatus(UserEventDto userEventDto);
     ResponseEntity<?> getJoiningStatus(User user, String companyId, String userEmail);
     ResponseEntity<?> sendRefreshToken(String userPrincipal, AuthenticationResponse authenticationResponse, String userEmail);

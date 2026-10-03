@@ -22,17 +22,20 @@ import static com.notification.util.HttpClientUtil.buildUrl;
 @RequiredArgsConstructor
 public class EmailServiceImplementation implements EmailService {
 
+    private static final String NAME_PLACEHOLDER = "[[name]]";
+    private static final String URL_PLACEHOLDER = "[[URL]]";
+    private static final String COMPANY_PLACEHOLDER = "[[company]]";
+
     private final HttpClient httpClient;
     private final FileReaderClient fileReaderClient;
     private final JavaMailSenderClient javaMailSender;
 
     @Override
     public void sendVerificationEmail(UserDto userDto) {
-
-        var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?verify-code=", userDto.getUserVerificationCode());
-        var body = fileReaderClient.emailFormatterAndReader(REGISTRATION_EMAIL_FILE_NAME)
-                .replace("[[name]]", userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI())
-                .replace("[[URL]]", url);
+        final var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?verify-code=", userDto.getUserVerificationCode());
+        final var body = fileReaderClient.emailFormatterAndReader(REGISTRATION_EMAIL_FILE_NAME)
+                .replace(NAME_PLACEHOLDER, userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI())
+                .replace(URL_PLACEHOLDER, url);
 
         javaMailSender.sendEmail(FOR_COMPANY_EMAIL_ADDRESS, userDto.getUserEmail(), REGISTRATION_SUBJECT, body);
         log.debug("Verification email sent to {}", userDto.getUserEmail());
@@ -40,12 +43,11 @@ public class EmailServiceImplementation implements EmailService {
 
     @Override
     public void sendResetPasswordEmail(UserDto userDto) {
-
-        var url = buildUrl(PROTOCOL,CLIENT_ADDRESS, StringUtils.EMPTY,"/change-password?user-verification-code=",
+        final var url = buildUrl(PROTOCOL,CLIENT_ADDRESS, StringUtils.EMPTY,"/change-password?user-verification-code=",
                 userDto.getUserVerificationCode(), "&user-email=", userDto.getUserEmail());
-        var body = fileReaderClient.emailFormatterAndReader(RESET_PASSWORD_EMAIL_FILE_NAME)
-                .replace("[[name]]", userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI())
-                .replace("[[URL]]", url);
+        final var body = fileReaderClient.emailFormatterAndReader(RESET_PASSWORD_EMAIL_FILE_NAME)
+                .replace(NAME_PLACEHOLDER, userDto.getUserFirstNameI() + " " + userDto.getUserLastNameI())
+                .replace(URL_PLACEHOLDER, url);
 
         javaMailSender.sendEmail(FOR_COMPANY_EMAIL_ADDRESS, userDto.getUserEmail(), RESET_PASSWORD_SUBJECT, body);
         log.debug("Reset password email sent to {}", userDto.getUserEmail());
@@ -60,11 +62,11 @@ public class EmailServiceImplementation implements EmailService {
             throw new InvitationSendFailureException("Impossible to send invitation - current user or current company is null");
         }
 
-        var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?join-to-company=", invitationDto.getCompanyId());
-        var body = fileReaderClient.emailFormatterAndReader(USER_INVITATION_EMAIL_FILE_NAME)
-                .replace("[[name]]", invitationDto.getUserEmail())
-                .replace("[[company]]", currentCompanyDto.getCompanyName())
-                .replace("[[URL]]", url);
+        final var url = buildUrl(PROTOCOL, CLIENT_ADDRESS, StringUtils.EMPTY, "/sign-in?join-to-company=", invitationDto.getCompanyId());
+        final var body = fileReaderClient.emailFormatterAndReader(USER_INVITATION_EMAIL_FILE_NAME)
+                .replace(NAME_PLACEHOLDER, invitationDto.getUserEmail())
+                .replace(COMPANY_PLACEHOLDER, currentCompanyDto.getCompanyName())
+                .replace(URL_PLACEHOLDER, url);
 
         javaMailSender.sendEmail(FOR_COMPANY_EMAIL_ADDRESS, invitationDto.getUserEmail(), USER_INVITATION_SUBJECT, body);
         log.debug("Invitation email sent to {}", invitationDto.getUserEmail());
