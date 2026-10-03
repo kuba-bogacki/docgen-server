@@ -9,7 +9,7 @@ import com.document.infrastructure.HttpClient;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
 import com.document.repository.EvidenceRepository;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

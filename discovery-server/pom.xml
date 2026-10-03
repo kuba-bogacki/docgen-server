@@ -13,20 +13,11 @@
 
     <artifactId>discovery-server</artifactId>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.eureka.server.version>4.0.3</spring.eureka.server.version>
-        <spring.starter.security.version>3.1.2</spring.starter.security.version>
-    </properties>
-
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-server -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-            <version>${spring.eureka.server.version}</version>
         </dependency>
     </dependencies>
 

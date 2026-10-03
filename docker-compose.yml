@@ -104,6 +104,7 @@ services:
       - "5004:5004" #Debug port
     depends_on:
       - document-database
+      - message-queue
       - discovery-server
     networks:
       - my_network
@@ -113,6 +114,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: development
       SPRING_DATA_MONGODB_URI: mongodb://document-database:27017/document-service
+      SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_PASSWORD: ${artemis_mq_password}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
   notification-service:
@@ -194,6 +197,16 @@ services:
       - my_network
     environment:
       MONGO_DB: notification-service
+
+  message-queue:
+    image: apache/activemq-artemis:2.44.0-alpine
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    environment:
+      ARTEMIS_USER: admin
+      ARTEMIS_PASSWORD: ${artemis_mq_password}
+      ANONYMOUS_LOGIN: false
 
 networks:
   my_network:

@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.12</version>
+        <version>4.1.1</version>
         <relativePath/>
     </parent>
 
@@ -15,27 +15,33 @@
     <artifactId>docgenserver</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <modules>
-        <module>document-service</module>
-        <module>company-service</module>
-        <module>event-service</module>
-        <module>discovery-server</module>
         <module>api-gateway</module>
         <module>authentication-service</module>
-<!--        <module>kafka-service</module>-->
+        <module>company-service</module>
+        <module>discovery-server</module>
+        <module>document-service</module>
+        <module>event-service</module>
         <module>notification-service</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <org.test.containers.version>1.18.3</org.test.containers.version>
         <org.projectlombok.version>1.18.28</org.projectlombok.version>
         <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
         <org.mapstruct.binding.version>0.2.0</org.mapstruct.binding.version>
         <org.maven.surefire.version>3.1.2</org.maven.surefire.version>
-        <spring-cloud.version>2023.0.4</spring-cloud.version>
+        <org.apache.commons.lang3.version>3.20.0</org.apache.commons.lang3.version>
+        <spring.jjwt.api.version>0.11.5</spring.jjwt.api.version>
+        <spring.jjwt.impl.version>0.11.5</spring.jjwt.impl.version>
+        <spring.jjwt.jackson.version>0.11.5</spring.jjwt.jackson.version>
+        <mockito.core.version>5.14.1</mockito.core.version>
+        <assertj.core.version>3.27.7</assertj.core.version>
+        <org.postgresql.version>42.7.12</org.postgresql.version>
+        <jakarta.validation.version>3.1.1</jakarta.validation.version>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
@@ -46,6 +52,66 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${org.postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${org.projectlombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-mapstruct-binding</artifactId>
+                <version>${org.mapstruct.binding.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${spring.jjwt.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${spring.jjwt.impl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${spring.jjwt.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -75,10 +141,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
