@@ -6,7 +6,7 @@ import com.notification.exception.InvitationSendFailureException;
 import com.notification.exception.ReadEmailContentException;
 import com.notification.exception.SendEmailException;
 import com.notification.infrastructure.HttpClient;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

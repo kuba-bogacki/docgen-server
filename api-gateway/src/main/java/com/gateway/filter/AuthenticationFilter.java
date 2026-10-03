@@ -78,14 +78,14 @@ public class AuthenticationFilter implements WebFilter {
     }
 
     private String getValidToken(ServerHttpRequest request) {
-        if (request.getHeaders().containsKey(COOKIE)) {
+        if (request.getHeaders().containsHeader(COOKIE)) {
             return request.getHeaders().getOrEmpty(COOKIE).get(0).split("=")[1];
         }
         return request.getHeaders().getOrEmpty(AUTHORIZATION_HEADER).get(0).split(" ")[1];
     }
 
     private boolean isAuthMissing(ServerHttpRequest request) {
-        return !request.getHeaders().containsKey(AUTHORIZATION_HEADER);
+        return !request.getHeaders().containsHeader(AUTHORIZATION_HEADER);
     }
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {

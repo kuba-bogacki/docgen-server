@@ -2,7 +2,7 @@ package com.notification.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 import java.util.Arrays;
