@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+@Slf4j
 @Component
 @PropertySource(value = {"classpath:application.properties"})
 public class JwtProperties {
@@ -42,6 +44,7 @@ public class JwtProperties {
         try {
             return isTokenExpired(token);
         } catch (JwtException | IllegalArgumentException exception) {
+            log.error("JWT validation failed. Exception: {}. Cause: {}", exception.getClass().getSimpleName(), exception.getMessage());
             return true;
         }
     }

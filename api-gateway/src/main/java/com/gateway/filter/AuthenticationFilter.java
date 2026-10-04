@@ -65,7 +65,7 @@ public class AuthenticationFilter implements WebFilter {
 
             if (jwtProperties.isInvalid(token))
                 return onError(exchange, "Authorization header is invalid");
-            populateRequestWithHeaders(exchange, token);
+            exchange = populateRequestWithHeaders(exchange, token);
         }
         return Objects.requireNonNull(chain).filter(exchange);
     }
@@ -88,11 +88,14 @@ public class AuthenticationFilter implements WebFilter {
         return !request.getHeaders().containsHeader(AUTHORIZATION_HEADER);
     }
 
-    private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {
+    private ServerWebExchange populateRequestWithHeaders(ServerWebExchange exchange, String token) {
         final var claims = jwtProperties.getAllClaimsFromToken(token);
-        exchange.getRequest().mutate()
+        final var request = exchange.getRequest().mutate()
                 .header(USER_EMAIL_HEADER, String.valueOf(claims.get(SUB)))
                 .header(USER_ROLE_HEADER, String.valueOf(claims.get(ROLE)))
+                .build();
+        return exchange.mutate()
+                .request(request)
                 .build();
     }
 }
