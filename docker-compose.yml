@@ -44,8 +44,8 @@ services:
     ports:
       - "5001:5001" #Debug port
     depends_on:
-      - authentication-database
       - discovery-server
+      - authentication-database
     networks:
       - my_network
     environment:
@@ -67,8 +67,8 @@ services:
     ports:
       - "5002:5002" #Debug port
     depends_on:
-      - company-database
       - discovery-server
+      - company-database
     networks:
       - my_network
     environment:
@@ -85,8 +85,8 @@ services:
     ports:
       - "5003:5003" #Debug port
     depends_on:
-      - event-database
       - discovery-server
+      - event-database
     networks:
       - my_network
     environment:
@@ -103,9 +103,9 @@ services:
     ports:
       - "5004:5004" #Debug port
     depends_on:
+      - discovery-server
       - document-database
       - message-queue
-      - discovery-server
     networks:
       - my_network
     dns:
@@ -125,8 +125,8 @@ services:
     ports:
       - "5005:5005" #Debug port
     depends_on:
-      - notification-database
       - discovery-server
+      - notification-database
     networks:
       - my_network
     dns:
@@ -202,7 +202,7 @@ services:
     image: apache/activemq-artemis:2.44.0-alpine
     ports:
       - "8161:8161"
-      - "61616:61616"
+      - "61616:61616" # Java message service
     environment:
       ARTEMIS_USER: admin
       ARTEMIS_PASSWORD: ${artemis_mq_password}

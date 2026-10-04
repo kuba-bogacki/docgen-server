@@ -6,6 +6,8 @@ import com.authentication.security.AuthenticationResponse;
 import com.authentication.security.RegisterRequest;
 
 public interface AuthenticationService {
+
+    void logout(String userEmail);
     void register(RegisterRequest registerRequest);
     void refreshToken(String userEmail);
     void addUserPrincipal(UserPrincipalDto userPrincipalDto);

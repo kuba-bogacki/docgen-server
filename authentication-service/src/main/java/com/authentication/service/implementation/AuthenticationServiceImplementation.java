@@ -107,7 +107,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         if (user.isEmpty()) {
             throw new UserNotFoundException("Impossible to find user with provided email");
         }
-        if (!user.get().getEnabled()) {
+        if (Boolean.FALSE.equals(user.get().getEnabled())) {
             throw new UserAccountDisableException("User account need to be activate first. Check your email for activate link");
         }
 
@@ -118,6 +118,17 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .jwtToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    public void logout(String userEmail) {
+        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Impossible to find user by provided email");
+        }
+        user.get().setUserPrincipal(null);
+        userRepository.save(user.get());
     }
 
     @Override

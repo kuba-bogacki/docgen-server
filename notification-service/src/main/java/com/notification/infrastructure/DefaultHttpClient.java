@@ -3,20 +3,24 @@ package com.notification.infrastructure;
 import com.notification.model.dto.CompanyDto;
 import com.notification.model.dto.UserDto;
 import com.notification.model.dto.UserPrincipalDto;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import static com.notification.util.ApplicationConstants.*;
+import static com.notification.util.ApplicationConstants.API_VERSION;
+import static com.notification.util.ApplicationConstants.PROTOCOL;
 import static com.notification.util.HttpClientUtil.buildUrl;
 import static com.notification.util.HttpClientUtil.setRequestAttributes;
 
 @Component
-@RequiredArgsConstructor
 public class DefaultHttpClient implements HttpClient {
 
     private final RestClient.Builder restClientBuilder;
+
+    public DefaultHttpClient(@Qualifier("loadBalancedRestClientBuilderDevelopment") RestClient.Builder restClientBuilder) {
+        this.restClientBuilder = restClientBuilder;
+    }
 
     @Override
     public UserDto getUserDtoById(String userId, String userEmail) {

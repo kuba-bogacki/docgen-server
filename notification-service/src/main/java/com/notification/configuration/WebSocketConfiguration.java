@@ -1,6 +1,7 @@
 package com.notification.configuration;
 
 import com.sun.security.auth.UserPrincipal;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
@@ -10,7 +11,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-import reactor.util.annotation.NonNull;
 
 import java.security.Principal;
 import java.util.Map;

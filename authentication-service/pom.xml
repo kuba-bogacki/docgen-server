@@ -19,9 +19,7 @@
         <org.byte.buddy.version>1.14.6</org.byte.buddy.version>
         <com.github.imagekit>2.0.0</com.github.imagekit>
         <com.stripe.version>30.2.0</com.stripe.version>
-        <com.squareup.okhttp3>4.9.2</com.squareup.okhttp3>
-        <mockito.core.version>5.14.1</mockito.core.version>
-        <assertj.core.version>3.27.7</assertj.core.version>
+        <com.squareup.okhttp3>3.10.0</com.squareup.okhttp3>
     </properties>
 
     <dependencies>

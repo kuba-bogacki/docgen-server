@@ -37,6 +37,12 @@ public class AuthenticationController {
         return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.OK);
     }
 
+    @PatchMapping(value = "/logout")
+    public ResponseEntity<Void> logoutUser(@RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+        authenticationService.logout(userEmail);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
     @PostMapping(value = "/refresh")
     public ResponseEntity<Void> refreshToken(@Email(regexp = EMAIL_PATTERN) @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         authenticationService.refreshToken(userEmail);

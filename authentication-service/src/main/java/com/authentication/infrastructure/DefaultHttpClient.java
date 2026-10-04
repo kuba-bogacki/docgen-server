@@ -3,7 +3,7 @@ package com.authentication.infrastructure;
 import com.authentication.model.User;
 import com.authentication.model.dto.UserEventDto;
 import com.authentication.security.AuthenticationResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,13 @@ import static com.authentication.util.HttpClientUtil.buildUrl;
 import static com.authentication.util.HttpClientUtil.setRequestAttributes;
 
 @Component
-@RequiredArgsConstructor
 public class DefaultHttpClient implements HttpClient {
 
     private final RestClient.Builder restClientBuilder;
+
+    public DefaultHttpClient(@Qualifier("loadBalancedRestClientBuilderDevelopment") RestClient.Builder restClientBuilder) {
+        this.restClientBuilder = restClientBuilder;
+    }
 
     @Override
     public ResponseEntity<?> getEmailStatus(UserEventDto userEventDto) {
