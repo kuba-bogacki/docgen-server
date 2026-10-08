@@ -13,7 +13,7 @@
     <artifactId>document-service</artifactId>
 
     <properties>
-        <org.docx4j.core.version>11.5.14</org.docx4j.core.version>
+        <org.docx4j.core.version>11.5.3</org.docx4j.core.version>
         <org.docx4j.export.version>11.5.3</org.docx4j.export.version>
         <org.docx4j.jaxb.version>11.5.3</org.docx4j.jaxb.version>
         <org.glassfish.jaxb.version>4.0.5</org.glassfish.jaxb.version>

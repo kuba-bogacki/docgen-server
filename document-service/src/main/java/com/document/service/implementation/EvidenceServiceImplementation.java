@@ -1,6 +1,5 @@
 package com.document.service.implementation;
 
-import com.document.client.docx.DocxReaderClient;
 import com.document.exception.CompanyNotFoundException;
 import com.document.exception.EvidenceNotFoundException;
 import com.document.exception.UserNotFoundException;
@@ -8,6 +7,9 @@ import com.document.infrastructure.HttpClient;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
 import com.document.model.dto.*;
+import com.document.model.type.EvidenceStatus;
+import com.document.model.type.EvidenceType;
+import com.document.queue.MessageQueuePublisher;
 import com.document.repository.EvidenceRepository;
 import com.document.service.EvidenceService;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
 import static com.document.util.ApplicationConstants.DEFAULT_DATE_PATTERN;
 import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
 
@@ -29,9 +31,9 @@ import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NA
 public class EvidenceServiceImplementation implements EvidenceService {
 
     private final HttpClient httpClient;
-    private final DocxReaderClient docxReader;
     private final EvidenceMapper evidenceMapper;
     private final EvidenceRepository evidenceRepository;
+    private final MessageQueuePublisher messageQueuePublisher;
 
     @Override
     public void deleteEvidenceById(String evidenceId) {
@@ -56,17 +58,25 @@ public class EvidenceServiceImplementation implements EvidenceService {
         if (Optional.ofNullable(currentCompanyDto).isEmpty()) {
             throw new CompanyNotFoundException("Couldn't find company with provided id in database");
         }
-        final var placeholders = createPlaceholdersMap(financialStatementDto, currentCompanyDto, currentUserDto);
-        var document = docxReader.generateDocument(placeholders, FINANCIAL_STATEMENT_FILE_NAME);
 
         final var evidence = Evidence.builder()
-                .evidenceType(FINANCIAL_STATEMENT)
+                .evidenceType(EvidenceType.FINANCIAL_STATEMENT)
+                .evidenceStatus(EvidenceStatus.DRAFTED)
                 .evidenceName(currentCompanyDto.getCompanyName())
                 .companyId(financialStatementDto.getCompanyId())
-                .evidenceContent(document.getContent())
                 .build();
-        final var savedEvidenceEntity = evidenceRepository.save(evidence);
-        log.info("Evidence has been created with id : {}", savedEvidenceEntity.getEvidenceId());
+        final var savedEntity = evidenceRepository.save(evidence);
+        log.info("Drafted evidence has been saved with id : {}", savedEntity.getEvidenceId());
+
+        final var placeholders = createPlaceholdersMap(financialStatementDto, currentCompanyDto, currentUserDto);
+        final var queueMessage = QueueMessage.builder()
+                .evidenceId(savedEntity.getEvidenceId())
+                .userEmail(userEmail)
+                .evidenceName(savedEntity.getEvidenceName())
+                .templateFileName(FINANCIAL_STATEMENT_FILE_NAME)
+                .placeholders(placeholders)
+                .build();
+        messageQueuePublisher.publishEvidenceDrafted(queueMessage);
     }
 
     @Override
@@ -89,28 +99,28 @@ public class EvidenceServiceImplementation implements EvidenceService {
     }
 
     private Map<String, String> createPlaceholdersMap(FinancialStatementDto financialStatementDto, CompanyDto companyDto, UserDto userDto) {
-        return new HashMap<>() {{
-            put("periodStartDate", financialStatementDto.getPeriodStartDate());
-            put("periodEndDate", financialStatementDto.getPeriodEndDate());
-            put("companyEquity", String.valueOf(financialStatementDto.getCompanyEquity()));
-            put("companyTotalSum", String.valueOf(financialStatementDto.getCompanyTotalSum()));
-            put("companyNetProfit", String.valueOf(financialStatementDto.getCompanyNetProfit()));
-            put("companyNetIncrease", String.valueOf(financialStatementDto.getCompanyNetIncrease()));
-            put("managementBoardPresident", financialStatementDto.getManagementBoardPresident());
-            put("supervisoryBoardChairman", financialStatementDto.getSupervisoryBoardChairman());
-            put("supervisoryBoardMembers", getMembers(financialStatementDto.getSupervisoryBoardMembers()));
-            put("addressStreetName", companyDto.getCompanyAddressDto().getAddressStreetName());
-            put("addressStreetNumber", companyDto.getCompanyAddressDto().getAddressStreetNumber());
-            put("addressLocalNumber", getAddressLocalNumber(companyDto));
-            put("addressPostalCode", companyDto.getCompanyAddressDto().getAddressPostalCode());
-            put("addressCity", companyDto.getCompanyAddressDto().getAddressCity());
-            put("companyName", companyDto.getCompanyName());
-            put("companyKrsNumber", companyDto.getCompanyKrsNumber());
-            put("companyRegonNumber", String.valueOf(companyDto.getCompanyRegonNumber()));
-            put("companyNipNumber", String.valueOf(companyDto.getCompanyNipNumber()));
-            put("currentUser", concatCurrentUserNames(userDto));
-            put("currentDate", parseCustomLocalDate());
-        }};
+        final Map<String, String> placeholdersMap = new HashMap<>();
+        placeholdersMap.put("periodStartDate", financialStatementDto.getPeriodStartDate());
+        placeholdersMap.put("periodEndDate", financialStatementDto.getPeriodEndDate());
+        placeholdersMap.put("companyEquity", String.valueOf(financialStatementDto.getCompanyEquity()));
+        placeholdersMap.put("companyTotalSum", String.valueOf(financialStatementDto.getCompanyTotalSum()));
+        placeholdersMap.put("companyNetProfit", String.valueOf(financialStatementDto.getCompanyNetProfit()));
+        placeholdersMap.put("companyNetIncrease", String.valueOf(financialStatementDto.getCompanyNetIncrease()));
+        placeholdersMap.put("managementBoardPresident", financialStatementDto.getManagementBoardPresident());
+        placeholdersMap.put("supervisoryBoardChairman", financialStatementDto.getSupervisoryBoardChairman());
+        placeholdersMap.put("supervisoryBoardMembers", getMembers(financialStatementDto.getSupervisoryBoardMembers()));
+        placeholdersMap.put("addressStreetName", companyDto.getCompanyAddressDto().getAddressStreetName());
+        placeholdersMap.put("addressStreetNumber", companyDto.getCompanyAddressDto().getAddressStreetNumber());
+        placeholdersMap.put("addressLocalNumber", getAddressLocalNumber(companyDto));
+        placeholdersMap.put("addressPostalCode", companyDto.getCompanyAddressDto().getAddressPostalCode());
+        placeholdersMap.put("addressCity", companyDto.getCompanyAddressDto().getAddressCity());
+        placeholdersMap.put("companyName", companyDto.getCompanyName());
+        placeholdersMap.put("companyKrsNumber", companyDto.getCompanyKrsNumber());
+        placeholdersMap.put("companyRegonNumber", String.valueOf(companyDto.getCompanyRegonNumber()));
+        placeholdersMap.put("companyNipNumber", String.valueOf(companyDto.getCompanyNipNumber()));
+        placeholdersMap.put("currentUser", concatCurrentUserNames(userDto));
+        placeholdersMap.put("currentDate", parseCustomLocalDate());
+        return placeholdersMap;
     }
 
     private String getMembers(List<String> supervisoryBoardMembers) {
@@ -130,6 +140,6 @@ public class EvidenceServiceImplementation implements EvidenceService {
     }
 
     private String parseCustomLocalDate() {
-        return LocalDate.now().format(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN));
+        return LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN));
     }
 }

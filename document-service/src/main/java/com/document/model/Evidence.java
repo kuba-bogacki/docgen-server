@@ -1,5 +1,6 @@
 package com.document.model;
 
+import com.document.model.type.EvidenceStatus;
 import com.document.model.type.EvidenceType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,8 @@ public class Evidence {
 
     private EvidenceType evidenceType;
 
+    private EvidenceStatus evidenceStatus;
+
     private String evidenceName;
 
     private String companyId;
@@ -40,6 +43,7 @@ public class Evidence {
     public Evidence(Builder builder) {
         this.evidenceName = builder.evidenceName;
         this.evidenceType = builder.evidenceType;
+        this.evidenceStatus = builder.evidenceStatus;
         this.companyId = builder.companyId;
         this.evidenceContent = builder.evidenceContent;
     }
@@ -47,6 +51,7 @@ public class Evidence {
     public static class Builder {
 
         private EvidenceType evidenceType;
+        private EvidenceStatus evidenceStatus;
         private String evidenceName;
         private String companyId;
         private byte[] evidenceContent;
@@ -54,6 +59,12 @@ public class Evidence {
         public Builder evidenceType(EvidenceType evidenceType) {
             requireNonNull(evidenceType, "Evidence type cannot be null");
             this.evidenceType = evidenceType;
+            return this;
+        }
+
+        public Builder evidenceStatus(EvidenceStatus evidenceStatus) {
+            requireNonNull(evidenceStatus, "Evidence status cannot be null");
+            this.evidenceStatus = evidenceStatus;
             return this;
         }
 

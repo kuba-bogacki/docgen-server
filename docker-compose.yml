@@ -115,6 +115,7 @@ services:
       SPRING_PROFILES_ACTIVE: development
       SPRING_DATA_MONGODB_URI: mongodb://document-database:27017/document-service
       SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_URL: tcp://message-queue:61616
       SPRING_ARTEMIS_PASSWORD: ${artemis_mq_password}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
@@ -148,7 +149,7 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
   authentication-database:
-    image: postgres:15
+    image: postgres:15-bookworm
     volumes:
       - authentication_service_data:/var/lib/postgresql/data
     networks:
@@ -159,7 +160,7 @@ services:
       POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   company-database:
-    image: postgres:15
+    image: postgres:15-bookworm
     volumes:
       - company_service_data:/var/lib/postgresql/data
     networks:
@@ -170,7 +171,7 @@ services:
       POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   event-database:
-    image: postgres:15
+    image: postgres:15-bookworm
     volumes:
       - event_service_data:/var/lib/postgresql/data
     networks:
@@ -181,7 +182,7 @@ services:
       POSTGRES_PASSWORD: ${postgres_datasource_password}
 
   document-database:
-    image: mongo:6
+    image: mongo:6-jammy
     volumes:
       - document_service_data:/data/db
     networks:
@@ -190,7 +191,7 @@ services:
       MONGO_DB: document-service
 
   notification-database:
-    image: mongo:6
+    image: mongo:6-jammy
     volumes:
       - notification_service_data:/data/db
     networks:
@@ -202,7 +203,9 @@ services:
     image: apache/activemq-artemis:2.44.0-alpine
     ports:
       - "8161:8161"
-      - "61616:61616" # Java message service
+      - "61616:61616" #Java message service
+    networks:
+      - my_network
     environment:
       ARTEMIS_USER: admin
       ARTEMIS_PASSWORD: ${artemis_mq_password}

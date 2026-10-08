@@ -4,9 +4,11 @@ import com.document.model.Evidence;
 import com.document.model.dto.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
+import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
 
 class EvidenceSamples {
 
@@ -112,19 +114,23 @@ class EvidenceSamples {
             .companyAddressDto(addressDto)
             .build();
 
-    DocumentDto documentDto = DocumentDto.builder()
-            .content(evidenceContent)
+    QueueMessage queueMessage = QueueMessage.builder()
+            .evidenceId(evidenceIdNo1)
+            .userEmail(userEmail)
+            .evidenceName(evidenceName)
+            .templateFileName(FINANCIAL_STATEMENT_FILE_NAME)
+            .placeholders(new HashMap<>())
             .build();
 
     Evidence createEvidenceEntity(String evidenceId, int year, int month, int day, int hour, int minute) {
-        final var evidenceEntity = Evidence.builder()
+        final var evidence = Evidence.builder()
                 .evidenceType(FINANCIAL_STATEMENT)
                 .evidenceName(evidenceName)
                 .companyId(companyIdNo1)
                 .evidenceContent(evidenceContent)
                 .build();
-        evidenceEntity.setCreateDateTime(LocalDateTime.of(year, month, day, hour, minute));
-        evidenceEntity.setEvidenceId(evidenceId);
-        return evidenceEntity;
+        evidence.setCreateDateTime(LocalDateTime.of(year, month, day, hour, minute));
+        evidence.setEvidenceId(evidenceId);
+        return evidence;
     }
 }

@@ -1,15 +1,14 @@
 package com.document.service.implementation;
 
-import com.document.client.docx.DocxReaderClient;
 import com.document.exception.CompanyNotFoundException;
-import com.document.exception.DocxEvidenceReaderException;
 import com.document.exception.EvidenceNotFoundException;
 import com.document.exception.UserNotFoundException;
 import com.document.infrastructure.HttpClient;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
+import com.document.model.dto.QueueMessage;
+import com.document.queue.MessageQueuePublisher;
 import com.document.repository.EvidenceRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +17,11 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.MessagingException;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.document.model.type.EvidenceType.FINANCIAL_STATEMENT;
 import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
@@ -30,14 +30,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EvidenceServiceImplementationTest extends EvidenceSamples {
+class EvidenceServiceImplementationTest extends EvidenceSamples {
 
     @Mock private HttpClient httpClient;
-    @Mock private DocxReaderClient docxReader;
-    @Mock private EvidenceRepository evidenceRepository;
     @Mock private EvidenceMapper evidenceMapper;
+    @Mock private EvidenceRepository evidenceRepository;
+    @Mock private MessageQueuePublisher messageQueuePublisher;
     @Captor private ArgumentCaptor<Evidence> evidenceCaptor;
-    @Captor private ArgumentCaptor<Map<String, String>> placeholdersCaptor;
+    @Captor private ArgumentCaptor<QueueMessage> queueMessageCaptor;
     @InjectMocks private EvidenceServiceImplementation evidenceService;
 
     @Test
@@ -71,28 +71,28 @@ public class EvidenceServiceImplementationTest extends EvidenceSamples {
     }
 
     @Test
-    @DisplayName("Should create and save financial statement if necessary data was provide")
+    @DisplayName("Should publish message on queue if necessary data was provide")
     void test_03() {
         //when
         when(httpClient.getCurrentUserDto(userEmail)).thenReturn(userDto);
         when(httpClient.getCurrentCompanyDto(companyIdNo1, userEmail)).thenReturn(companyDto);
-        when(docxReader.generateDocument(anyMap(), eq(FINANCIAL_STATEMENT_FILE_NAME))).thenReturn(documentDto);
         when(evidenceRepository.save(any(Evidence.class))).thenReturn(evidenceEntity);
+        doNothing().when(messageQueuePublisher).publishEvidenceDrafted(any(QueueMessage.class));
 
         evidenceService.createFinancialStatement(financialStatementDto, userEmail);
 
         //then
-        verify(docxReader, times(1)).generateDocument(placeholdersCaptor.capture(), eq(FINANCIAL_STATEMENT_FILE_NAME));
+        verify(messageQueuePublisher, times(1)).publishEvidenceDrafted(queueMessageCaptor.capture());
         verify(evidenceRepository, times(1)).save(evidenceCaptor.capture());
         assertAll(
-                () -> assertThat(placeholdersCaptor.getValue().get("supervisoryBoardMembers"))
-                        .isEqualTo(String.format("%s, \n%s", supervisoryBoardMembersNo1, supervisoryBoardMembersNo2)),
-                () -> assertThat(placeholdersCaptor.getValue().get("addressLocalNumber"))
-                        .isEqualTo(StringUtils.EMPTY),
-                () -> assertThat(placeholdersCaptor.getValue().get("currentUser"))
-                        .isEqualTo(String.format("%s %s %s", userFirstNameI, userFirstNameII, userLastNameI)),
+                () -> assertThat(queueMessageCaptor.getValue().getUserEmail())
+                        .isEqualTo(userEmail),
+                () -> assertThat(queueMessageCaptor.getValue().getTemplateFileName())
+                        .isEqualTo(FINANCIAL_STATEMENT_FILE_NAME),
                 () -> assertThat(evidenceCaptor.getValue().getEvidenceType())
                         .isEqualTo(FINANCIAL_STATEMENT),
+                () -> assertThat(queueMessageCaptor.getValue().getPlaceholders())
+                        .isInstanceOf(HashMap.class),
                 () -> assertThat(evidenceCaptor.getValue().getEvidenceName())
                         .isEqualTo("Financial_statement_Allegro_sp._z_o.o.")
         );
@@ -108,7 +108,7 @@ public class EvidenceServiceImplementationTest extends EvidenceSamples {
                 catchException(() -> evidenceService.createFinancialStatement(financialStatementDto, userEmail));
 
         //then
-        verify(docxReader, never()).generateDocument(anyMap(), eq(FINANCIAL_STATEMENT_FILE_NAME));
+        verify(messageQueuePublisher, never()).publishEvidenceDrafted(queueMessage);
         verify(evidenceRepository, never()).save(any(Evidence.class));
         assertThat(expectedException)
                 .isInstanceOf(UserNotFoundException.class)
@@ -126,7 +126,7 @@ public class EvidenceServiceImplementationTest extends EvidenceSamples {
                 catchException(() -> evidenceService.createFinancialStatement(financialStatementDto, userEmail));
 
         //then
-        verify(docxReader, never()).generateDocument(anyMap(), eq(FINANCIAL_STATEMENT_FILE_NAME));
+        verify(messageQueuePublisher, never()).publishEvidenceDrafted(queueMessage);
         verify(evidenceRepository, never()).save(any(Evidence.class));
         assertThat(expectedException)
                 .isInstanceOf(CompanyNotFoundException.class)
@@ -134,21 +134,22 @@ public class EvidenceServiceImplementationTest extends EvidenceSamples {
     }
 
     @Test
-    @DisplayName("Should throw an exception if could not generate company financial statement")
+    @DisplayName("Should throw an exception if error occur due publishing message on queue")
     void test_06() {
         //when
         when(httpClient.getCurrentUserDto(userEmail)).thenReturn(userDto);
         when(httpClient.getCurrentCompanyDto(companyIdNo1, userEmail)).thenReturn(companyDto);
-        when(docxReader.generateDocument(anyMap(), eq(FINANCIAL_STATEMENT_FILE_NAME))).thenThrow(DocxEvidenceReaderException.class);
+        when(evidenceRepository.save(any(Evidence.class))).thenReturn(evidenceEntity);
+        doThrow(MessagingException.class).when(messageQueuePublisher).publishEvidenceDrafted(any(QueueMessage.class));
 
         final var expectedException =
                 catchException(() -> evidenceService.createFinancialStatement(financialStatementDto, userEmail));
 
         //then
-        verify(docxReader, times(1)).generateDocument(anyMap(), eq(FINANCIAL_STATEMENT_FILE_NAME));
-        verify(evidenceRepository, never()).save(any(Evidence.class));
+        verify(messageQueuePublisher, times(1)).publishEvidenceDrafted(any(QueueMessage.class));
+        verify(evidenceRepository, times(1)).save(any(Evidence.class));
         assertThat(expectedException)
-                .isInstanceOf(DocxEvidenceReaderException.class);
+                .isInstanceOf(MessagingException.class);
     }
 
     @Test

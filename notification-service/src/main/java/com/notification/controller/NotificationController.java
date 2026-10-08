@@ -1,6 +1,7 @@
 package com.notification.controller;
 
 import com.notification.model.dto.AuthenticationResponse;
+import com.notification.model.dto.NotificationDto;
 import com.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,12 @@ public class NotificationController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping(value = "/create-notification")
+    public ResponseEntity<Void> createUserNotification(@RequestHeader(USER_EMAIL_HEADER) String userEmail, @RequestBody NotificationDto notificationDto) {
+        notificationService.createNotification(userEmail, notificationDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/refresh-token/{userPrincipal}")

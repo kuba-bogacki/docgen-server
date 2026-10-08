@@ -9,6 +9,7 @@ import com.notification.infrastructure.HttpClient;
 import com.notification.mapper.NotificationMapper;
 import com.notification.model.Notification;
 import com.notification.model.dto.*;
+import com.notification.model.type.NotificationType;
 import com.notification.repository.NotificationRepository;
 import com.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,22 @@ public class NotificationServiceImplementation implements NotificationService {
 
         var currentUserNotificationList = notificationRepository.findNotificationsByNotificationReceiverId(currentUserDto.getUserId());
         return notificationMapper.toNotificationDtoList(currentUserNotificationList);
+    }
+
+    @Override
+    public void createNotification(String userEmail, NotificationDto notificationDto) {
+        final var currentUserDto = httpClient.getCurrentUserDto(userEmail);
+
+        if (Objects.isNull(currentUserDto.getUserId())) {
+            throw new CurrentUserNotFoundException("Impossible to get current user dto by user email");
+        }
+
+        final NotificationDto notification = NotificationDto.builder()
+                .notificationUserPrincipal(currentUserDto.getUserPrincipal())
+                .notificationMessage(notificationDto.getNotificationMessage())
+                .notificationType(notificationDto.getNotificationType())
+                .build();
+        saveAndSend(notification, "/queue/evidence-info");
     }
 
     @Override

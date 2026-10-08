@@ -1,13 +1,13 @@
 package com.document.infrastructure;
 
 import com.document.model.dto.CompanyDto;
+import com.document.model.dto.EvidenceNotificationDto;
 import com.document.model.dto.UserDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import static com.document.util.ApplicationConstants.API_VERSION;
-import static com.document.util.ApplicationConstants.PROTOCOL;
+import static com.document.util.ApplicationConstants.*;
 import static com.document.util.HttpClientUtil.buildUrl;
 import static com.document.util.HttpClientUtil.setRequestAttributes;
 
@@ -25,7 +25,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/user"))
+                .uri(buildUrl(PROTOCOL, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/user"))
                 .retrieve()
                 .body(UserDto.class);
     }
@@ -35,8 +35,19 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/details/" + companyId))
+                .uri(buildUrl(PROTOCOL, COMPANY_SERVICE, API_VERSION, "/company/details/" + companyId))
                 .retrieve()
                 .body(CompanyDto.class);
+    }
+
+    @Override
+    public void createCurrentUserNotification(String userEmail, EvidenceNotificationDto evidenceNotificationDto) {
+        restClientBuilder
+                .requestInterceptor(setRequestAttributes(userEmail))
+                .build().post()
+                .uri(buildUrl(PROTOCOL, NOTIFICATION_SERVICE, API_VERSION, "/notification/create-notification"))
+                .body(evidenceNotificationDto)
+                .retrieve()
+                .toEntity(Void.class);
     }
 }
