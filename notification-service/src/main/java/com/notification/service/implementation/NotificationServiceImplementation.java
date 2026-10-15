@@ -55,6 +55,7 @@ public class NotificationServiceImplementation implements NotificationService {
 
         final NotificationDto notification = NotificationDto.builder()
                 .notificationUserPrincipal(currentUserDto.getUserPrincipal())
+                .notificationReceiverId(currentUserDto.getUserId())
                 .notificationMessage(notificationDto.getNotificationMessage())
                 .notificationType(notificationDto.getNotificationType())
                 .build();

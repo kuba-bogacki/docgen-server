@@ -67,33 +67,28 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
     @Override
     public void addUserPrincipal(UserPrincipalDto userPrincipalDto) {
-        final Optional<User> user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()));
+        final User user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()))
+                .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provide id"));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user with provide id");
-        }
-
-        user.get().setUserPrincipal(userPrincipalDto.getUserPrincipal());
-        userRepository.save(user.get());
+        user.setUserPrincipal(userPrincipalDto.getUserPrincipal());
+        userRepository.save(user);
     }
 
     @Override
     public AuthenticationResponse verifyUserRegistrationCode(String registrationCode, AuthenticationRequest authenticationRequest) {
-        Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
+        final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provided email"));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user with provided email");
-        }
-        if (!user.get().getUserVerificationCode().equals(registrationCode)) {
+        if (!user.getUserVerificationCode().equals(registrationCode)) {
             throw new UserAuthenticationException("Verification codes are different or code already expired");
         }
 
-        user.get().setEnabled(true);
-        userRepository.save(user.get());
+        user.setEnabled(true);
+        userRepository.save(user);
 
         authenticateUser(authenticationRequest);
-        final String jwtToken = jwtService.generateJwtToken(user.get());
-        final String refreshToken = jwtService.generateRefreshToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -102,18 +97,16 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
+        final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provided email"));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user with provided email");
-        }
-        if (Boolean.FALSE.equals(user.get().getEnabled())) {
+        if (Boolean.FALSE.equals(user.getEnabled())) {
             throw new UserAccountDisableException("User account need to be activate first. Check your email for activate link");
         }
 
         authenticateUser(authenticationRequest);
-        final String jwtToken = jwtService.generateJwtToken(user.get());
-        final String refreshToken = jwtService.generateRefreshToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -122,26 +115,21 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
     @Override
     public void logout(String userEmail) {
-        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final User user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("Impossible to find user by provided email"));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user by provided email");
-        }
-        user.get().setUserPrincipal(null);
-        userRepository.save(user.get());
+        user.setUserPrincipal(null);
+        userRepository.save(user);
     }
 
     @Override
     public void refreshToken(String userEmail) {
-        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final User user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("Couldn't find user with provided email"));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user with provided email");
-        }
-
-        final String userPrincipal = user.get().getUserPrincipal();
-        final String jwtToken = jwtService.generateJwtToken(user.get());
-        final String refreshToken = jwtService.generateRefreshToken(user.get());
+        final String userPrincipal = user.getUserPrincipal();
+        final String jwtToken = jwtService.generateJwtToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
 
         final AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .jwtToken(jwtToken)
@@ -158,17 +146,14 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
 
     @Override
     public AuthenticationResponse confirmCompanyMembership(String companyId, AuthenticationRequest authenticationRequest) {
-        final Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
-
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to find user with provided email");
-        }
+        final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("User with provided email cannot be found"));
 
         authenticateUser(authenticationRequest);
-        final String jwtToken = jwtService.generateJwtToken(user.get());
-        final String refreshToken = jwtService.generateRefreshToken(user.get());
+        final String jwtToken = jwtService.generateJwtToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
 
-        final ResponseEntity<?> joiningStatus = httpClient.getJoiningStatus(user.get(), companyId, authenticationRequest.getUserEmail());
+        final ResponseEntity<?> joiningStatus = httpClient.getJoiningStatus(user, companyId, authenticationRequest.getUserEmail());
 
         if (!joiningStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException(String.format("Couldn't add user as a member to company with id: %s.", companyId));

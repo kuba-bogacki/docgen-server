@@ -1,5 +1,7 @@
 package com.document.controller;
 
+import com.document.model.dto.EvidenceDetailsDto;
+import com.document.model.dto.EvidenceDto;
 import com.document.model.dto.FinancialStatementDto;
 import com.document.service.EvidenceService;
 import jakarta.validation.Valid;
@@ -7,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.document.util.ApplicationConstants.API_VERSION;
 import static com.document.util.ApplicationConstants.USER_EMAIL_HEADER;
@@ -19,23 +23,23 @@ public class EvidenceController {
     private final EvidenceService evidenceService;
 
     @GetMapping(value = "/{evidenceId}")
-    public ResponseEntity<?> getEvidenceDetailsById(@PathVariable String evidenceId) {
+    public ResponseEntity<EvidenceDetailsDto> getEvidenceDetailsById(@PathVariable String evidenceId) {
         return new ResponseEntity<>(evidenceService.getEvidenceDetailsById(evidenceId), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create-financial-statement")
-    public ResponseEntity<?> createFinancialStatement(@Valid @RequestBody FinancialStatementDto financialStatementDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<Void> createFinancialStatement(@Valid @RequestBody FinancialStatementDto financialStatementDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         evidenceService.createFinancialStatement(financialStatementDto, userEmail);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/get-all/{companyId}")
-    public ResponseEntity<?> getAllCompanyEvidences(@PathVariable String companyId) {
+    public ResponseEntity<List<EvidenceDto>> getAllCompanyEvidences(@PathVariable String companyId) {
         return new ResponseEntity<>(evidenceService.getAllCompanyEvidences(companyId), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{evidenceId}")
-    public ResponseEntity<?> deleteEvidenceById(@PathVariable String evidenceId) {
+    public ResponseEntity<Void> deleteEvidenceById(@PathVariable String evidenceId) {
         evidenceService.deleteEvidenceById(evidenceId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
