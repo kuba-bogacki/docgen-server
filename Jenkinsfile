@@ -13,6 +13,10 @@ pipeline {
                 git credentialsId: 'd1a07e22-e482-4351-88a6-2f40c9a760a9',
                     url: 'https://github.com/kuba-bogacki/docgen-server',
                     branch: 'main'
+                script {
+                    def shortCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${shortCommit}"
+                }
             }
         }
 
@@ -43,7 +47,7 @@ pipeline {
                 script {
                     def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
-                        def imageName = "${DOCKER_NAMESPACE}/${service}:1.0-SNAPSHOT"
+                        def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
                         sh """
                             docker build -t ${imageName} -f ${service}/Dockerfile .
                         """
@@ -58,7 +62,7 @@ pipeline {
                     docker.withRegistry("${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
                         def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                         for (service in services) {
-                            def imageName = "${DOCKER_NAMESPACE}/${service}:1.0-SNAPSHOT"
+                            def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
                             docker.image(imageName).push()
                         }
                     }
