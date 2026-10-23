@@ -48,8 +48,9 @@ pipeline {
                     def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
+                        def latestName = "${DOCKER_NAMESPACE}/${service}:latest"
                         sh """
-                            docker build -t ${imageName} -f ${service}/Dockerfile .
+                            docker build -t ${imageName} -t ${latestName} -f ${service}/Dockerfile .
                         """
                     }
                 }
@@ -63,8 +64,9 @@ pipeline {
                         def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
                         for (service in services) {
                             def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
+                            def latestName = "${DOCKER_NAMESPACE}/${service}:latest"
                             docker.image(imageName).push()
-                            docker.image('latest').push()
+                            docker.image(latestName).push()
                         }
                     }
                 }
