@@ -64,6 +64,7 @@ pipeline {
                         for (service in services) {
                             def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
                             docker.image(imageName).push()
+                            docker.image('latest').push()
                         }
                     }
                 }
