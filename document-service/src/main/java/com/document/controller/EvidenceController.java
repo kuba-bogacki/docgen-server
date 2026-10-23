@@ -28,7 +28,7 @@ public class EvidenceController {
     }
 
     @PostMapping(value = "/create-financial-statement")
-    public ResponseEntity<Void> createFinancialStatement(@Valid @RequestBody FinancialStatementDto financialStatementDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<Void> createFinancialStatement(@RequestHeader(USER_EMAIL_HEADER) String userEmail, @Valid @RequestBody FinancialStatementDto financialStatementDto) {
         evidenceService.createFinancialStatement(financialStatementDto, userEmail);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

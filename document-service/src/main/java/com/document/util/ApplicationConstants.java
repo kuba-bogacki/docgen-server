@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 public final class ApplicationConstants {
 
     // Url
-    public static final String API_VERSION = "/v1.0";
-    public static final String PROTOCOL = "http";
+    public static final String HTTP = "http";
+    public static final String API_VERSION = "/api/v1.0";
 
     // Header
     public static final String USER_EMAIL_HEADER = "X-User-Email";
@@ -18,7 +18,6 @@ public final class ApplicationConstants {
     public static final String COMPANY_SERVICE = "company-service";
     public static final String NOTIFICATION_SERVICE = "notification-service";
     public static final String AUTHENTICATION_SERVICE = "authentication-service";
-
 
     // Message queue
     public static final String EVIDENCE_QUEUE = "evidence-queue";

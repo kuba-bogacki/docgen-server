@@ -7,6 +7,7 @@ import com.document.model.dto.FinancialStatementDto;
 import java.util.List;
 
 public interface EvidenceService {
+
     void deleteEvidenceById(String evidenceId);
     void createFinancialStatement(FinancialStatementDto financialStatementDto, String userEmail);
     EvidenceDetailsDto getEvidenceDetailsById(String evidenceId);

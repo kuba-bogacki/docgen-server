@@ -523,7 +523,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         assertThat(expectedException)
                 .isNotNull()
                 .isInstanceOf(UserNotFoundException.class)
-                .hasMessageContaining("Impossible to find user with provided email");
+                .hasMessageContaining("User with provided email cannot be found");
         verify(userRepository).findUserByUserEmail(userEmail);
         verify(authenticationManager, never()).authenticate(any());
         verify(jwtService, never()).generateJwtToken(any());
@@ -594,7 +594,6 @@ class AuthenticationServiceImplementationTest extends Samples {
     void test_22() {
         //given
         final var sampleToken = "sample-secret-token";
-        final var sampleUri = "http://company-service/v1.0/company/add-new-member/" + companyId;
         final var userEntity = sampleUserEntity
                 .toBuilder()
                 .userId(userIdI)

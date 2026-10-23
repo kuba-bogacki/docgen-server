@@ -14,6 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static com.authentication.util.ApplicationConstants.API_VERSION;
+
 @Log4j2
 @Configuration
 @EnableWebMvc
@@ -30,13 +32,13 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1.0/authentication/create").permitAll()
-                        .requestMatchers("/v1.0/authentication/login").permitAll()
-                        .requestMatchers("/v1.0/authentication/refresh").permitAll()
-                        .requestMatchers("/v1.0/authentication/verify/**").permitAll()
-                        .requestMatchers("/v1.0/authentication/reset-password/**").permitAll()
-                        .requestMatchers("/v1.0/authentication/confirm-membership/**").permitAll()
-                        .requestMatchers("/v1.0/authentication/send-email-to-reset-password").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/create").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/login").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/refresh").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/verify/**").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/reset-password/**").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/confirm-membership/**").permitAll()
+                        .requestMatchers(API_VERSION + "/authentication/send-email-to-reset-password").permitAll()
                         .anyRequest().authenticated()
                 );
         return httpSecurity.build();

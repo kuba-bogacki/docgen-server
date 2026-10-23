@@ -1,12 +1,11 @@
 package com.gateway.configuration;
 
+import com.gateway.configuration.properties.CorsProperties;
 import com.gateway.filter.AuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -14,47 +13,35 @@ import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpe
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 import java.util.List;
 
-import static com.gateway.util.ApplicationConstants.*;
-import static com.gateway.util.HttpClientUtil.buildUrl;
-
 @Log4j2
 @Configuration
 @EnableWebFluxSecurity
-@PropertySource(value = {"classpath:application.properties"})
+@RequiredArgsConstructor
 public class SecurityConfiguration implements WebFluxConfigurer {
 
-    private final String clientHost;
-    private final String clientPort;
+    private final CorsProperties corsProperties;
     private final AuthenticationFilter authenticationFilter;
 
-    @Autowired
-    public SecurityConfiguration(
-            @Value("${cors.client.host:}") String clientHost,
-            @Value("${cors.client.port:}") String clientPort,
-            AuthenticationFilter authenticationFilter) {
-        this.clientHost = clientHost;
-        this.clientPort = clientPort;
-        this.authenticationFilter = authenticationFilter;
-    }
-
     @Bean
-    public CorsWebFilter corsWebFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         final var corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of(buildUrl(PROTOCOL, clientHost, clientPort)));
-        corsConfig.setAllowedMethods(List.of(ALLOWED_METHODS));
-        corsConfig.setAllowedHeaders(List.of(ALLOWED_HEADERS));
-        corsConfig.setAllowCredentials(true);
+
+        corsConfig.setAllowedOrigins(List.of(corsProperties.getAllowedOrigin()));
+        corsConfig.setAllowedMethods(corsProperties.getAllowedMethods());
+        corsConfig.setAllowedHeaders(corsProperties.getAllowedHeaders());
+        corsConfig.setAllowCredentials(corsProperties.getAllowedCredentials());
+        corsConfig.setMaxAge(corsProperties.getMaxAge());
 
         final var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
+        source.registerCorsConfiguration(corsProperties.getConfigurationsPath(), corsConfig);
 
-        return new CorsWebFilter(source);
+        return source;
     }
 
     @Bean
@@ -69,10 +56,9 @@ public class SecurityConfiguration implements WebFluxConfigurer {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity serverHttpSecurity) {
         serverHttpSecurity
                 .csrf(CsrfSpec::disable)
-                .cors(cors -> {})
+                .cors(cors -> corsConfigurationSource())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationHandler()))
                 .addFilterAt(authenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         return serverHttpSecurity.build();
     }
-
 }

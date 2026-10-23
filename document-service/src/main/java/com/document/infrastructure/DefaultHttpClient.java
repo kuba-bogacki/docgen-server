@@ -25,7 +25,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/user"))
+                .uri(buildUrl(HTTP, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/user"))
                 .retrieve()
                 .body(UserDto.class);
     }
@@ -35,7 +35,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, COMPANY_SERVICE, API_VERSION, "/company/details/" + companyId))
+                .uri(buildUrl(HTTP, COMPANY_SERVICE, API_VERSION, "/company/details/" + companyId))
                 .retrieve()
                 .body(CompanyDto.class);
     }
@@ -45,7 +45,7 @@ public class DefaultHttpClient implements HttpClient {
         restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().post()
-                .uri(buildUrl(PROTOCOL, NOTIFICATION_SERVICE, API_VERSION, "/notification/create-notification"))
+                .uri(buildUrl(HTTP, NOTIFICATION_SERVICE, API_VERSION, "/notification/create-notification"))
                 .body(evidenceNotificationDto)
                 .retrieve()
                 .toEntity(Void.class);

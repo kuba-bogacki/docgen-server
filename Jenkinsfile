@@ -10,7 +10,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'd1a07e22-e482-4351-88a6-2f40c9a760a9', url: 'https://github.com/kuba-bogacki/docgen-server', branch: 'main'
+                git credentialsId: 'd1a07e22-e482-4351-88a6-2f40c9a760a9',
+                    url: 'https://github.com/kuba-bogacki/docgen-server',
+                    branch: 'main'
             }
         }
 
@@ -67,6 +69,7 @@ pipeline {
 
     post {
         always {
+            cleanWs()
             sh 'docker system prune -af'
         }
         success {

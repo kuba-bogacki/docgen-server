@@ -1,6 +1,7 @@
 package com.document.util.annotation;
 
 import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,4 +16,8 @@ public @interface Date {
     String format() default "dd-MM-yyyy";
 
     String message() default "Provided date format is incorrect or null";
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

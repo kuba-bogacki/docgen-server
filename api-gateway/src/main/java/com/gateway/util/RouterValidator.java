@@ -7,19 +7,21 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static com.gateway.util.ApplicationConstants.API_VERSION;
+
 @Component
 public class RouterValidator {
 
     public static final List<String> openApiEndpoints= List.of(
-            "/v1.0/authentication/create",
-            "/v1.0/authentication/login",
-            "/v1.0/authentication/refresh",
-            "/v1.0/authentication/verify/{id}",
-            "/v1.0/authentication/reset-password/{id}",
-            "/v1.0/authentication/confirm-membership/{id}",
-            "/v1.0/authentication/send-email-to-reset-password",
-            "/v1.0/notification/verification",
-            "/v1.0/notification/websocket/{id}"
+            API_VERSION + "/authentication/create",
+            API_VERSION + "/authentication/login",
+            API_VERSION + "/authentication/refresh",
+            API_VERSION + "/authentication/verify/{id}",
+            API_VERSION + "/authentication/reset-password/{id}",
+            API_VERSION + "/authentication/confirm-membership/{id}",
+            API_VERSION + "/authentication/send-email-to-reset-password",
+            API_VERSION + "/notification/verification",
+            API_VERSION + "/notification/websocket/{id}"
     );
 
     private final List<Pattern> openApiPatterns = openApiEndpoints.stream()

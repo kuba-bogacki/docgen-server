@@ -6,14 +6,34 @@
       "description": "Description for token.secret.key."
     },
     {
-      "name": "cors.client.host",
+      "name": "cors.client.allowed.origin",
       "type": "java.lang.String",
-      "description": "Description for cors.client.host."
+      "description": "Description for cors.client.allowed.origin."
     },
     {
-      "name": "cors.client.port",
+      "name": "cors.client.allowed.methods",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Description for cors.client.allowed.methods."
+    },
+    {
+      "name": "cors.client.allowed.headers",
       "type": "java.lang.String",
-      "description": "Description for cors.client.port."
+      "description": "Description for cors.client.allowed.headers."
+    },
+    {
+      "name": "cors.client.allowed.credentials",
+      "type": "java.lang.Boolean",
+      "description": "Description for cors.client.allowed.credentials."
+    },
+    {
+      "name": "cors.client.max.age",
+      "type": "java.lang.Long",
+      "description": "Description for cors.client.max.age."
+    },
+    {
+      "name": "cors.client.configurations.path",
+      "type": "java.lang.String",
+      "description": "Description for cors.client.configurations.path."
     }
   ]
 }

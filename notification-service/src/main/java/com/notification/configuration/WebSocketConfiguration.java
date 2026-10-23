@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.notification.util.ApplicationConstants.ALLOWED_ORIGIN_PATTERN;
-import static com.notification.util.ApplicationConstants.WEBSOCKET_ENDPOINT;
+import static com.notification.util.ApplicationConstants.API_VERSION;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -33,7 +33,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint(WEBSOCKET_ENDPOINT)
+                .addEndpoint(API_VERSION + "/notification/websocket")
                 .setAllowedOriginPatterns(ALLOWED_ORIGIN_PATTERN)
                 .setHandshakeHandler(getCustomHandshakeHandler())
                 .withSockJS()

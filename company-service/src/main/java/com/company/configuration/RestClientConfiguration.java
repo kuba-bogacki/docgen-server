@@ -11,21 +11,15 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfiguration {
 
     @Bean
-    @Profile("production")
-    public RestClient.Builder restClientBuilderProduction() {
-        return RestClient.builder();
-    }
-
-    @Bean
     @Primary
-    @Profile("development")
+    @Profile(value = {"development", "production"})
     public RestClient.Builder restClientBuilderDevelopment() {
         return RestClient.builder();
     }
 
     @Bean
     @LoadBalanced
-    @Profile("development")
+    @Profile(value = {"development", "production"})
     public RestClient.Builder loadBalancedRestClientBuilderDevelopment() {
         return RestClient.builder();
     }

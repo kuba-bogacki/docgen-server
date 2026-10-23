@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import static com.notification.util.ApplicationConstants.API_VERSION;
-import static com.notification.util.ApplicationConstants.PROTOCOL;
+import static com.notification.util.ApplicationConstants.HTTP;
 import static com.notification.util.HttpClientUtil.buildUrl;
 import static com.notification.util.HttpClientUtil.setRequestAttributes;
 
@@ -27,7 +27,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail)).build()
                 .get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/get-by-id/" + userId))
+                .uri(buildUrl(HTTP, "authentication-service", API_VERSION, "/authentication/get-by-id/" + userId))
                 .retrieve()
                 .body(UserDto.class);
     }
@@ -37,7 +37,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail)).build()
                 .get()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/user"))
+                .uri(buildUrl(HTTP, "authentication-service", API_VERSION, "/authentication/user"))
                 .retrieve()
                 .body(UserDto.class);
     }
@@ -47,7 +47,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail)).build()
                 .get()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/details/" + companyId))
+                .uri(buildUrl(HTTP, "company-service", API_VERSION, "/company/details/" + companyId))
                 .retrieve()
                 .body(CompanyDto.class);
     }
@@ -57,7 +57,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail)).build()
                 .put()
-                .uri(buildUrl(PROTOCOL, "authentication-service", API_VERSION, "/authentication/add-user-principal"))
+                .uri(buildUrl(HTTP, "authentication-service", API_VERSION, "/authentication/add-user-principal"))
                 .body(userPrincipalDto)
                 .retrieve()
                 .toEntity(ResponseEntity.class);
@@ -68,7 +68,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail)).build()
                 .put()
-                .uri(buildUrl(PROTOCOL, "company-service", API_VERSION, "/company/add-new-member/" + companyId))
+                .uri(buildUrl(HTTP, "company-service", API_VERSION, "/company/add-new-member/" + companyId))
                 .body(userId)
                 .retrieve()
                 .toEntity(ResponseEntity.class);

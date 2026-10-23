@@ -14,6 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static com.notification.util.ApplicationConstants.API_VERSION;
+
 @Log4j2
 @Configuration
 @EnableWebMvc
@@ -30,8 +32,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1.0/notification/verification").permitAll()
-                        .requestMatchers("/v1.0/notification/websocket/**").permitAll()
+                        .requestMatchers(API_VERSION + "/notification/verification").permitAll()
+                        .requestMatchers(API_VERSION + "/notification/websocket/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return httpSecurity.build();

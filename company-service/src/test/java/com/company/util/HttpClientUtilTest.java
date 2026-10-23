@@ -35,14 +35,14 @@ public class HttpClientUtilTest {
         //given
         final String protocol = "https";
         final String clientHost = "8.8.8.8";
-        final String apiVersion = "/v1.0";
+        final String apiVersion = "/api/v1.0";
 
         //when
         final String result = HttpClientUtil.buildUrl(protocol, clientHost, apiVersion);
 
         //then
         assertThat(result)
-                .isEqualTo("https://8.8.8.8/v1.0");
+                .isEqualTo("https://8.8.8.8/api/v1.0");
     }
 
     @Test

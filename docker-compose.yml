@@ -3,11 +3,12 @@ services:
     build:
       context: .
       dockerfile: discovery-server/Dockerfile
+    container_name: discovery-server
     ports:
       - "8761:8761"
       - "2137:2137" #Debug port
     networks:
-      - my_network
+      - for_company_network
     environment:
       EUREKA_USERNAME: eureka
       EUREKA_PASSWORD: ${eureka_password}
@@ -18,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
     ports:
       - "8080:8080"
       - "5000:5000" #Debug port
@@ -29,11 +31,10 @@ services:
       - document-service
       - notification-service
     networks:
-      - my_network
+      - for_company_network
     environment:
-      SPRING_PROFILES_ACTIVE: development
-      CORS_CLIENT_HOST: localhost
-      CORS_CLIENT_PORT: 3000
+      SPRING_PROFILES_ACTIVE: ${active_profile}
+      CLIENT_APPLICATION_ADDRESS: ${client_application_address}
       TOKEN_SECRET_KEY: ${token_secret_key}
       EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka:password@discovery-server:8761/eureka
 
@@ -41,15 +42,16 @@ services:
     build:
       context: .
       dockerfile: authentication-service/Dockerfile
+    container_name: authentication-service
     ports:
       - "5001:5001" #Debug port
     depends_on:
       - discovery-server
       - authentication-database
     networks:
-      - my_network
+      - for_company_network
     environment:
-      SPRING_PROFILES_ACTIVE: development
+      SPRING_PROFILES_ACTIVE: ${active_profile}
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       SPRING_DATASOURCE_URL: jdbc:postgresql://authentication-database:5432/authentication-service
@@ -64,15 +66,16 @@ services:
     build:
       context: .
       dockerfile: company-service/Dockerfile
+    container_name: company-service
     ports:
       - "5002:5002" #Debug port
     depends_on:
       - discovery-server
       - company-database
     networks:
-      - my_network
+      - for_company_network
     environment:
-      SPRING_PROFILES_ACTIVE: development
+      SPRING_PROFILES_ACTIVE: ${active_profile}
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       SPRING_DATASOURCE_URL: jdbc:postgresql://company-database:5432/company-service
@@ -82,15 +85,16 @@ services:
     build:
       context: .
       dockerfile: event-service/Dockerfile
+    container_name: event-service
     ports:
       - "5003:5003" #Debug port
     depends_on:
       - discovery-server
       - event-database
     networks:
-      - my_network
+      - for_company_network
     environment:
-      SPRING_PROFILES_ACTIVE: development
+      SPRING_PROFILES_ACTIVE: ${active_profile}
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${postgres_datasource_password}
       SPRING_DATASOURCE_URL: jdbc:postgresql://event-database:5432/event-service
@@ -100,6 +104,7 @@ services:
     build:
       context: .
       dockerfile: document-service/Dockerfile
+    container_name: document-service
     ports:
       - "5004:5004" #Debug port
     depends_on:
@@ -107,12 +112,12 @@ services:
       - document-database
       - message-queue
     networks:
-      - my_network
+      - for_company_network
     dns:
       - 8.8.8.8
       - 8.8.5.5
     environment:
-      SPRING_PROFILES_ACTIVE: development
+      SPRING_PROFILES_ACTIVE: ${active_profile}
       SPRING_DATA_MONGODB_URI: mongodb://document-database:27017/document-service
       SPRING_ARTEMIS_USER: admin
       SPRING_ARTEMIS_URL: tcp://message-queue:61616
@@ -123,18 +128,20 @@ services:
     build:
       context: .
       dockerfile: notification-service/Dockerfile
+    container_name: notification-service
     ports:
       - "5005:5005" #Debug port
     depends_on:
       - discovery-server
       - notification-database
     networks:
-      - my_network
+      - for_company_network
     dns:
       - 8.8.8.8
       - 8.8.4.4
     environment:
-      SPRING_PROFILES_ACTIVE: development
+      SPRING_PROFILES_ACTIVE: ${active_profile}
+      CLIENT_APPLICATION_ADDRESS: ${client_application_address}
       TOKEN_SECRET_KEY: ${token_secret_key}
       SPRING_DATA_MONGODB_URI: mongodb://notification-database:27017/notification-service
       SPRING_MAIL_PORT: 587
@@ -150,10 +157,11 @@ services:
 
   authentication-database:
     image: postgres:15-bookworm
+    container_name: authentication-database
     volumes:
       - authentication_service_data:/var/lib/postgresql/data
     networks:
-      - my_network
+      - for_company_network
     environment:
       POSTGRES_DB: authentication-service
       POSTGRES_USER: postgres
@@ -161,10 +169,11 @@ services:
 
   company-database:
     image: postgres:15-bookworm
+    container_name: company-database
     volumes:
       - company_service_data:/var/lib/postgresql/data
     networks:
-      - my_network
+      - for_company_network
     environment:
       POSTGRES_DB: company-service
       POSTGRES_USER: postgres
@@ -172,10 +181,11 @@ services:
 
   event-database:
     image: postgres:15-bookworm
+    container_name: event-database
     volumes:
       - event_service_data:/var/lib/postgresql/data
     networks:
-      - my_network
+      - for_company_network
     environment:
       POSTGRES_DB: event-service
       POSTGRES_USER: postgres
@@ -183,37 +193,51 @@ services:
 
   document-database:
     image: mongo:6-jammy
+    container_name: document-database
     volumes:
       - document_service_data:/data/db
     networks:
-      - my_network
+      - for_company_network
     environment:
       MONGO_DB: document-service
 
   notification-database:
     image: mongo:6-jammy
+    container_name: notification-database
     volumes:
       - notification_service_data:/data/db
     networks:
-      - my_network
+      - for_company_network
     environment:
       MONGO_DB: notification-service
 
   message-queue:
     image: apache/activemq-artemis:2.44.0-alpine
+    container_name: message-queue
     ports:
       - "8161:8161"
       - "61616:61616" #Java message service
     networks:
-      - my_network
+      - for_company_network
     environment:
       ARTEMIS_USER: admin
       ARTEMIS_PASSWORD: ${artemis_mq_password}
       ANONYMOUS_LOGIN: false
 
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle-viewer
+    restart: always
+    ports:
+      - "9999:8080" #Dozzle panel port
+    networks:
+      - for_company_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 networks:
-  my_network:
-    driver: bridge
+  for_company_network:
+    external: true
 
 volumes:
   authentication_service_data:

@@ -37,27 +37,22 @@ public class EvidenceServiceImplementation implements EvidenceService {
 
     @Override
     public void deleteEvidenceById(String evidenceId) {
-        var evidenceEntity = evidenceRepository.findByEvidenceId(evidenceId);
+        var evidenceEntity = Optional.ofNullable(evidenceRepository.findByEvidenceId(evidenceId))
+                .orElseGet(() -> {
+                    log.warn("Couldn't delete entity because evidence with provided id [{}] is not exist", evidenceId);
+                    throw new EvidenceNotFoundException(evidenceId);
+                });
 
-        if (Optional.ofNullable(evidenceEntity).isEmpty()) {
-            log.warn("Couldn't delete entity because evidence with provided id [{}] is not exist", evidenceId);
-            throw new EvidenceNotFoundException(evidenceId);
-        }
         evidenceRepository.delete(evidenceEntity);
     }
 
     @Override
     public void createFinancialStatement(FinancialStatementDto financialStatementDto, String userEmail) {
-        var currentUserDto = httpClient.getCurrentUserDto(userEmail);
+        final var currentUserDto = Optional.ofNullable(httpClient.getCurrentUserDto(userEmail))
+                .orElseThrow(() -> new UserNotFoundException("Couldn't find current user with provided id in database"));
 
-        if (Optional.ofNullable(currentUserDto).isEmpty()) {
-            throw new UserNotFoundException("Couldn't find current user with provided id in database");
-        }
-        var currentCompanyDto = httpClient.getCurrentCompanyDto(financialStatementDto.getCompanyId(), userEmail);
-
-        if (Optional.ofNullable(currentCompanyDto).isEmpty()) {
-            throw new CompanyNotFoundException("Couldn't find company with provided id in database");
-        }
+        final var currentCompanyDto = Optional.ofNullable(httpClient.getCurrentCompanyDto(financialStatementDto.getCompanyId(), userEmail))
+                .orElseThrow(() -> new CompanyNotFoundException("Couldn't find company with provided id in database"));
 
         final var evidence = Evidence.builder()
                 .evidenceType(EvidenceType.FINANCIAL_STATEMENT)
@@ -81,12 +76,12 @@ public class EvidenceServiceImplementation implements EvidenceService {
 
     @Override
     public EvidenceDetailsDto getEvidenceDetailsById(String evidenceId) {
-        var evidenceEntity = evidenceRepository.findByEvidenceId(evidenceId);
+        final var evidenceEntity = Optional.ofNullable(evidenceRepository.findByEvidenceId(evidenceId))
+                .orElseGet(() -> {
+                    log.warn("Evidence with provided id [{}] not exist", evidenceId);
+                    throw new EvidenceNotFoundException(evidenceId);
+                });
 
-        if (Optional.ofNullable(evidenceEntity).isEmpty()) {
-            log.warn("Evidence with provided id [{}] not exist", evidenceId);
-            throw new EvidenceNotFoundException(evidenceId);
-        }
         return evidenceMapper.mapToDetailDto(evidenceEntity);
     }
 

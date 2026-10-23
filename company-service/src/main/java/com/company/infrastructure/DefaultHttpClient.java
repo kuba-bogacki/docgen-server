@@ -25,7 +25,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/get-id"))
+                .uri(buildUrl(HTTP, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/get-id"))
                 .retrieve()
                 .body(UUID.class);
     }
@@ -35,7 +35,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(PROTOCOL, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/get-by-id/" + userId))
+                .uri(buildUrl(HTTP, AUTHENTICATION_SERVICE, API_VERSION, "/authentication/get-by-id/" + userId))
                 .retrieve()
                 .body(UserDto.class);
     }

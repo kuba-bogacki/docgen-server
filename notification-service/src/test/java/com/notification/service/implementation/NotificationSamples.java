@@ -17,6 +17,7 @@ class NotificationSamples {
     final String userFirstNameI = "John";
     final String userLastNameI = "Doe";
     final String userEmail = "john.doe@gmail.com";
+    final String clientAddress = "http://localhost:3000";
     final String userVerificationCode = "HDoLh86MBCMB4uEc3jWkgHfUTGxhbGDZjkgyS2Dm46tysfylyVYhyxJUEvpKDTQf";
     final String userPrincipal = "cf8579c0-b0f1-4f8a-bbc3-cb5e00f1a929";
 

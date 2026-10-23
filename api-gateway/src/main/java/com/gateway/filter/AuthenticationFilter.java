@@ -8,10 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -27,35 +25,12 @@ import static com.gateway.util.ApplicationConstants.*;
 @RequiredArgsConstructor
 public class AuthenticationFilter implements WebFilter {
 
-    private final RouterValidator routerValidator;
     private final JwtProperties jwtProperties;
+    private final RouterValidator routerValidator;
 
     @Override
     public @NotNull Mono<Void> filter(ServerWebExchange exchange, @Nullable WebFilterChain chain) {
         final var request = exchange.getRequest();
-
-        if (CorsUtils.isCorsRequest(request)) {
-            final var response = exchange.getResponse();
-            final var headers = response.getHeaders();
-
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_HEADERS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_HEADERS, ALLOWED_HEADERS);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_ORIGIN))) {
-                headers.add(ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_METHODS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS);
-            }
-            if (Objects.isNull(headers.get(ACCESS_CONTROL_ALLOW_CREDENTIALS))) {
-                headers.add(ACCESS_CONTROL_ALLOW_CREDENTIALS, ALLOWED_CREDENTIALS);
-            }
-
-            if (request.getMethod() == HttpMethod.OPTIONS) {
-                response.setStatusCode(HttpStatus.OK);
-                return Mono.empty();
-            }
-        }
 
         if (routerValidator.isSecured.test(request)) {
             if (isAuthMissing(request))
@@ -78,14 +53,21 @@ public class AuthenticationFilter implements WebFilter {
     }
 
     private String getValidToken(ServerHttpRequest request) {
-        if (request.getHeaders().containsHeader(COOKIE)) {
-            return request.getHeaders().getOrEmpty(COOKIE).get(0).split("=")[1];
+        if (request.getHeaders().containsHeader(AUTHORIZATION_HEADER)) {
+            final var authHeaders = request.getHeaders().getOrEmpty(AUTHORIZATION_HEADER);
+            if (!authHeaders.isEmpty() && authHeaders.get(0).startsWith(BEARER)) {
+                return authHeaders.get(0).substring(BEARER.length()).trim();
+            }
         }
-        return request.getHeaders().getOrEmpty(AUTHORIZATION_HEADER).get(0).split(" ")[1];
+        final var authCookie = request.getCookies().getFirst(ACCESS_TOKEN);
+        return authCookie != null ? authCookie.getValue() : null;
     }
 
     private boolean isAuthMissing(ServerHttpRequest request) {
-        return !request.getHeaders().containsHeader(AUTHORIZATION_HEADER);
+        final boolean hasAuthHeader = request.getHeaders().containsHeader(AUTHORIZATION_HEADER);
+        final boolean hasAuthCookie = request.getCookies().containsKey(ACCESS_TOKEN);
+
+        return !hasAuthHeader && !hasAuthCookie;
     }
 
     private ServerWebExchange populateRequestWithHeaders(ServerWebExchange exchange, String token) {
