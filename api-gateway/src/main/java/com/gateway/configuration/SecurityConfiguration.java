@@ -3,7 +3,7 @@ package com.gateway.configuration;
 import com.gateway.configuration.properties.CorsProperties;
 import com.gateway.filter.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -19,7 +19,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 import java.util.List;
 
-@Log4j2
+@Slf4j
 @Configuration
 @EnableWebFluxSecurity
 @RequiredArgsConstructor

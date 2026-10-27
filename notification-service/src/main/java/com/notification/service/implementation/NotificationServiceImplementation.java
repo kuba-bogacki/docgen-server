@@ -9,10 +9,10 @@ import com.notification.infrastructure.HttpClient;
 import com.notification.mapper.NotificationMapper;
 import com.notification.model.Notification;
 import com.notification.model.dto.*;
-import com.notification.model.type.NotificationType;
 import com.notification.repository.NotificationRepository;
 import com.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImplementation implements NotificationService {
@@ -41,7 +42,7 @@ public class NotificationServiceImplementation implements NotificationService {
             throw new CurrentUserNotFoundException("Impossible to get current user id by token credential");
         }
 
-        var currentUserNotificationList = notificationRepository.findNotificationsByNotificationReceiverId(currentUserDto.getUserId());
+        final var currentUserNotificationList = notificationRepository.findNotificationsByNotificationReceiverId(currentUserDto.getUserId());
         return notificationMapper.toNotificationDtoList(currentUserNotificationList);
     }
 
@@ -65,18 +66,19 @@ public class NotificationServiceImplementation implements NotificationService {
     @Override
     public void sendRefreshToken(AuthenticationResponse authenticationResponse, String userPrincipal) {
         simpMessagingTemplate.convertAndSendToUser(userPrincipal, "/queue/refresh-token", authenticationResponse);
+        log.info("Refresh token has been successfully send to user principal with number {}.", userPrincipal);
     }
 
     @Override
     public void sendUserPrincipalName(String jwtToken, Principal principal) {
         final var userEmail = jwtProperties.getUserEmail(jwtToken);
-        var currentUserDto = httpClient.getCurrentUserDto(userEmail);
+        final var currentUserDto = httpClient.getCurrentUserDto(userEmail);
         if (Objects.isNull(currentUserDto)) {
             throw new InvitationSendFailureException("Current user not found in database");
         }
 
-        var userPrincipalDto = createUserPrincipalDto(currentUserDto.getUserId(), principal.getName());
-        var response = httpClient.addUserPrincipalName(userPrincipalDto, userEmail);
+        final var userPrincipalDto = createUserPrincipalDto(currentUserDto.getUserId(), principal.getName());
+        final var response = httpClient.addUserPrincipalName(userPrincipalDto, userEmail);
 
         if (response.getStatusCode().is4xxClientError()) {
             throw new EntityNotFoundException("Couldn't set user principal name.");
@@ -89,22 +91,21 @@ public class NotificationServiceImplementation implements NotificationService {
     }
 
     @Override
-    @Transactional
     public void sendMembershipPetition(NotificationRequest request, String jwtToken) {
         final var userEmail = jwtProperties.getUserEmail(jwtToken);
-        var currentUserDto = httpClient.getCurrentUserDto(userEmail);
+        final var currentUserDto = httpClient.getCurrentUserDto(userEmail);
 
         if (Objects.isNull(currentUserDto)) {
             throw new InvitationSendFailureException("Impossible to send membership petition - current user not found");
         }
 
-        var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
+        final var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
 
         if (Objects.isNull(companyDto)) {
             throw new InvitationSendFailureException("Impossible to send membership petition - current company is null");
         }
 
-        var userDtoList = companyDto.getCompanyMembers().stream()
+        final var userDtoList = companyDto.getCompanyMembers().stream()
                 .map(memberId -> httpClient.getUserDtoById(memberId.toString(), userEmail))
                 .collect(Collectors.toSet());
 
@@ -119,16 +120,15 @@ public class NotificationServiceImplementation implements NotificationService {
     }
 
     @Override
-    @Transactional
     public void acceptMembershipPetition(NotificationRequest request, String jwtToken) {
         final var userEmail = jwtProperties.getUserEmail(jwtToken);
-        var userDto = httpClient.getUserDtoById(request.getNotificationReceiverId(), userEmail);
+        final var userDto = httpClient.getUserDtoById(request.getNotificationReceiverId(), userEmail);
 
         if (Objects.isNull(userDto)) {
             throw new InvitationSendFailureException("Impossible to send membership response - receiver user not found");
         }
 
-        var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
+        final var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
 
         if (Objects.isNull(companyDto)) {
             throw new InvitationSendFailureException("Impossible to send membership petition - current company is null");
@@ -151,22 +151,21 @@ public class NotificationServiceImplementation implements NotificationService {
     }
 
     @Override
-    @Transactional
     public void sendNewEventInfo(NotificationRequest request, String jwtToken) {
         final var userEmail = jwtProperties.getUserEmail(jwtToken);
-        var currentUserDto = httpClient.getCurrentUserDto(userEmail);
+        final var currentUserDto = httpClient.getCurrentUserDto(userEmail);
 
         if (Objects.isNull(currentUserDto)) {
             throw new EventSendFailureException("Impossible to send new event request - current user not found");
         }
 
-        var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
+        final var companyDto = httpClient.getCompanyDtoById(request.getNotificationCompanyId(), userEmail);
 
         if (Objects.isNull(companyDto)) {
             throw new EventSendFailureException("Impossible to send new event request - current company is null");
         }
 
-        var userDtoList = companyDto.getCompanyMembers().stream()
+        final var userDtoList = companyDto.getCompanyMembers().stream()
                 .map(memberId -> httpClient.getUserDtoById(memberId.toString(), userEmail))
                 .collect(Collectors.toSet());
 
@@ -176,15 +175,16 @@ public class NotificationServiceImplementation implements NotificationService {
 
         final var updatedMessage = updateCompanyInfoMessage(request.getNotificationMessage(), companyDto);
         request.setNotificationMessage(updatedMessage);
-        userDtoList.forEach(companyUser -> sendNewEventRequestNotification(request, currentUserDto.getUserId(), companyUser.getUserId(), companyUser.getUserPrincipal()));
+        userDtoList.forEach(companyUser ->
+                sendNewEventRequestNotification(request, currentUserDto.getUserId(), companyUser.getUserId(), companyUser.getUserPrincipal()));
     }
 
     private void deleteNotification(String notificationId) {
-        Optional<Notification> entity = notificationRepository.findById(notificationId);
-        if (entity.isEmpty()) {
-            throw new EntityNotFoundException(String.format("Notification with id [%s] not found", notificationId));
-        }
-        notificationRepository.delete(entity.get());
+        final var entity = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Notification with id [%s] not found", notificationId)));
+
+        notificationRepository.delete(entity);
+        log.info("Notification with id {} has been successfully deleted.", entity.getNotificationId());
     }
 
     private String updateMembershipRequestMessage(String message, UserDto userDto, CompanyDto companyDto) {
@@ -208,8 +208,12 @@ public class NotificationServiceImplementation implements NotificationService {
 
     private void saveAndSend(NotificationDto notificationDto, String path) {
         final var notification = notificationMapper.toNotificationEntity(notificationDto);
-        final var entity = notificationRepository.save(notification);
-        simpMessagingTemplate.convertAndSendToUser(notificationDto.getNotificationUserPrincipal(), path, notificationMapper.toNotificationDto(entity));
+
+        final var savedNotification = notificationRepository.save(notification);
+        log.info("New notification with id {} has been successfully saved.", savedNotification.getNotificationId());
+
+        simpMessagingTemplate.convertAndSendToUser(notificationDto.getNotificationUserPrincipal(), path, notificationMapper.toNotificationDto(savedNotification));
+        log.info("Notification with id {} has been successfully send to user principal with number {}.", savedNotification.getNotificationId(), notificationDto.getNotificationUserPrincipal());
     }
 
     private NotificationDto createNotificationDto(String userPrincipal, NotificationRequest request, String requesterId, String receiverId) {

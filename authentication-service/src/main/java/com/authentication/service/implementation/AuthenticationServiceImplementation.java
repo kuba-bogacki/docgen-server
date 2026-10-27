@@ -16,15 +16,18 @@ import com.authentication.service.AuthenticationService;
 import com.authentication.service.JwtService;
 import com.authentication.util.random.NumberGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImplementation implements AuthenticationService {
@@ -38,6 +41,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     private final AuthenticationManager authenticationManager;
 
     @Override
+    @Transactional
     public void register(RegisterRequest registerRequest) {
         checkIfUserExist(registerRequest.getUserEmail());
         User user = User.builder()
@@ -62,19 +66,23 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException("Couldn't send verification email. New user is not saved in database.");
         }
-        userRepository.save(user);
+        final var savedUser = userRepository.save(user);
+        log.info("New user with id {} successfully saved.", savedUser.getUserId());
     }
 
     @Override
+    @Transactional
     public void addUserPrincipal(UserPrincipalDto userPrincipalDto) {
         final User user = userRepository.findById(UUID.fromString(userPrincipalDto.getUserId()))
                 .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provide id"));
 
         user.setUserPrincipal(userPrincipalDto.getUserPrincipal());
-        userRepository.save(user);
+        final var savedUser = userRepository.save(user);
+        log.info("User principal number added and user with id {} successfully updated.", savedUser.getUserId());
     }
 
     @Override
+    @Transactional
     public AuthenticationResponse verifyUserRegistrationCode(String registrationCode, AuthenticationRequest authenticationRequest) {
         final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provided email"));
@@ -84,7 +92,8 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         }
 
         user.setEnabled(true);
-        userRepository.save(user);
+        final var savedUser = userRepository.save(user);
+        log.info("Enabled account set and user with id {} successfully updated.", savedUser.getUserId());
 
         authenticateUser(authenticationRequest);
         final String jwtToken = jwtService.generateJwtToken(user);
@@ -96,6 +105,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("Impossible to find user with provided email"));
@@ -114,15 +124,18 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
+    @Transactional
     public void logout(String userEmail) {
         final User user = userRepository.findUserByUserEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("Impossible to find user by provided email"));
 
         user.setUserPrincipal(null);
-        userRepository.save(user);
+        final var savedUser = userRepository.save(user);
+        log.info("User with id {} successfully logout and updated.", savedUser.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void refreshToken(String userEmail) {
         final User user = userRepository.findUserByUserEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("Couldn't find user with provided email"));
@@ -145,6 +158,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthenticationResponse confirmCompanyMembership(String companyId, AuthenticationRequest authenticationRequest) {
         final User user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
                 .orElseThrow(() -> new UserNotFoundException("User with provided email cannot be found"));

@@ -44,13 +44,18 @@ class AuthenticationServiceImplementationTest extends Samples {
     @Test
     @DisplayName("Should create new user entity if register request is valid")
     void test_01() {
+        //given
+        final var userEntity = sampleUserEntity.toBuilder()
+                .userId(userIdI)
+                .build();
+
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(any(User.class))).thenReturn(sampleUserEventDto);
         when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
-        when(userRepository.save(any(User.class))).thenReturn(any());
+        when(userRepository.save(any(User.class))).thenReturn(userEntity);
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));
 
@@ -302,6 +307,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(authenticationManager.authenticate(usernamePasswordAuthentication)).thenThrow(UserAuthorizationException.class);
+        when(userRepository.save(any(User.class))).thenReturn(userEntity);
 
         final var expectedException = catchThrowable(() -> authenticationService.verifyUserRegistrationCode(userVerificationCode, wrongCredentialsAuthenticationRequest));
 

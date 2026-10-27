@@ -4,7 +4,7 @@ import com.notification.filter.JwtAuthenticationFilter;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static com.notification.util.ApplicationConstants.API_VERSION;
 
-@Log4j2
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfiguration {

@@ -377,6 +377,7 @@ class CompanyServiceTest extends CompanySamples {
                 .build();
         //when
         when(companyRepository.findCompanyByCompanyId(companyIdI)).thenReturn(Optional.of(companyEntity));
+        when(companyRepository.save(companyEntity)).thenReturn(companyEntity);
 
         companyService.addNewMemberToCompany(companyIdI.toString(), currentUserId.toString());
 

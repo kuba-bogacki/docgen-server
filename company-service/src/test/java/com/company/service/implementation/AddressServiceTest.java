@@ -40,7 +40,7 @@ class AddressServiceTest extends AddressSamples {
                 .build();
 
         //when
-        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundEntity));
+        when(addressRepository.findById(addressIdI)).thenReturn(Optional.of(foundEntity));
         when(addressMapper.mapToDto(foundEntity)).thenReturn(expectedDto);
 
         final var result = addressService.getAddressByAddressId(addressIdI);
@@ -56,7 +56,7 @@ class AddressServiceTest extends AddressSamples {
     @DisplayName("Should throw an exception if entity with provided id not found")
     void test_02() {
         //when
-        when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
+        when(addressRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         final var expectedException = catchException(() -> addressService.getAddressByAddressId(addressIdI));
 
@@ -207,7 +207,7 @@ class AddressServiceTest extends AddressSamples {
                 .build();
 
         //when
-        when(addressRepository.findAddressByAddressId(addressIdI)).thenReturn(Optional.of(foundEntity));
+        when(addressRepository.findById(addressIdI)).thenReturn(Optional.of(foundEntity));
         when(addressMapper.mapToEntity(providedDto)).thenReturn(savedEntity);
         when(addressRepository.save(savedEntity)).thenReturn(savedEntity);
         when(addressMapper.mapToDto(savedEntity)).thenReturn(expectedDto);
@@ -221,14 +221,14 @@ class AddressServiceTest extends AddressSamples {
                 .isEqualTo(expectedDto);
         verify(addressMapper).mapToEntity(providedDto);
         verify(addressMapper).mapToDto(savedEntity);
-        verify(addressRepository).findAddressByAddressId(addressIdI);
+        verify(addressRepository).findById(addressIdI);
     }
 
     @Test
     @DisplayName("Should throw an exception if address entity to update was not found")
     void test_09() {
         //when
-        when(addressRepository.findAddressByAddressId(any(UUID.class))).thenReturn(Optional.empty());
+        when(addressRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         final var expectedException = catchException(() -> addressService.getAddressByAddressId(addressIdII));
 

@@ -9,6 +9,7 @@ import com.event.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,10 +22,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventServiceImplementation implements EventService {
 
-    private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final EventRepository eventRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventDto> getCompanyEventsByDate(String companyId, String date) {
         final var sortedEventsList = eventRepository.findAllByEventCompanyAndEventDate(UUID.fromString(companyId), parseCustomLocalDate(date)).stream()
                 .sorted(Comparator.comparing(Event::getEventTime))
@@ -33,24 +35,28 @@ public class EventServiceImplementation implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventDto> getCompanyEvents(String companyId) {
         return eventMapper.mapToDtos(eventRepository.findAllByEventCompany(UUID.fromString(companyId)));
     }
 
     @Override
+    @Transactional
     public EventDto createEvent(EventDto eventDto) {
-        var event = eventRepository.save(eventMapper.mapToEntity(eventDto));
+        final var event = eventRepository.save(eventMapper.mapToEntity(eventDto));
         log.info("Event has been created with id : {}", event.getEventId());
         return eventMapper.mapToDto(event);
     }
 
     @Override
+    @Transactional
     public void deleteCompanyEvent(String eventId) {
-        var optionalEvent = eventRepository.findById(UUID.fromString(eventId));
+        final var optionalEvent = eventRepository.findById(UUID.fromString(eventId));
         if (optionalEvent.isEmpty()) {
             throw new EventNotExistException(String.format("Event with id [%s] does not exist", eventId));
         }
         eventRepository.deleteById(UUID.fromString(eventId));
+        log.info("Event with id {} has been successfully deleted.", eventId);
     }
 
     private LocalDate parseCustomLocalDate(String date) {

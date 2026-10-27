@@ -21,5 +21,6 @@ public class EventDto {
     private String eventDate;
     private String eventTime;
     private EventType eventType;
+    @Builder.Default
     private Set<String> eventMembers = new HashSet<>();
 }

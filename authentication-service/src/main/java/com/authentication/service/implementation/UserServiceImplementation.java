@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -35,91 +36,88 @@ public class UserServiceImplementation implements UserService {
 
     private static final String USER_NOT_FOUND = "Can't find %s user";
 
-    private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final HttpClient httpClient;
+    private final StripeClient stripeClient;
+    private final ImageKitClient imageKitClient;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final NumberGenerator numberGenerator;
-    private final HttpClient httpClient;
-    private final ImageKitClient imageKitClient;
-    private final StripeClient stripeClient;
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserDtoByUserEmail(String userEmail) {
-        Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final var user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail)));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
-        }
-        return userMapper.mapToUserDto(user.get());
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
+    @Transactional
     public Boolean sendVerificationEmail(String userEmail) {
-        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final var user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("Impossible to send reset link because user with provide email not exist."));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Impossible to send reset link because user with provide email not exist.");
-        }
-
-        final UserEventDto userEventDto = userMapper.mapToUserEventDto(user.get());
-        final ResponseEntity<?> emailStatus = httpClient.getEmailStatus(userEventDto);
+        final var userEventDto = userMapper.mapToUserEventDto(user);
+        final var emailStatus = httpClient.getEmailStatus(userEventDto);
         if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserWebClientException("Couldn't send reset email. User account still locked.");
         }
-        user.get().setAccountNonLocked(false);
-        final User savedUser = userRepository.save(user.get());
+        user.setAccountNonLocked(false);
+        final var savedUser = userRepository.save(user);
 
+        log.info("Verification email sent and user with id {} successfully updated.", savedUser.getUserId());
         return savedUser.getAccountNonLocked();
     }
 
     @Override
+    @Transactional
     public Boolean resetUserPassword(String verificationCode, AuthenticationRequest authenticationRequest) {
-        Optional<User> user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail());
+        final var user = userRepository.findUserByUserEmail(authenticationRequest.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException("Bad credentials. Impossible to find user with provide email."));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Bad credentials. Impossible to find user with provide email.");
-        }
-        if (!user.get().getUserVerificationCode().equals(verificationCode)) {
+        if (!user.getUserVerificationCode().equals(verificationCode)) {
             throw new UserAuthenticationException("Verification codes are different or code already expired.");
         }
 
-        user.get().setAccountNonLocked(true);
-        user.get().setUserVerificationCode(numberGenerator.generateVerificationCode(64));
-        user.get().setUserPassword(passwordEncoder.encode(authenticationRequest.getUserPassword()));
-        User savedUser = userRepository.save(user.get());
+        user.setAccountNonLocked(true);
+        user.setUserVerificationCode(numberGenerator.generateVerificationCode(64));
+        user.setUserPassword(passwordEncoder.encode(authenticationRequest.getUserPassword()));
+        final var savedUser = userRepository.save(user);
 
+        log.info("Password reset and user with id {} successfully updated.", savedUser.getUserId());
         return savedUser.getAccountNonLocked();
     }
 
     @Override
+    @Transactional
     public UserDto updateUserData(UserDto userDto) {
-        Optional<User> user = userRepository.findUserByUserEmail(userDto.getUserEmail());
+        final var user = userRepository.findUserByUserEmail(userDto.getUserEmail())
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, userDto.getUserEmail())));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userDto.getUserEmail()));
-        }
+        user.setUserFirstNameI(userDto.getUserFirstNameI());
+        user.setUserFirstNameII(userDto.getUserFirstNameII());
+        user.setUserLastNameI(userDto.getUserLastNameI());
+        user.setUserLastNameII(userDto.getUserLastNameII());
+        final var savedUser = userRepository.save(user);
 
-        user.get().setUserFirstNameI(userDto.getUserFirstNameI());
-        user.get().setUserFirstNameII(userDto.getUserFirstNameII());
-        user.get().setUserLastNameI(userDto.getUserLastNameI());
-        user.get().setUserLastNameII(userDto.getUserLastNameII());
-        User savedUser = userRepository.save(user.get());
-
+        log.info("User data with id {} successfully updated.", savedUser.getUserId());
         return userMapper.mapToUserDto(savedUser);
     }
 
     @Override
+    @Transactional
     public String uploadNewUserPhoto(MultipartFile multipartFile, String userEmail) {
-        Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final var user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail)));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
-        }
-        final var resultFileName = uploadNewMultipartFile(multipartFile, user.get().getUserPhotoFileName());
+        final var resultFileName = uploadNewMultipartFile(multipartFile, user.getUserPhotoFileName());
 
-        user.get().setUserPhotoFileName(resultFileName);
-        var savedUser = userRepository.save(user.get());
+        user.setUserPhotoFileName(resultFileName);
+        final var savedUser = userRepository.save(user);
 
+        log.info("New photo uploaded and user with id {} successfully updated.", savedUser.getUserId());
         return savedUser.getUserPhotoFileName();
     }
 
@@ -138,29 +136,26 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserNotCompanyMember(String companyId, String userEmail) {
-        final Optional<User> user = userRepository.findUserByUserEmail(userEmail);
+        final var user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail)));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
-        }
+        final var membersList = httpClient.getMemberUuidList(companyId, userEmail);
 
-        final List<UUID> membersList = httpClient.getMemberUuidList(companyId, userEmail);
-
-        if (Objects.nonNull(membersList) && membersList.contains(user.get().getUserId())) {
+        if (Objects.nonNull(membersList) && membersList.contains(user.getUserId())) {
             throw new UserAlreadyExistException(String.format("User with email %s is already member of company", userEmail));
         }
-        return userMapper.mapToUserDto(user.get());
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserDtoByUserId(String userId) {
-        Optional<User> user = userRepository.findById(UUID.fromString(userId));
+        final var user = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new UserNotFoundException("Can't find user with provided id: " + userId));
 
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Can't find user with provided id: " + userId);
-        }
-        return userMapper.mapToUserDto(user.get());
+        return userMapper.mapToUserDto(user);
     }
 
     @Override
@@ -176,15 +171,14 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
+    @Transactional
     public void updateUserMembership(Membership membership, String userEmail) {
-        final var user = userRepository.findUserByUserEmail(userEmail);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail));
-        }
+        final var user = userRepository.findUserByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, userEmail)));
 
-        user.get().setUserMembership(membership);
-        userRepository.save(user.get());
-        log.info("User {} membership was successfully updated.", membership.name());
+        user.setUserMembership(membership);
+        final var updatedUser = userRepository.save(user);
+        log.info("User {} membership was successfully updated.", updatedUser.getUserMembership().name());
     }
 
     @Override

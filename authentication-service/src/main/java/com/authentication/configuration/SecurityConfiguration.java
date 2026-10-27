@@ -3,7 +3,7 @@ package com.authentication.configuration;
 import com.authentication.filter.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static com.authentication.util.ApplicationConstants.API_VERSION;
 
-@Log4j2
+@Slf4j
 @Configuration
 @EnableWebMvc
 @RequiredArgsConstructor

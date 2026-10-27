@@ -13,7 +13,7 @@ import com.document.queue.MessageQueuePublisher;
 import com.document.repository.EvidenceRepository;
 import com.document.service.EvidenceService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ import java.util.*;
 import static com.document.util.ApplicationConstants.DEFAULT_DATE_PATTERN;
 import static com.document.util.ApplicationConstants.FINANCIAL_STATEMENT_FILE_NAME;
 
-@Log4j2
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EvidenceServiceImplementation implements EvidenceService {
@@ -37,13 +37,14 @@ public class EvidenceServiceImplementation implements EvidenceService {
 
     @Override
     public void deleteEvidenceById(String evidenceId) {
-        var evidenceEntity = Optional.ofNullable(evidenceRepository.findByEvidenceId(evidenceId))
+        final var evidenceEntity = Optional.ofNullable(evidenceRepository.findByEvidenceId(evidenceId))
                 .orElseGet(() -> {
                     log.warn("Couldn't delete entity because evidence with provided id [{}] is not exist", evidenceId);
                     throw new EvidenceNotFoundException(evidenceId);
                 });
 
         evidenceRepository.delete(evidenceEntity);
+        log.info("Evidence with provided id {} successfully deleted.", evidenceId);
     }
 
     @Override
@@ -72,6 +73,7 @@ public class EvidenceServiceImplementation implements EvidenceService {
                 .placeholders(placeholders)
                 .build();
         messageQueuePublisher.publishEvidenceDrafted(queueMessage);
+        log.info("Queue message with message id {} successfully publish on queue.", queueMessage.getMessageId());
     }
 
     @Override
