@@ -21,6 +21,7 @@ public class CompanyDto {
     private String companyRegistrationDate;
     private AddressDto companyAddressDto;
     private Float companyShareCapital;
+    @Builder.Default
     private Set<UUID> companyMembers = new HashSet<>();
 }
 

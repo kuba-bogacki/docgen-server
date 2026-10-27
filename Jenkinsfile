@@ -21,17 +21,6 @@ pipeline {
             }
         }
 
-        stage('Build with Maven') {
-            steps {
-                script {
-                    def services = ['discovery-server', 'notification-service', 'authentication-service', 'company-service', 'document-service', 'event-service', 'api-gateway']
-                    for (service in services) {
-                        sh "mvn clean package -pl ${service} -am -DskipTests"
-                    }
-                }
-            }
-        }
-
         stage('Build Test') {
             steps {
                 script {
@@ -86,7 +75,7 @@ pipeline {
                             for service in "${SERVICES[@]}"; do
                                 docker compose pull "$service"
                                 docker compose up -d "$service"
-                                sleep 3
+                                sleep 5
                             done
                             docker image prune -f
                         '

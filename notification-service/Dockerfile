@@ -10,11 +10,11 @@ COPY document-service/pom.xml ./document-service/
 COPY event-service/pom.xml ./event-service/
 COPY notification-service/pom.xml ./notification-service/
 
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 COPY . .
-RUN mvn clean compile -Dmaven.test.skip && mvn clean package -Dmaven.test.skip
+RUN mvn clean package -pl notification-service -am -Dmaven.test.skip=true
 
 FROM amazoncorretto:17-alpine-jdk
 WORKDIR /notification-service
-COPY --from=builder /docgenserver/notification-service/target/notification-service-1.0-SNAPSHOT.jar ./
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "notification-service-1.0-SNAPSHOT.jar"]
+COPY --from=builder /docgenserver/notification-service/target/*.jar ./notification-service.jar
+CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "notification-service.jar"]

@@ -10,11 +10,11 @@ COPY document-service/pom.xml ./document-service/
 COPY event-service/pom.xml ./event-service/
 COPY notification-service/pom.xml ./notification-service/
 
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 COPY . .
-RUN mvn clean compile -Dmaven.test.skip && mvn clean package -Dmaven.test.skip
+RUN mvn clean package -pl authentication-service -am -Dmaven.test.skip=true
 
 FROM amazoncorretto:17-alpine-jdk
 WORKDIR /authentication-service
-COPY --from=builder /docgenserver/authentication-service/target/authentication-service-1.0-SNAPSHOT.jar ./
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001", "-jar", "authentication-service-1.0-SNAPSHOT.jar"]
+COPY --from=builder /docgenserver/authentication-service/target/*.jar ./authentication-service.jar
+CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001", "-jar", "authentication-service.jar"]
