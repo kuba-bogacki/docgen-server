@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.*;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyDto {

@@ -70,7 +70,7 @@ class CompanyServiceTest extends CompanySamples {
     void test_03() {
         //given
         final var companyDto = sampleDtoCompanyI;
-        final var savedCompanyDto = sampleDtoCompanyI.toBuilder()
+        final var savedCompanyDto = CompanyDto.builder()
                 .companyId(companyIdI)
                 .companyMembers(Set.of(currentUserId))
                 .build();
@@ -125,7 +125,7 @@ class CompanyServiceTest extends CompanySamples {
     void test_05() {
         //given
         final var malformedCompanyRegistrationDate = "123-error;2137";
-        final var companyDto = sampleDtoCompanyI.toBuilder()
+        final var companyDto = CompanyDto.builder()
                 .companyRegistrationDate(malformedCompanyRegistrationDate)
                 .build();
 
@@ -147,7 +147,7 @@ class CompanyServiceTest extends CompanySamples {
     @DisplayName("Should throw an exception if issue appear due null company krs number")
     void test_06() {
         //given
-        final var companyDto = sampleDtoCompanyI.toBuilder()
+        final var companyDto = CompanyDto.builder()
                 .companyKrsNumber(null)
                 .build();
         final var companyEntity = sampleEntityCompanyI.toBuilder()
@@ -173,7 +173,8 @@ class CompanyServiceTest extends CompanySamples {
     @DisplayName("Should return found company dto if company entity exist and company name is valid")
     void test_07() {
         //given
-        final var companyDto = sampleDtoCompanyI.toBuilder()
+        final var companyDto = CompanyDto.builder()
+                .companyName(companyNameI)
                 .companyId(companyIdI)
                 .build();
         final var companyEntity = sampleEntityCompanyI.toBuilder()
@@ -219,7 +220,7 @@ class CompanyServiceTest extends CompanySamples {
     @DisplayName("Should return found company dto if company entity exist and company id is valid")
     void test_09() {
         //given
-        final var companyDto = sampleDtoCompanyI.toBuilder()
+        final var companyDto = CompanyDto.builder()
                 .companyId(companyIdI)
                 .build();
         final var companyEntity = sampleEntityCompanyI.toBuilder()
@@ -265,8 +266,9 @@ class CompanyServiceTest extends CompanySamples {
     @DisplayName("Should return found company dto if company entity exist and company krs number is valid")
     void test_11() {
         //given
-        final var companyDto = sampleDtoCompanyI.toBuilder()
+        final var companyDto = CompanyDto.builder()
                 .companyId(companyIdI)
+                .companyKrsNumber(companyKrsNumberI)
                 .build();
         final var companyEntity = sampleEntityCompanyI.toBuilder()
                 .companyId(companyIdI)

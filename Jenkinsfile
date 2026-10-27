@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS = 'a7d50e5c-36b3-464f-aa85-81d0a498ce09'
-        DOCKER_REGISTRY = 'https://registry.hub.docker.com'
-        DOCKER_NAMESPACE = 'spaceavocado34'
+        DOCKER_REGISTRY    = 'https://registry.hub.docker.com'
+        DOCKER_NAMESPACE   = 'spaceavocado34'
+        SSH_KEY_NAME       = 'vps-ssh-key'
     }
 
     stages {
@@ -23,7 +24,7 @@ pipeline {
         stage('Build with Maven') {
             steps {
                 script {
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
+                    def services = ['discovery-server', 'notification-service', 'authentication-service', 'company-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         sh "mvn clean package -pl ${service} -am -DskipTests"
                     }
@@ -34,7 +35,7 @@ pipeline {
         stage('Build Test') {
             steps {
                 script {
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
+                    def services = ['discovery-server', 'notification-service', 'authentication-service', 'company-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         sh "mvn test -pl ${service}"
                     }
@@ -45,7 +46,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
+                    def services = ['discovery-server', 'notification-service', 'authentication-service', 'company-service', 'document-service', 'event-service', 'api-gateway']
                     for (service in services) {
                         def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
                         def latestName = "${DOCKER_NAMESPACE}/${service}:latest"
@@ -61,7 +62,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry("${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
-                        def services = ['discovery-server', 'authentication-service', 'company-service', 'notification-service', 'document-service', 'event-service', 'api-gateway']
+                        def services = ['discovery-server', 'notification-service', 'authentication-service', 'company-service', 'document-service', 'event-service', 'api-gateway']
                         for (service in services) {
                             def imageName = "${DOCKER_NAMESPACE}/${service}:${env.IMAGE_TAG}"
                             def latestName = "${DOCKER_NAMESPACE}/${service}:latest"
@@ -69,6 +70,27 @@ pipeline {
                             docker.image(latestName).push()
                         }
                     }
+                }
+            }
+        }
+
+        stage('Deploy to Virtual Private Server') {
+            steps {
+                sshagent(["${SSH_KEY_NAME}"]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@213.32.18.90 '
+                            cd ~/docgen && \
+
+                            SERVICES=("discovery-server", "notification-service", "authentication-service", "company-service", "document-service", "event-service", "api-gateway")
+
+                            for service in "${SERVICES[@]}"; do
+                                docker compose pull "$service"
+                                docker compose up -d "$service"
+                                sleep 3
+                            done
+                            docker image prune -f
+                        '
+                    """
                 }
             }
         }
