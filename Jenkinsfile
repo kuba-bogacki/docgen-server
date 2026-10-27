@@ -77,11 +77,11 @@ pipeline {
         stage('Deploy to Virtual Private Server') {
             steps {
                 sshagent(["${SSH_KEY_NAME}"]) {
-                    sh """
+                    sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@213.32.18.90 '
                             cd ~/docgen && \
 
-                            SERVICES=("discovery-server", "notification-service", "authentication-service", "company-service", "document-service", "event-service", "api-gateway")
+                            SERVICES=("discovery-server" "notification-service" "authentication-service" "company-service" "document-service" "event-service" "api-gateway")
 
                             for service in "${SERVICES[@]}"; do
                                 docker compose pull "$service"
@@ -90,7 +90,7 @@ pipeline {
                             done
                             docker image prune -f
                         '
-                    """
+                    '''
                 }
             }
         }
