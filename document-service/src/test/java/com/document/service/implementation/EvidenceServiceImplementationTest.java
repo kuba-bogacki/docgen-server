@@ -7,6 +7,7 @@ import com.document.infrastructure.HttpClient;
 import com.document.mapper.EvidenceMapper;
 import com.document.model.Evidence;
 import com.document.model.dto.QueueMessage;
+import com.document.model.type.EvidenceStatus;
 import com.document.queue.MessageQueuePublisher;
 import com.document.repository.EvidenceRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -183,16 +184,15 @@ class EvidenceServiceImplementationTest extends EvidenceSamples {
     }
 
     @Test
-    @DisplayName("Should return company evidences list sorted by creation date if company id is provided")
+    @DisplayName("Should return company evidences list without 'Drafted' status sorted by creation date if company id is provided")
     void test_09() {
         //given
-        final var evidenceNo1 = createEvidenceEntity(evidenceIdNo1, 2025, 12, 12, 13, 20);
-        final var evidenceNo2 = createEvidenceEntity(evidenceIdNo2, 2024, 5, 5, 13, 50);
-        final var evidenceNo3 = createEvidenceEntity(evidenceIdNo3, 2025, 2, 1, 15, 15);
+        final var evidenceNo1 = createEvidenceEntity(evidenceIdNo1, EvidenceStatus.DRAFTED, 2025, 12, 12, 13, 20);
+        final var evidenceNo2 = createEvidenceEntity(evidenceIdNo2, EvidenceStatus.EDITED, 2024, 5, 5, 13, 50);
+        final var evidenceNo3 = createEvidenceEntity(evidenceIdNo3, EvidenceStatus.CREATED, 2025, 2, 1, 15, 15);
 
         //when
         when(evidenceRepository.findAllByCompanyId(companyIdNo1)).thenReturn(List.of(evidenceNo1, evidenceNo2, evidenceNo3));
-        when(evidenceMapper.mapToDto(evidenceNo1)).thenReturn(evidenceDtoNo1);
         when(evidenceMapper.mapToDto(evidenceNo2)).thenReturn(evidenceDtoNo2);
         when(evidenceMapper.mapToDto(evidenceNo3)).thenReturn(evidenceDtoNo3);
 
@@ -200,7 +200,7 @@ class EvidenceServiceImplementationTest extends EvidenceSamples {
 
         //then
         assertThat(result)
-                .containsExactly(evidenceDtoNo1, evidenceDtoNo3, evidenceDtoNo2);
+                .containsExactly(evidenceDtoNo3, evidenceDtoNo2);
     }
 
     @Test

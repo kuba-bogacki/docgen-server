@@ -88,6 +88,7 @@ public class EvidenceServiceImplementation implements EvidenceService {
     @Override
     public List<EvidenceDto> getAllCompanyEvidences(String companyId) {
         return evidenceRepository.findAllByCompanyId(companyId).stream()
+                .filter(evidence -> evidence.getEvidenceStatus() != EvidenceStatus.DRAFTED)
                 .sorted(Comparator.comparing(Evidence::getCreateDateTime).reversed())
                 .map(evidenceMapper::mapToDto)
                 .toList();

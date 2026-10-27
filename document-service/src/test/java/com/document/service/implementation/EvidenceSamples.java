@@ -2,6 +2,7 @@ package com.document.service.implementation;
 
 import com.document.model.Evidence;
 import com.document.model.dto.*;
+import com.document.model.type.EvidenceStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -122,9 +123,10 @@ class EvidenceSamples {
             .placeholders(new HashMap<>())
             .build();
 
-    Evidence createEvidenceEntity(String evidenceId, int year, int month, int day, int hour, int minute) {
+    Evidence createEvidenceEntity(String evidenceId, EvidenceStatus status, int year, int month, int day, int hour, int minute) {
         final var evidence = Evidence.builder()
                 .evidenceType(FINANCIAL_STATEMENT)
+                .evidenceStatus(status)
                 .evidenceName(evidenceName)
                 .companyId(companyIdNo1)
                 .evidenceContent(evidenceContent)
