@@ -70,7 +70,7 @@ public class Evidence {
 
         public Builder evidenceName(String evidenceName) {
             requireNonNull(evidenceName, "Evidence name cannot be null");
-            this.evidenceName = String.format("%s_%s", this.evidenceType.getDescription(), evidenceName).replace(" ", "_");
+            this.evidenceName = (this.evidenceType.getDescription() + "_" + evidenceName).replace(" ", "_");
             return this;
         }
 

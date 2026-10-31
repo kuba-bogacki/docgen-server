@@ -19,7 +19,6 @@ public class Samples {
     final Float companyTotalSum = 123.12F;
     final Float companyNetProfit = 123.12F;
     final Float companyNetIncrease = 123.12F;
-    final byte[] evidenceContent = new byte[] {0, 0, 7};
 
     final EvidenceDetailsDto evidenceDetailsDto = EvidenceDetailsDto.builder()
             .evidenceId(evidenceId)

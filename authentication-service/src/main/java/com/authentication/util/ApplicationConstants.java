@@ -20,4 +20,8 @@ public final class ApplicationConstants {
 
     // Regex
     public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+
+    // Service
+    public static final String COMPANY_SERVICE = "company-service";
+    public static final String NOTIFICATION_SERVICE = "notification-service";
 }

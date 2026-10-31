@@ -10,7 +10,8 @@ import java.util.UUID;
 
 public interface HttpClient {
 
-    ResponseEntity<?> getEmailStatus(UserEventDto userEventDto);
+    ResponseEntity<?> getEmailVerificationStatus(UserEventDto userEventDto);
+    ResponseEntity<?> getResetPasswordStatus(UserEventDto userEventDto);
     ResponseEntity<?> getJoiningStatus(User user, String companyId, String userEmail);
     ResponseEntity<?> sendRefreshToken(String userPrincipal, AuthenticationResponse authenticationResponse, String userEmail);
     List<UUID> getMemberUuidList(String companyId, String userEmail);

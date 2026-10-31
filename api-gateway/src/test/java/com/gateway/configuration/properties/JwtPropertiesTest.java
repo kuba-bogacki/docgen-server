@@ -23,8 +23,8 @@ public class JwtPropertiesTest {
     private static final String ROLE = "role";
     private static final String ADMIN = "ADMIN";
     private static final String USERNAME = "joker";
-    private static final String VALID_SECRET = "VGhpcy1pcy1hLXZlcnktc2VjdXJlLWFuZC1sb25nLXNlY3JldC1rZXktZm9yLXRlc3Rpbmc=";
-    private static final String INVALID_SECRET = "QW5vdGhlci12ZXJ5LXNlY3VyZS1hbmQtbG9uZy1zZWNyZXQta2V5LWZvci10ZXN0aW5n";
+    private static final String VALID_SECRET = "mySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecretMySecret=";
+    private static final String INVALID_SECRET = "yourSecretYourSecretYourSecretYourSecretYourSecretYourSecretYourSecretYourSecretYourSecretYourSecret=";
 
     private JwtProperties jwtProperties;
 

@@ -33,7 +33,9 @@ public class DefaultMessageQueueSubscriber implements MessageQueueSubscriber {
     @JmsListener(destination = EVIDENCE_QUEUE)
     public void subscribeEvidenceDrafted(QueueMessage queueMessage) {
         log.info("Event 'Evidence drafted' with id: {} successfully subscribed.", queueMessage.getMessageId());
-        final Evidence evidenceEntity = getEvidenceEntity(queueMessage.getEvidenceId());
+        final Evidence evidenceEntity = Optional.ofNullable(evidenceRepository.findByEvidenceId(queueMessage.getEvidenceId()))
+                .orElseThrow(() -> new EvidenceNotFoundException(String.format("Evidence with provided id [%s] not exist", queueMessage.getEvidenceId())));
+
         final StringBuilder notification = new StringBuilder()
                 .append("New evidence ");
         try {
@@ -67,13 +69,5 @@ public class DefaultMessageQueueSubscriber implements MessageQueueSubscriber {
             final Evidence updatedEntity = evidenceRepository.save(evidenceEntity);
             log.info("Evidence with status '{}' and with id {} has been updated.", updatedEntity.getEvidenceStatus(), updatedEntity.getEvidenceId());
         }
-    }
-
-    private Evidence getEvidenceEntity(String evidenceId) {
-        final Optional<Evidence> evidence = Optional.ofNullable(evidenceRepository.findByEvidenceId(evidenceId));
-        if (evidence.isEmpty()) {
-            throw new EvidenceNotFoundException(String.format("Evidence with provided id [%s] not exist", evidenceId));
-        }
-        return evidence.get();
     }
 }

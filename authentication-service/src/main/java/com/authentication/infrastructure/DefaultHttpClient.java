@@ -26,9 +26,18 @@ public class DefaultHttpClient implements HttpClient {
     }
 
     @Override
-    public ResponseEntity<?> getEmailStatus(UserEventDto userEventDto) {
+    public ResponseEntity<?> getEmailVerificationStatus(UserEventDto userEventDto) {
         return restClientBuilder.build().post()
-                .uri(buildUrl(HTTP, "notification-service", API_VERSION, "/notification/verification"))
+                .uri(buildUrl(HTTP, NOTIFICATION_SERVICE, API_VERSION, "/notification/verification"))
+                .body(userEventDto)
+                .retrieve()
+                .toEntity(ResponseEntity.class);
+    }
+
+    @Override
+    public ResponseEntity<?> getResetPasswordStatus(UserEventDto userEventDto) {
+        return restClientBuilder.build().post()
+                .uri(buildUrl(HTTP, NOTIFICATION_SERVICE, API_VERSION, "/notification/reset"))
                 .body(userEventDto)
                 .retrieve()
                 .toEntity(ResponseEntity.class);
@@ -39,7 +48,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().put()
-                .uri(buildUrl(HTTP, "company-service", API_VERSION, "/company/add-new-member/" + companyId))
+                .uri(buildUrl(HTTP, COMPANY_SERVICE, API_VERSION, "/company/add-new-member/" + companyId))
                 .body(user.getUserId().toString())
                 .retrieve()
                 .toEntity(ResponseEntity.class);
@@ -50,7 +59,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().post()
-                .uri(buildUrl(HTTP, "notification-service", API_VERSION, "/notification/refresh-token/" + userPrincipal))
+                .uri(buildUrl(HTTP, NOTIFICATION_SERVICE, API_VERSION, "/notification/refresh-token/" + userPrincipal))
                 .body(authenticationResponse)
                 .retrieve()
                 .toEntity(ResponseEntity.class);
@@ -61,7 +70,7 @@ public class DefaultHttpClient implements HttpClient {
         return restClientBuilder
                 .requestInterceptor(setRequestAttributes(userEmail))
                 .build().get()
-                .uri(buildUrl(HTTP, "company-service", API_VERSION, "/company/company-members/" + companyId.substring(0, companyId.length() - 1)))
+                .uri(buildUrl(HTTP, COMPANY_SERVICE, API_VERSION, "/company/company-members/" + companyId.substring(0, companyId.length() - 1)))
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }

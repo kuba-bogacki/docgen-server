@@ -54,7 +54,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(any(User.class))).thenReturn(sampleUserEventDto);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(httpClient.getEmailVerificationStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         when(userRepository.save(any(User.class))).thenReturn(userEntity);
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));
@@ -101,7 +101,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(any(User.class))).thenReturn(sampleUserEventDto);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE));
+        when(httpClient.getEmailVerificationStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE));
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));
 
@@ -124,7 +124,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(any(User.class))).thenReturn(sampleUserEventDto);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SEE_OTHER));
+        when(httpClient.getEmailVerificationStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SEE_OTHER));
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));
 
@@ -147,7 +147,7 @@ class AuthenticationServiceImplementationTest extends Samples {
         when(passwordEncoder.encode(userPassword)).thenReturn(userEncodedPassword);
         when(numberGenerator.generateVerificationCode(64)).thenReturn(userVerificationCode);
         when(userMapper.mapToUserEventDto(any(User.class))).thenReturn(sampleUserEventDto);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(httpClient.getEmailVerificationStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
         doThrow(ConstraintViolationException.class).when(userRepository).save(any(User.class));
 
         final var catchException = catchThrowable(() -> authenticationService.register(registerRequest));

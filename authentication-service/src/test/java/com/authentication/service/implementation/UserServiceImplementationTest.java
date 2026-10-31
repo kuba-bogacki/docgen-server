@@ -96,7 +96,7 @@ class UserServiceImplementationTest extends Samples {
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(userMapper.mapToUserEventDto(userEntity)).thenReturn(sampleUserEventDto);
         when(userRepository.save(userEntity)).thenReturn(userEntity);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+        when(httpClient.getResetPasswordStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
         final var result = userService.sendVerificationEmail(userEmail);
 
@@ -140,7 +140,7 @@ class UserServiceImplementationTest extends Samples {
         //when
         when(userRepository.findUserByUserEmail(userEmail)).thenReturn(Optional.of(userEntity));
         when(userMapper.mapToUserEventDto(userEntity)).thenReturn(sampleUserEventDto);
-        when(httpClient.getEmailStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE));
+        when(httpClient.getResetPasswordStatus(sampleUserEventDto)).thenReturn(new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE));
 
         final var expectedException = catchThrowable(() -> userService.sendVerificationEmail(userEmail));
 

@@ -19,19 +19,19 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping(value = "/verification")
-    public ResponseEntity<?> sendVerificationEmail(@RequestBody UserDto userDto) {
+    public ResponseEntity<Void> sendVerificationEmail(@RequestBody UserDto userDto) {
         emailService.sendVerificationEmail(userDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/reset")
-    public ResponseEntity<?> sendResetPasswordEmail(@RequestBody UserDto userDto) {
+    public ResponseEntity<Void> sendResetPasswordEmail(@RequestBody UserDto userDto) {
         emailService.sendResetPasswordEmail(userDto);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/invite")
-    public ResponseEntity<?> sendInvitationEmail(@RequestBody InvitationDto invitationDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
+    public ResponseEntity<Void> sendInvitationEmail(@RequestBody InvitationDto invitationDto, @RequestHeader(USER_EMAIL_HEADER) String userEmail) {
         emailService.sendInvitationEmail(invitationDto, userEmail);
         return new ResponseEntity<>(HttpStatus.OK);
     }

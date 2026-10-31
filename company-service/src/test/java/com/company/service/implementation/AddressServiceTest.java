@@ -102,7 +102,7 @@ class AddressServiceTest extends AddressSamples {
     @DisplayName("Should throw an exception if address dto is null")
     void test_04() {
         //given
-        AddressDto nullAddressDto = null;
+        final AddressDto nullAddressDto = null;
 
         //when
         when(addressMapper.mapToEntity(nullAddressDto)).thenReturn(null);

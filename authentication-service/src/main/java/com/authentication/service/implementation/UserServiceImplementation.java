@@ -5,11 +5,9 @@ import com.authentication.client.stripe.StripeClient;
 import com.authentication.exception.*;
 import com.authentication.infrastructure.HttpClient;
 import com.authentication.mapper.UserMapper;
-import com.authentication.model.User;
 import com.authentication.model.dto.PaymentDto;
 import com.authentication.model.dto.PaymentIntentDto;
 import com.authentication.model.dto.UserDto;
-import com.authentication.model.dto.UserEventDto;
 import com.authentication.model.type.Membership;
 import com.authentication.repository.UserRepository;
 import com.authentication.security.AuthenticationRequest;
@@ -18,15 +16,12 @@ import com.authentication.util.random.NumberGenerator;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -60,7 +55,7 @@ public class UserServiceImplementation implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("Impossible to send reset link because user with provide email not exist."));
 
         final var userEventDto = userMapper.mapToUserEventDto(user);
-        final var emailStatus = httpClient.getEmailStatus(userEventDto);
+        final var emailStatus = httpClient.getResetPasswordStatus(userEventDto);
         if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserWebClientException("Couldn't send reset email. User account still locked.");
         }

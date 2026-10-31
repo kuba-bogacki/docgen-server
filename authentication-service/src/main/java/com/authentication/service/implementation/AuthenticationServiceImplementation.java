@@ -62,7 +62,7 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
                 .enabled(false)
                 .build();
         var userEventDto = userMapper.mapToUserEventDto(user);
-        ResponseEntity<?> emailStatus = httpClient.getEmailStatus(userEventDto);
+        ResponseEntity<?> emailStatus = httpClient.getEmailVerificationStatus(userEventDto);
         if (!emailStatus.getStatusCode().is2xxSuccessful()) {
             throw new UserAuthenticationException("Couldn't send verification email. New user is not saved in database.");
         }
