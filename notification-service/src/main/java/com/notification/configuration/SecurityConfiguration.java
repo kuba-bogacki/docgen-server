@@ -33,6 +33,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers(API_VERSION + "/notification/verification").permitAll()
+                        .requestMatchers(API_VERSION + "/notification/reset").permitAll()
                         .requestMatchers(API_VERSION + "/notification/websocket/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()

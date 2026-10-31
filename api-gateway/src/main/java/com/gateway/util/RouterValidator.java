@@ -20,7 +20,6 @@ public class RouterValidator {
             API_VERSION + "/authentication/reset-password/{id}",
             API_VERSION + "/authentication/confirm-membership/{id}",
             API_VERSION + "/authentication/send-email-to-reset-password",
-            API_VERSION + "/notification/verification",
             API_VERSION + "/notification/websocket/{id}"
     );
 
