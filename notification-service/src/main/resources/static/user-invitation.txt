@@ -49,7 +49,7 @@
 </div>
 
 <footer>
-    <h4>Team for-company.com</h4>
+    <h4>Team forcompany.org.pl</h4>
     <h5>E-mail: <a href="mailto:for.company.document.generator@gmail.com">for.company.document.generator@gmail.com</a></h5>
 </footer>
 
